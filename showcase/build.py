@@ -86,17 +86,23 @@ def parse_folder_name(name: str) -> tuple[int | None, str]:
 
 # ---------------------------------------------------------------- media
 
+def register_heic() -> bool:
+    """Let Pillow open iPhone HEIC photos, if pillow-heif is installed."""
+    try:
+        import pillow_heif
+
+        pillow_heif.register_heif_opener()
+        return True
+    except ImportError:
+        return False
+
+
 def _open_image(path: Path):
     from PIL import Image, ImageOps
 
-    if path.suffix.lower() in {".heic", ".heif"}:
-        try:
-            import pillow_heif  # iPhone photos
-
-            pillow_heif.register_heif_opener()
-        except ImportError:
-            print(f"  ! skipped {path.name}: install pillow-heif to read iPhone HEIC photos (pip install pillow-heif)")
-            return None
+    if path.suffix.lower() in {".heic", ".heif"} and not register_heic():
+        print(f"  ! skipped {path.name}: install pillow-heif to read iPhone HEIC photos (pip install pillow-heif)")
+        return None
     img = Image.open(path)
     return ImageOps.exif_transpose(img).convert("RGB")
 
@@ -143,7 +149,7 @@ def import_folder(folder: Path, catalog: dict, use_ai: bool) -> dict | None:
     year, title = parse_folder_name(folder.name)
     notes_file = folder / "notes.txt"
     notes = notes_file.read_text(encoding="utf-8").strip() if notes_file.exists() else ""
-    files = sorted(p for p in folder.rglob("*") if p.is_file() and not p.name.startswith("."))
+    files = sorted(p for p in folder.rglob("*") if p.is_file() and not p.name.startswith((".", "_")))
     photos = [p for p in files if p.suffix.lower() in IMAGE_EXT]
     videos = [p for p in files if p.suffix.lower() in VIDEO_EXT]
     if not photos and not videos:
@@ -182,7 +188,11 @@ def import_folder(folder: Path, catalog: dict, use_ai: bool) -> dict | None:
         "eventTypes": found["eventTypes"], "services": found["services"], "tags": [],
         "featured": False, "link": "", "media": media, "source": folder.name,
     }
-    if use_ai:
+    info_file = folder / "info.json"
+    if info_file.exists():  # written by organize.py, which already looked at the photos
+        info = json.loads(info_file.read_text(encoding="utf-8"))
+        project.update({k: v for k, v in info.items() if v})
+    elif use_ai:
         ai = describe_with_claude(catalog, project, dest, notes)
         if ai:
             project.update(ai)
@@ -301,7 +311,7 @@ def build(use_ai: bool = False, embed: bool = False) -> dict:
     imported = {p.get("source") for p in catalog["projects"]}
     added = 0
     if INBOX.exists():
-        for folder in sorted(p for p in INBOX.iterdir() if p.is_dir() and not p.name.startswith(".")):
+        for folder in sorted(p for p in INBOX.iterdir() if p.is_dir() and not p.name.startswith((".", "_"))):
             if folder.name in imported:
                 continue
             project = import_folder(folder, catalog, use_ai)
