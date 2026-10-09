@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import io
 import json
 import math
@@ -190,6 +191,47 @@ def scan(root: Path) -> tuple[list[Shot], int]:
     return shots, skipped
 
 
+def fingerprint(path: Path) -> str:
+    """Same size and same start of file: the same photo or video saved twice (WhatsApp, edits, re-imports)."""
+    with open(path, "rb") as f:
+        return f"{path.stat().st_size}:{hashlib.sha1(f.read(256 * 1024)).hexdigest()}"
+
+
+def look(path: Path) -> int | None:
+    """A 64-bit picture of the image's light and dark areas; bursts and re-takes come out nearly identical."""
+    from PIL import Image
+
+    try:
+        with Image.open(path) as img:
+            img.draft("L", (64, 64))
+            small = img.convert("L").resize((9, 8))
+    except Exception:
+        return None
+    px = small.tobytes()
+    return sum(1 << i for i in range(64) if px[(i // 8) * 9 + i % 8] > px[(i // 8) * 9 + i % 8 + 1])
+
+
+def dedupe(g: "Group") -> int:
+    """Drop copies and near-identical photos within an event. Free: runs on the laptop. Returns how many."""
+    seen, kept, recent = set(), [], []
+    for s in g.shots:
+        fp = fingerprint(s.path)
+        if fp in seen:
+            continue
+        seen.add(fp)
+        if not s.video:
+            h = look(s.path)
+            # Bursts sit next to each other in time, so comparing with the last few kept photos is enough.
+            if h is not None and any(bin(h ^ r).count("1") <= 5 for r in recent):
+                continue
+            if h is not None:
+                recent = (recent + [h])[-12:]
+        kept.append(s)
+    removed = len(g.shots) - len(kept)
+    g.shots = kept
+    return removed
+
+
 def group(shots: list[Shot]) -> list[Group]:
     groups: list[Group] = []
     last_gps = None
@@ -352,8 +394,10 @@ def organize(root: Path, use_ai: bool = True, limit: int = 0, budget: float = 0,
     print(f"Reading {root} ...")
     shots, skipped = scan(root)
     groups = [g for g in group(shots) if len(g.shots) >= MIN_ITEMS]
-    print(f"{len(shots)} photos and videos ({skipped} screenshots and Live Photo clips ignored), "
-          f"{len(groups)} possible events.")
+    dupes = sum(dedupe(g) for g in groups)
+    groups = [g for g in groups if len(g.shots) >= MIN_ITEMS]
+    print(f"{len(shots)} photos and videos ({skipped} screenshots and Live Photo clips ignored, "
+          f"{dupes} duplicates removed), {len(groups)} possible events.")
     if limit:
         groups = groups[-limit:]
 

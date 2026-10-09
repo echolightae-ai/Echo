@@ -48,6 +48,8 @@ What `organize.py` does:
 
 - Reads when and where every photo and video was taken (from the phone's own data; nothing is uploaded for this),
   and skips screenshots and the short clips iPhone Live Photos make.
+- Removes duplicates for free on your laptop: the same file saved twice, and burst shots or re-takes that look
+  nearly identical.
 - Groups them into events: shots within 4 hours of each other at the same place are one event. The city comes from
   GPS.
 - Makes one contact sheet per event and asks Claude: is this an EchoLight event or something else? For real events

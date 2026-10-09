@@ -90,7 +90,14 @@ def test_page_data_cannot_close_its_script_tag(monkeypatch):
 
 def _photo(path, when, gps=None, color="navy"):
     Image = pytest.importorskip("PIL.Image")
+    from PIL import ImageDraw
+
     img = Image.new("RGB", (800, 600), color)
+    # A different pattern per file, so the duplicate check sees different shots.
+    seed = sum(map(ord, path.name))
+    for k in range(6):
+        x, y = (seed * (k + 3) * 37) % 700, (seed * (k + 5) * 53) % 500
+        ImageDraw.Draw(img).rectangle([x, y, x + 100, y + 100], fill="white")
     exif = Image.Exif()
     exif.get_ifd(0x8769)[36867] = when
     if gps:
@@ -222,3 +229,21 @@ def test_videos_get_most_of_the_contact_sheet(organize):
     assert len(picked) == organize.SHEET_TILES
     assert sum(s.video for s in picked) == 18
     assert picked == sorted(picked, key=lambda s: s.when)
+
+
+def test_duplicates_and_bursts_are_dropped_for_free(tmp_path, organize):
+    Image = pytest.importorskip("PIL.Image")
+    ImageDraw = pytest.importorskip("PIL.ImageDraw")
+    roll = tmp_path / "DCIM"
+    roll.mkdir()
+    for i in range(6):  # six different scenes
+        img = Image.new("RGB", (800, 600), "black")
+        ImageDraw.Draw(img).rectangle([i * 120, 0, i * 120 + 100, 600], fill="white")
+        img.save(roll / f"IMG_{i}.JPG")
+    (roll / "IMG_0 copy.JPG").write_bytes((roll / "IMG_0.JPG").read_bytes())  # saved twice
+    burst = Image.open(roll / "IMG_1.JPG")
+    burst.save(roll / "IMG_1_burst.JPG", quality=60)  # a near-identical re-take
+    shots, _ = organize.scan(roll)
+    (g,) = organize.group(shots)
+    assert organize.dedupe(g) == 2
+    assert len(g.shots) == 6
