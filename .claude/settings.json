@@ -1,0 +1,13 @@
+{
+  "enabledPlugins": {
+    "claude-council@hex-plugins": true
+  },
+  "extraKnownMarketplaces": {
+    "hex-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "hex/claude-marketplace"
+      }
+    }
+  }
+}
