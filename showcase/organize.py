@@ -232,6 +232,13 @@ def dedupe(g: "Group") -> int:
     return removed
 
 
+def event_score(g: Group) -> float:
+    """Rough guess at 'is this an event' from cheap facts: evening hours, lots of video, a crowd of shots."""
+    videos = sum(s.video for s in g.shots)
+    evening = sum(1 for s in g.shots if s.when.hour >= 18 or s.when.hour < 3)
+    return videos * 3 + min(len(g.shots), 60) / 2 + evening / max(len(g.shots), 1) * 20
+
+
 def group(shots: list[Shot]) -> list[Group]:
     groups: list[Group] = []
     last_gps = None
@@ -399,7 +406,9 @@ def organize(root: Path, use_ai: bool = True, limit: int = 0, budget: float = 0,
     print(f"{len(shots)} photos and videos ({skipped} screenshots and Live Photo clips ignored, "
           f"{dupes} duplicates removed), {len(groups)} possible events.")
     if limit:
-        groups = groups[-limit:]
+        # Most groups are ordinary days. Keep the ones that look most like events first.
+        groups = sorted(groups, key=event_score, reverse=True)[:limit]
+        groups.sort(key=lambda g: g.start)
 
     client = None
     if use_ai:
@@ -511,7 +520,8 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("folder", type=Path, help="the camera folder copied from your phone (for example DCIM)")
     ap.add_argument("--no-ai", action="store_true", help="only group by date and place; don't ask Claude")
-    ap.add_argument("--latest", type=int, default=0, metavar="N", help="only the N most recent events (a quick test)")
+    ap.add_argument("--latest", type=int, default=0, metavar="N",
+                    help="only the N groups that look most like events (evening, lots of video); a quick test")
     ap.add_argument("--model", default=MODEL, choices=sorted(PRICES), help="which Claude model looks at the photos")
     ap.add_argument("--budget", type=float, default=0, metavar="USD", help="stop asking Claude once this much is spent")
     ap.add_argument("--yes", action="store_true", help="don't ask before spending")

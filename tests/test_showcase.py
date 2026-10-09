@@ -247,3 +247,20 @@ def test_duplicates_and_bursts_are_dropped_for_free(tmp_path, organize):
     (g,) = organize.group(shots)
     assert organize.dedupe(g) == 2
     assert len(g.shots) == 6
+
+
+def test_sample_picks_event_like_groups_not_just_recent_ones(organize):
+    from datetime import datetime, timedelta
+
+    def grp(start, n, video_every=0, hour=None):
+        t = datetime(2026, 3, 1, hour if hour is not None else 12)
+        shots = [organize.Shot(Path(f"{start}{i}"), t + timedelta(minutes=i), None,
+                               video=bool(video_every) and i % video_every == 0) for i in range(n)]
+        return organize.Group(shots)
+
+    ordinary = grp("day", 8, hour=12)  # lunchtime, no video
+    party = grp("party", 20, video_every=3, hour=21)  # evening, lots of video
+    recent_ordinary = grp("later", 8, hour=12)
+    recent_ordinary.shots[0].when = datetime(2026, 4, 1, 12)
+    kept = sorted([ordinary, party, recent_ordinary], key=organize.event_score, reverse=True)[:1]
+    assert kept == [party]
