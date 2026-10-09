@@ -97,8 +97,8 @@ each one as an activity (`whatsapp`, `email`, `quote`).
 - Re-read `mode` right before sending. If it is no longer `"live"`, write a draft instead (2.3).
 - `claudePaused`, `doNotContact` and the quiet hours (7.5) always apply.
 - **WhatsApp:** check that the chat's name and number match the lead's `phone` before every message, send
-  one message at a time, at a human pace, and never send in a chat you haven't just read. BlueTicks works
-  through WhatsApp Web, and WhatsApp's terms restrict automated use, so keep it to normal one-to-one replies.
+  one message at a time, at a human pace, and never send in a chat you haven't just read. The WhatsApp tool
+  works through a linked WhatsApp device, and WhatsApp's terms restrict automated use, so keep it to normal one-to-one replies.
 - Email is sent from the EchoLight email account only, as a reply in the customer's own thread.
 
 ### 2.2 Learning from the owner
@@ -125,7 +125,7 @@ draft. The owner reviews drafts in the CRM's Trial tab.
 | Task | What you need | If it's missing |
 |---|---|---|
 | Read and update the CRM | The `ArtifactData` tool with the CRM link above | Ask the user to open this in a Claude session that has their claude.ai account |
-| WhatsApp history (and live replies) | The **BlueTicks WhatsApp** connector (preferred), or the owner's WhatsApp Web open in a browser Claude can use | Say WhatsApp isn't reachable from this session; work on the CRM and drafts instead |
+| WhatsApp history (and live replies) | The local **whatsapp** MCP server on the owner's computer (3.1) | Say WhatsApp isn't reachable from this session; work on the CRM and drafts instead |
 | Email history (and live replies) | The **Gmail** connector (preferred), or the owner's webmail open in the browser | Same as above |
 | Instagram DMs | Instagram open in the browser | Same as above |
 | Finding prospects | Web search and web fetch | Say so; work on the CRM instead |
@@ -137,17 +137,19 @@ Copy into the CRM only what the sales process needs (section 11).
 
 ### 3.1 Connector rules (exact tools)
 
-**BlueTicks WhatsApp** (`BlueTicksWhatsapp` tools):
-- **Allowed in every mode (read-only):** `chats` with action `get_latest`, `list` (use `kinds: ["contact"]`
-  to skip groups, `include_last_message: true` to see who is waiting), `search`, `get`, `list_messages`,
-  `get_media`, `load_more_history`; `contacts` with action `list`; `utils` with action `current_date_time`
-  (always treat times as **Asia/Dubai**, whatever timezone the tool reports by default).
-- **Never:** `chats` actions `mark_read`, `archive`, `unarchive` (they hide unread customers from the
-  owner), `send_message_poll` and `send_button_reply`.
-- **Never in any mode:** the `campaigns`, `audiences`, `scheduled_messages`, `agents`, `agent_schedules`,
-  `groups` and `webhooks` tools. No broadcasts, no bulk or scheduled sends, no group messages.
-- **Sending (live mode):** `chats` `send_message_text` (and `send_message_media` for a portfolio file the
-  owner provided) inside an existing conversation with a customer who wrote first, one message at a time.
+**WhatsApp** (the local `whatsapp` MCP server on the owner's computer, `whatsapp-mcp`). It only works when
+Claude runs on that computer (Claude Desktop or a local project), with WhatsApp linked. Tool names can vary
+by version; check the list and map them to these rules:
+- **Allowed in every mode (read-only):** listing and searching chats and contacts (e.g. `list_chats`,
+  `get_chat`, `search_contacts`, `get_direct_chat_by_contact`), reading messages (`list_messages`,
+  `get_message_context`, `get_last_interaction`) and `download_media` to look at a file a customer sent.
+  Read only direct chats with customers; skip groups. Treat all times as **Asia/Dubai**.
+- **Never:** anything that marks chats read, archives, deletes, or leaves/creates groups; broadcasts, bulk
+  or scheduled sends, group messages.
+- **Sending (live mode):** `send_message` (and `send_file` for a portfolio file the owner provided) inside an
+  existing conversation with a customer who wrote first, one message at a time.
+- If the WhatsApp tools are missing or return errors (not linked, computer asleep), skip WhatsApp for this
+  run, carry on with email, and say so in the summary.
 
 **Gmail** (`Gmail` tools):
 - **Allowed in every mode (read-only):** `search_threads`, `get_thread`, `get_message`, `list_labels`.
@@ -657,7 +659,7 @@ never reply, never change a chat.
 chats (for example a "Customer" or "Lead" label in WhatsApp Business). If that hasn't been done, ask for it
 and stop.
 
-1. With BlueTicks, list direct chats (`kinds: ["contact"]`, `include_last_message: true`) and open only those
+1. List direct chats (newest first, with their last message) and open only those
    with a business label, or whose name and last message clearly show a sales enquiry or client. Never open chats that look personal, family or supplier-related. Cover roughly
    the last 12 months (WhatsApp Business and the sales email).
 2. For each enquiry or client, create or update a lead (dedupe by phone and email). Copy only what the CRM
