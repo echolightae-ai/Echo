@@ -97,6 +97,7 @@ h2 { font: 600 13px var(--body); text-transform: uppercase; letter-spacing: .08e
 .pill.accent { background: var(--accent-soft); color: var(--accent); }
 .pill.claude { background: var(--cool-soft); color: var(--cool); }
 .pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.wrap { white-space: normal; border-radius: 8px; }
 
 /* Pipeline board */
 .board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 1fr); gap: 12px; overflow-x: auto; padding-bottom: 12px; }
@@ -172,6 +173,42 @@ td.wrap { white-space: normal; min-width: 220px; }
 .show-date small { display: block; font: 500 11px var(--body); color: var(--muted); text-transform: uppercase; }
 .switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
 .switch input { width: auto; }
+
+/* Trial mode, drafts and warnings */
+.banner.info { background: var(--cool-soft); color: var(--ink); }
+.banner.info b { color: var(--cool); }
+.flags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.note-box { border-radius: 8px; padding: 10px 12px; font-size: 13px; background: var(--sunk); color: var(--ink); overflow-wrap: anywhere; }
+.note-box.warn { background: var(--warn-soft); }
+.note-box.warn b { color: var(--warn); }
+.note-box.bad { background: var(--bad-soft); }
+.note-box.bad b { color: var(--bad); }
+.note-box.info { background: var(--cool-soft); }
+.note-box.info b { color: var(--cool); }
+.drafts { display: flex; flex-direction: column; gap: 12px; max-width: 980px; }
+.draft { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.draft.pending { border-color: var(--cool); }
+.draft-head { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.draft-head .who-for { font-weight: 600; margin-inline-end: auto; min-width: 0; overflow-wrap: anywhere; }
+.linkish { background: none; border: 0; padding: 0; color: var(--cool); font-weight: 600; cursor: pointer; text-align: start; }
+.linkish:hover { text-decoration: underline; }
+.said { border-inline-start: 3px solid var(--line); padding: 2px 0 2px 10px; color: var(--muted); font-size: 13px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.why { font-size: 13px; color: var(--muted); }
+.why b { color: var(--ink); font-weight: 600; }
+.review { display: flex; flex-direction: column; gap: 8px; border-top: 1px dashed var(--line); padding-top: 10px; }
+.review textarea { min-height: 54px; }
+.btn.good.on, .btn.good:hover { border-color: var(--good); color: var(--good); }
+.btn.mid.on, .btn.mid:hover { border-color: var(--warn); color: var(--warn); }
+.btn.bad.on, .btn.bad:hover { border-color: var(--bad); color: var(--bad); }
+.btn.on { background: var(--sunk); font-weight: 600; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; flex-wrap: wrap; }
+.seg button { border: 0; background: var(--panel); padding: 8px 14px; cursor: pointer; color: var(--muted); font-weight: 500; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.seg button[disabled] { cursor: not-allowed; opacity: .6; }
+.mode-card { display: flex; flex-direction: column; gap: 10px; }
+.mode-card .seg { align-self: flex-start; }
+.pct { font: 800 34px/1.1 var(--display); }
+.drawer-tools { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; align-items: center; }
 @media (max-width: 640px) {
   h1.view-title { font-size: 28px; }
   .who span { display: none; }
@@ -219,12 +256,27 @@ const PROSPECT_STATUSES = [
   { id: "do_not_contact", label: "Do not contact" },
 ];
 const VAT = 0.05;
+const QUOTE_VALID_DAYS = 3;
+// Another lead in one of these stages on the same date is a possible clash for crew and kit.
+const CLASH_STAGES = new Set(["awaiting_price", "quoted", "negotiating", "booked", "confirmed", "completed"]);
+const DRAFT_KINDS = [
+  { id: "reply", label: "Replies", one: "Reply" }, { id: "follow_up", label: "Follow-ups", one: "Follow-up" },
+  { id: "price", label: "Price messages", one: "Price message" }, { id: "booking", label: "Booking", one: "Booking" },
+  { id: "review", label: "Review requests", one: "Review request" }, { id: "outreach", label: "Outreach", one: "Outreach" },
+  { id: "other", label: "Other", one: "Other" },
+];
+const DRAFT_STATUS = {
+  pending: { label: "To review", cls: "claude" }, good: { label: "Good", cls: "good" },
+  needs_changes: { label: "Needs changes", cls: "warn" }, wrong: { label: "Wrong", cls: "bad" },
+};
+const ACT_LABELS = { draft: "Claude draft", site_visit: "Site visit", stage: "Stage", quote: "Quote", payment: "Payment" };
 const TABS = [
-  { id: "today", label: "Call sheet" }, { id: "pipeline", label: "Pipeline" }, { id: "leads", label: "Leads" },
+  { id: "today", label: "Call sheet" }, { id: "trial", label: "Trial" }, { id: "pipeline", label: "Pipeline" }, { id: "leads", label: "Leads" },
   { id: "prospects", label: "Prospects" }, { id: "shows", label: "Shows" }, { id: "reports", label: "Reports" },
   { id: "messages", label: "Messages" }, { id: "settings", label: "Settings" },
 ];
 const DEFAULT_SETTINGS = {
+  mode: "trial",
   autopilot: { inboundReplies: true, followUps: true, outreach: false, outreachNeedsApproval: true, outreachDailyCap: 20 },
   followUpDays: [1, 3, 7],
   targetSegments: ["Corporate", "Hospitality / hotel", "Automotive", "Event agency", "Wedding"],
@@ -233,10 +285,11 @@ const DEFAULT_SETTINGS = {
 
 // ---------- State ----------
 const S = {
-  db: null, user: null, me: null, writable: true, canEdit: false, ready: false, failed: false,
-  leads: [], prospects: [], templates: [], settings: DEFAULT_SETTINGS,
+  db: null, user: null, me: null, downloads: null, writable: true, canEdit: false, ready: false, failed: false,
+  leads: [], prospects: [], templates: [], drafts: [], draftsReady: false, settings: DEFAULT_SETTINGS,
   view: "today", openLead: null, activities: [], actUnsub: null,
   q: "", fStage: "open", fSource: "", fSegment: "", pq: "", pStatus: "",
+  dShow: "pending", dKind: "", fb: {},
   profiles: {},
 };
 try { const v = localStorage.getItem("el-crm-view"); if (v && TABS.some(t => t.id === v)) S.view = v; } catch (e) {}
@@ -258,6 +311,47 @@ const isWon = (l) => !!STAGE[l.stage]?.won;
 const temp = (l) => l.priority ? `<span class="pill ${esc(l.priority)}">${esc(l.priority)}</span>` : "";
 const stagePill = (l) => `<span class="pill ${l.stage === "lost" ? "bad" : isWon(l) ? "good" : l.stage === "awaiting_price" ? "accent" : ""}">${esc(STAGE[l.stage]?.label || l.stage)}</span>`;
 const byLabel = (by) => by === "claude" ? `<span class="pill claude">Claude</span>` : (by ? esc(S.profiles[by]?.name || "Team") : "");
+const fmtDateAr = (iso) => { if (!iso) return ""; const d = new Date(iso + "T12:00:00"); return isNaN(d) ? iso : d.toLocaleDateString("ar-AE-u-nu-latn", { day: "numeric", month: "long", year: "numeric" }); };
+const isTrial = () => S.settings.mode !== "live";
+const fmtDuration = (ms) => { if (ms == null || isNaN(ms)) return "—"; const m = Math.max(0, Math.round(ms / 60000)); if (m < 60) return m + "m"; const h = m / 60; if (h < 48) return (h < 10 ? h.toFixed(1) : Math.round(h)) + "h"; return Math.round(h / 24) + "d"; };
+// A price the customer hasn't been told yet: flagged for Claude, never marked sent, or newer than the last quote sent.
+// Only flagged prices count once a deal is booked (older booked deals often have no quoteSentAt).
+const priceUnsent = (l) => !!l.priceAED && l.stage !== "lost" && (!!l.priceToSend || ((STAGE[l.stage]?.i ?? 0) <= STAGE.negotiating.i && (!l.quoteSentAt || (!!l.priceSetAt && l.priceSetAt > l.quoteSentAt))));
+// The date a price message sent today is valid until, or the stored date for a quote already sent.
+const validUntilFor = (l) => (!priceUnsent(l) && l.quoteValidUntil) ? l.quoteValidUntil : addDays(todayISO(), QUOTE_VALID_DAYS);
+function quoteValidity(l) {
+  if (!l.quoteValidUntil || priceUnsent(l) || !["quoted", "negotiating"].includes(l.stage)) return null;
+  const d = daysUntil(l.quoteValidUntil);
+  if (d < 0) return { cls: "bad", text: `Expired ${-d}d ago`, expired: true, d };
+  if (d === 0) return { cls: "warn", text: "Valid until today", d };
+  if (d === 1) return { cls: "warn", text: "Valid until tomorrow", d };
+  return { cls: "good", text: `Valid until ${fmtDate(l.quoteValidUntil)}`, d };
+}
+const validityPill = (l) => { const v = quoteValidity(l); return v ? `<span class="pill ${v.cls}">${esc(v.text)}</span>` : ""; };
+function clashesFor(l) {
+  if (!l || !l.eventDate || l.stage === "lost") return [];
+  return S.leads.filter((o) => o.id !== l.id && o.eventDate === l.eventDate && CLASH_STAGES.has(o.stage));
+}
+const clashNames = (list) => list.map((o) => `${leadTitle(o)} (${STAGE[o.stage]?.label || o.stage})`).join(", ");
+function leadFlags(l, opts = {}) {
+  const f = [];
+  if (l.claudePaused) f.push(`<span class="pill warn">Claude paused</span>`);
+  if (l.doNotContact) f.push(`<span class="pill bad">Do not contact</span>`);
+  if (opts.clash !== false && l.eventDate && daysUntil(l.eventDate) >= 0 && l.stage !== "lost" && l.stage !== "completed") {
+    const c = clashesFor(l); if (c.length) f.push(`<span class="pill bad wrap" title="${esc(clashNames(c))}">Same date as ${esc(c.map((o) => o.name || o.company || "another lead").join(", "))}</span>`);
+  }
+  return f.join(" ");
+}
+// Re-rendering replaces inputs; keep the focused one (and its caret) if it is redrawn with the same id.
+function keepFocus(fn) {
+  const a = document.activeElement;
+  const id = a && a.id && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) ? a.id : null;
+  let s = null, e = null; try { s = a.selectionStart; e = a.selectionEnd; } catch (err) {}
+  fn();
+  if (!id) return;
+  const n = document.getElementById(id);
+  if (n && n !== a) { n.focus({ preventScroll: true }); try { if (s != null) n.setSelectionRange(s, e); } catch (err) {} }
+}
 
 function toast(msg) {
   const el = document.createElement("div"); el.className = "toast"; el.textContent = msg; el.setAttribute("role", "status");
@@ -289,12 +383,27 @@ function newLeadDoc(fields) {
     requirements: "", budgetAED: null, decisionMaker: "", priority: "warm",
     stage: "new", stageHistory: { new: now },
     priceAED: null, quoteDetails: "", quoteSentAt: null, priceRequestedAt: null,
+    priceToSend: false, priceSetAt: null, quoteValidUntil: "", dateCheckedBy: "",
     depositStatus: "not_due", depositReceivedAt: null, balanceStatus: "not_due", balanceReceivedAt: null,
     lostReason: "", nextAction: "Reply and qualify", nextActionDate: todayISO(),
     assignedTo: S.me?.id || null, marketingOptIn: false, doNotContact: false, prospectId: null,
+    claudePaused: false, firstReplyAt: null, campaign: "", crew: "", kit: "",
     lastContactAt: null, createdAt: now, updatedAt: now, createdBy: S.me?.id || null,
     ...fields,
   };
+}
+// Fields that mark a quote as sent today: valid for 3 days, nothing left for Claude to send.
+function quoteSentPatch(now = Date.now()) {
+  return { priceToSend: false, quoteSentAt: now, quoteValidUntil: addDays(todayISO(), QUOTE_VALID_DAYS), nextAction: "Follow up on quote", nextActionDate: addDays(todayISO(), 1) };
+}
+async function markQuoteSent(l, how = "Quote marked as sent by the team") {
+  const patch = quoteSentPatch();
+  const note = `${how}. Valid until ${fmtDate(patch.quoteValidUntil)}.`;
+  let ok;
+  if ((STAGE[l.stage]?.i ?? 0) < STAGE.quoted.i) ok = await setStage(l, "quoted", patch, note);
+  else ok = await updateLead(l.id, patch, { type: "quote", text: note });
+  if (ok !== false) toast(`Quote marked as sent. Valid until ${fmtDate(patch.quoteValidUntil)}.`);
+  return ok;
 }
 async function addActivity(leadId, type, text, extra = {}) {
   if (!S.db) return;
@@ -307,22 +416,25 @@ async function updateLead(id, patch, activity) {
   });
 }
 async function setStage(lead, stage, extra = {}, note = "") {
-  if (lead.stage === stage) return;
+  if (lead.stage === stage) return true;
   const hist = { ...(lead.stageHistory || {}), [stage]: Date.now() };
   const patch = { stage, stageHistory: hist, ...extra };
-  if (stage === "awaiting_price") { patch.priceRequestedAt = Date.now(); patch.nextAction = "Team to price this project"; patch.nextActionDate = todayISO(); }
+  if (stage === "awaiting_price") { patch.priceRequestedAt = Date.now(); patch.nextAction = lead.dateCheckedBy ? "Team to price this project" : "Team: check date and kit, then price"; patch.nextActionDate = todayISO(); }
   if (stage === "booked" && lead.depositStatus !== "received") { patch.depositStatus = "requested"; patch.nextAction = "Collect 50% deposit"; }
   if (stage === "confirmed") { patch.depositStatus = "received"; patch.depositReceivedAt = lead.depositReceivedAt || Date.now(); patch.balanceStatus = "due_on_event"; patch.nextAction = "Prepare production; collect balance on event day"; patch.nextActionDate = lead.eventDate || todayISO(); }
-  if (stage === "completed") { patch.nextAction = "Ask for a review and referral"; patch.nextActionDate = addDays(todayISO(), 1); }
-  if (stage === "lost") { patch.nextAction = ""; patch.nextActionDate = ""; }
+  // Review and referral requests only once the event is done, and never to someone who asked not to be contacted.
+  if (stage === "completed") { patch.nextAction = lead.doNotContact ? "" : "Ask for a review and referral"; patch.nextActionDate = lead.doNotContact ? "" : addDays(todayISO(), 1); }
+  if (stage === "lost") { patch.nextAction = ""; patch.nextActionDate = ""; patch.priceToSend = false; }
   const text = `Stage: ${STAGE[lead.stage]?.label || lead.stage} → ${STAGE[stage].label}${note ? ". " + note : ""}`;
-  await updateLead(lead.id, patch, { type: "stage", text });
+  return updateLead(lead.id, patch, { type: "stage", text });
 }
 
 // ---------- Boot ----------
 async function boot() {
   render();
   if (!window.claude?.use) { S.failed = true; render(); return; }
+  // Downloads is optional: resolve it on its own so a slow answer never holds up the data.
+  Promise.resolve(window.claude.use("downloads")).then((d) => { S.downloads = d || null; if (d) render(); }).catch(() => {});
   const [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
   S.db = db; S.user = user;
   if (user) {
@@ -344,18 +456,27 @@ async function boot() {
     S.templates = snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
     if (S.view === "messages") render(); refreshDrawer();
   }, err);
+  db.collection("drafts").orderBy("createdAt", "desc").limit(500).onSnapshot((snap) => {
+    S.drafts = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    S.draftsReady = true;
+    resolveProfiles(S.drafts.map((d) => d.reviewedBy)).then(() => { if (S.view === "trial") render(); });
+    if (["trial", "today", "reports"].includes(S.view)) render(); else renderTop();
+    refreshDrawer();
+  }, err);
   db.doc("config/settings").onSnapshot((snap) => {
-    S.settings = snap.exists ? { ...DEFAULT_SETTINGS, ...snap.data(), autopilot: { ...DEFAULT_SETTINGS.autopilot, ...(snap.data().autopilot || {}) } } : DEFAULT_SETTINGS;
-    if (S.view === "settings") render();
+    const data = snap.exists ? snap.data() : {};
+    S.settings = { ...DEFAULT_SETTINGS, ...data, mode: data.mode === "live" ? "live" : "trial", autopilot: { ...DEFAULT_SETTINGS.autopilot, ...(data.autopilot || {}) } };
+    render(); refreshDrawer();
   }, err);
   renderTop();
 }
 
 // ---------- Top bar ----------
 function renderTop() {
-  const needPrice = S.leads.filter((l) => l.stage === "awaiting_price").length;
+  const needPrice = S.leads.filter((l) => l.stage === "awaiting_price" && !l.priceAED).length;
   const toApprove = S.prospects.filter((p) => p.status === "found").length;
-  const counts = { today: needPrice, prospects: toApprove };
+  const toReview = S.drafts.filter((d) => (d.status || "pending") === "pending").length;
+  const counts = { today: needPrice, prospects: toApprove, trial: toReview };
   $("#tabs").innerHTML = TABS.map((t) => `<button type="button" data-tab="${t.id}" ${S.view === t.id ? 'aria-current="page"' : ""}>${t.label}${counts[t.id] ? `<span class="count">${counts[t.id]}</span>` : ""}</button>`).join("");
   const me = S.me;
   $("#who").innerHTML = me && me.id ? `<img alt="" src="${esc(me.avatarUrl)}"><span>${esc(me.name || "You")}</span>` : "";
@@ -363,10 +484,14 @@ function renderTop() {
 }
 $("#tabs").addEventListener("click", (e) => {
   const b = e.target.closest("button[data-tab]"); if (!b) return;
-  S.view = b.dataset.tab; try { localStorage.setItem("el-crm-view", S.view); } catch (err) {}
-  render(); window.scrollTo(0, 0);
+  goTo(b.dataset.tab);
 });
 $("#newLeadBtn").addEventListener("click", () => openLeadModal());
+function goTo(view) {
+  if (!TABS.some((t) => t.id === view)) return;
+  S.view = view; try { localStorage.setItem("el-crm-view", S.view); } catch (err) {}
+  render(); window.scrollTo(0, 0);
+}
 
 // ---------- Views ----------
 function render() {
@@ -375,29 +500,45 @@ function render() {
   let banner = "";
   if (S.failed) banner = `<div class="banner">Shared data isn't available in this view. Open the CRM from claude.ai while signed in to see and edit leads.</div>`;
   else if (!S.writable) banner = `<div class="banner">You have view-only access. Ask the owner to make you a Contributor to edit leads.</div>`;
-  const views = { today: viewToday, pipeline: viewPipeline, leads: viewLeads, prospects: viewProspects, shows: viewShows, reports: viewReports, messages: viewMessages, settings: viewSettings };
-  v.innerHTML = banner + views[S.view]();
+  if (isTrial()) banner += `<div class="banner info"><b>Trial mode:</b> Claude drafts only, nothing is sent. ${S.view === "trial" ? "Rate each draft below so Claude learns." : `Review the drafts in the <a href="#trial" data-go="trial">Trial tab</a>.`}</div>`;
+  const views = { today: viewToday, trial: viewTrial, pipeline: viewPipeline, leads: viewLeads, prospects: viewProspects, shows: viewShows, reports: viewReports, messages: viewMessages, settings: viewSettings };
+  keepFocus(() => { v.innerHTML = banner + views[S.view](); });
 }
 
 function leadRow(l, side) {
-  return `<div class="row" data-lead="${esc(l.id)}"><div class="row-main"><b>${esc(leadTitle(l))}</b><span>${esc([l.eventType, l.eventDate && fmtDate(l.eventDate), l.emirate].filter(Boolean).join(" · ") || "No event details yet")}</span></div><div class="row-side">${side}</div></div>`;
+  const flags = leadFlags(l);
+  return `<div class="row" data-lead="${esc(l.id)}"><div class="row-main"><b>${esc(leadTitle(l))}</b><span>${esc([l.eventType, l.eventDate && fmtDate(l.eventDate), l.emirate].filter(Boolean).join(" · ") || "No event details yet")}</span>${flags ? `<div class="flags">${flags}</div>` : ""}</div><div class="row-side">${side}</div></div>`;
 }
 function emptyLeads(msg) { return `<div class="empty">${msg}</div>`; }
 
 function viewToday() {
   const t = todayISO();
   const open = S.leads.filter(isOpen);
-  const needPrice = S.leads.filter((l) => l.stage === "awaiting_price").sort((a, b) => (a.priceRequestedAt || 0) - (b.priceRequestedAt || 0));
-  const due = open.filter((l) => l.stage !== "awaiting_price" && l.nextActionDate && l.nextActionDate <= t).sort((a, b) => a.nextActionDate.localeCompare(b.nextActionDate));
+  // Prices: projects waiting for a price, plus any price (new or revised, any stage) the customer hasn't been sent yet.
+  const priceList = S.leads.filter((l) => l.stage !== "lost" && ((l.stage === "awaiting_price" && !l.priceAED) || priceUnsent(l)))
+    .sort((a, b) => (!!a.priceAED - !!b.priceAED) || ((a.priceRequestedAt || a.priceSetAt || 0) - (b.priceRequestedAt || b.priceSetAt || 0)));
+  const needPrice = priceList.filter((l) => !l.priceAED);
+  const due = open.filter((l) => l.stage !== "awaiting_price" && !priceUnsent(l) && l.nextActionDate && l.nextActionDate <= t).sort((a, b) => a.nextActionDate.localeCompare(b.nextActionDate));
   const fresh = S.leads.filter((l) => l.stage === "new");
   const shows = S.leads.filter((l) => ["booked", "confirmed"].includes(l.stage) && l.eventDate && daysUntil(l.eventDate) >= 0 && daysUntil(l.eventDate) <= 21).sort((a, b) => a.eventDate.localeCompare(b.eventDate));
+  const expiring = S.leads.filter((l) => ["quoted", "negotiating"].includes(l.stage) && l.quoteValidUntil && !priceUnsent(l) && l.quoteValidUntil <= addDays(t, 1)).sort((a, b) => a.quoteValidUntil.localeCompare(b.quoteValidUntil));
+  const clashing = S.leads.filter((l) => l.eventDate && l.eventDate >= t && !["lost", "completed"].includes(l.stage) && clashesFor(l).length).sort((a, b) => a.eventDate.localeCompare(b.eventDate));
   const pipeline = S.leads.filter((l) => ["quoted", "negotiating", "booked"].includes(l.stage)).reduce((s, l) => s + (Number(l.priceAED) || 0), 0);
   const month = t.slice(0, 7);
   const wonMonth = S.leads.filter((l) => isWon(l) && l.depositReceivedAt && new Date(l.depositReceivedAt).toISOString().slice(0, 7) === month).reduce((s, l) => s + (Number(l.priceAED) || 0), 0);
   const toApprove = S.prospects.filter((p) => p.status === "found").length;
+  const toReview = S.drafts.filter((d) => (d.status || "pending") === "pending").length;
+  const waitingSince = needPrice[0]?.priceRequestedAt;
+  const waitPill = (l) => { const h = l.priceRequestedAt ? (Date.now() - l.priceRequestedAt) / 3600000 : 0; return `<span class="pill ${h >= 24 ? "bad" : h >= 3 ? "warn" : "accent"}">${l.priceRequestedAt ? "Waiting " + ago(l.priceRequestedAt).replace(" ago", "") : "Waiting"}</span>`; };
+  const priceSide = (l) => {
+    if (!l.priceAED) return waitPill(l);
+    if (l.priceToSend) return `<span class="pill good">Priced · ${isTrial() ? "Claude drafts it" : "Claude sends it"}</span>`;
+    return `<span class="pill warn">Send it, then mark sent</span>`;
+  };
 
   const kpis = `<div class="kpis">
-    <div class="kpi ${needPrice.length ? "alert" : ""}"><div class="label">Waiting for your price</div><div class="value num">${needPrice.length}</div><div class="hint">${needPrice[0] ? "Oldest waiting " + ago(needPrice[0].priceRequestedAt) : "Nobody is waiting"}</div></div>
+    <div class="kpi ${needPrice.length ? "alert" : ""}"><div class="label">Waiting for your price</div><div class="value num">${needPrice.length}</div><div class="hint">${waitingSince ? "Oldest waiting " + ago(waitingSince) : "Nobody is waiting"}</div></div>
+    ${isTrial() ? `<div class="kpi ${toReview ? "alert" : ""}"><div class="label">Drafts to review</div><div class="value num">${toReview}</div><div class="hint"><a href="#trial" data-go="trial">Open the Trial tab</a></div></div>` : ""}
     <div class="kpi ${due.length ? "alert" : ""}"><div class="label">Follow-ups due</div><div class="value num">${due.length}</div><div class="hint">Today and overdue</div></div>
     <div class="kpi"><div class="label">Open quotes</div><div class="value num">${aed(pipeline).replace("AED ", "")}</div><div class="hint">AED excl. VAT, quoted to booked</div></div>
     <div class="kpi"><div class="label">Won this month</div><div class="value num">${aed(wonMonth).replace("AED ", "")}</div><div class="hint">AED excl. VAT, deposit received</div></div>
@@ -407,13 +548,94 @@ function viewToday() {
     return `<h1 class="view-title">Call sheet</h1><p class="sub">${fmtDate(t)} · Abu Dhabi</p>${kpis}
       <div class="card"><h2>No leads yet</h2><p>Add your first enquiry with <b>+ New lead</b>, or ask Claude to import past enquiries from your WhatsApp and email. Every new lead lands in <b>New enquiry</b> and moves through the pipeline from there.</p></div>`;
   }
+  const loading = (msg) => emptyLeads(S.ready ? msg : "Loading…");
   return `<h1 class="view-title">Call sheet</h1><p class="sub">${fmtDate(t)} · Abu Dhabi${toApprove ? ` · <a href="#prospects" data-go="prospects">${toApprove} prospect${toApprove > 1 ? "s" : ""} waiting for approval</a>` : ""}</p>${kpis}
   <div class="grid2">
-    <section class="card"><h2>Price these projects</h2><div class="list">${needPrice.map((l) => leadRow(l, l.priceAED ? `<span class="pill good">Priced · Claude to send</span>` : `<span class="pill accent">${ago(l.priceRequestedAt) || "waiting"}</span>`)).join("") || emptyLeads(S.ready ? "No projects waiting for a price." : "Loading…")}</div></section>
-    <section class="card"><h2>Follow up today</h2><div class="list">${due.map((l) => leadRow(l, `${l.nextActionDate < t ? `<span class="pill bad">Overdue ${-daysUntil(l.nextActionDate)}d</span>` : `<span class="pill">Today</span>`}<div style="color:var(--muted)">${esc(l.nextAction || "")}</div>`)).join("") || emptyLeads(S.ready ? "Nothing due. Nice." : "Loading…")}</div></section>
-    <section class="card"><h2>New enquiries</h2><div class="list">${fresh.map((l) => leadRow(l, `${esc(l.source || "")}<div style="color:var(--muted)">${ago(l.createdAt)}</div>`)).join("") || emptyLeads(S.ready ? "No new enquiries." : "Loading…")}</div></section>
-    <section class="card"><h2>Shows in the next 3 weeks</h2><div class="list">${shows.map((l) => leadRow(l, `<b class="num">${daysUntil(l.eventDate) === 0 ? "Today" : "in " + daysUntil(l.eventDate) + "d"}</b><div>${paymentPills(l)}</div>`)).join("") || emptyLeads(S.ready ? "No booked shows in the next 3 weeks." : "Loading…")}</div></section>
+    <section class="card"><h2>Price these projects</h2><div class="list">${priceList.map((l) => leadRow(l, priceSide(l))).join("") || loading("No projects waiting for a price.")}</div></section>
+    <section class="card"><h2>Quotes expiring</h2><div class="list">${expiring.map((l) => { const v = quoteValidity(l); return leadRow(l, `${validityPill(l)}<div style="color:var(--muted)">${v?.expired ? "Team re-confirms the price" : esc(aed(l.priceAED))}</div>`); }).join("") || loading("No quotes expire today or tomorrow.")}</div></section>
+    <section class="card"><h2>Follow up today</h2><div class="list">${due.map((l) => leadRow(l, `${l.nextActionDate < t ? `<span class="pill bad">Overdue ${-daysUntil(l.nextActionDate)}d</span>` : `<span class="pill">Today</span>`}<div style="color:var(--muted)">${esc(l.nextAction || "")}</div>`)).join("") || loading("Nothing due. Nice.")}</div></section>
+    <section class="card"><h2>New enquiries</h2><div class="list">${fresh.map((l) => leadRow(l, `${esc(l.source || "")}<div style="color:var(--muted)">${ago(l.createdAt)}</div>`)).join("") || loading("No new enquiries.")}</div></section>
+    <section class="card"><h2>Shows in the next 3 weeks</h2><div class="list">${shows.map((l) => leadRow(l, `<b class="num">${daysUntil(l.eventDate) === 0 ? "Today" : "in " + daysUntil(l.eventDate) + "d"}</b><div>${paymentPills(l)}</div>`)).join("") || loading("No booked shows in the next 3 weeks.")}</div></section>
+    <section class="card"><h2>Date clashes</h2><div class="list">${clashing.map((l) => leadRow(l, `<span class="pill">${esc(STAGE[l.stage]?.label || l.stage)}</span>`)).join("") || loading("No two upcoming events share a date.")}</div></section>
   </div>`;
+}
+
+// ---------- Trial: Claude's drafts and the owner's ratings ----------
+const draftStatus = (d) => DRAFT_STATUS[d.status] ? d.status : "pending";
+const kindLabel = (k) => DRAFT_KINDS.find((x) => x.id === k)?.one || "Message";
+function readiness(list) {
+  const reviewed = list.filter((d) => draftStatus(d) !== "pending");
+  const good = reviewed.filter((d) => d.status === "good").length;
+  return { total: list.length, reviewed: reviewed.length, pending: list.length - reviewed.length, good,
+    needs: reviewed.filter((d) => d.status === "needs_changes").length, wrong: reviewed.filter((d) => d.status === "wrong").length,
+    pct: reviewed.length ? Math.round(100 * good / reviewed.length) : null };
+}
+function draftCard(d, opts = {}) {
+  const st = draftStatus(d);
+  const l = d.leadId ? S.leads.find((x) => x.id === d.leadId) : null;
+  const p = d.prospectId ? S.prospects.find((x) => x.id === d.prospectId) : null;
+  const dis = S.writable && S.db ? "" : "disabled";
+  const fbId = (opts.drawer ? "dfb-" : "fb-") + d.id;
+  const fb = S.fb[d.id] ?? d.feedback ?? "";
+  let who = "";
+  if (!opts.drawer) {
+    if (l) who = `<button type="button" class="linkish" data-open-lead="${esc(l.id)}">${esc(leadTitle(l))}</button> ${stagePill(l)}`;
+    else if (p) who = `<button type="button" class="linkish" data-open-prospect="${esc(p.id)}">${esc(p.company || "Prospect")}</button> <span class="pill">Prospect</span>`;
+    else who = `<span style="color:var(--muted)">${d.leadId || d.prospectId ? "Lead or prospect no longer in the CRM" : "Not linked to a lead"}</span>`;
+  }
+  const ph = l ? digits(l.phone) : "";
+  const wa = d.channel === "whatsapp" && ph && !(l && l.doNotContact) ? `<a class="btn small" target="_blank" rel="noopener" href="https://wa.me/${esc(ph)}?text=${encodeURIComponent(d.body || "")}">Open WhatsApp</a>` : "";
+  const reviewedLine = st !== "pending" ? `<span style="color:var(--muted);font-size:12px">Rated ${esc(DRAFT_STATUS[st].label.toLowerCase())}${d.reviewedBy ? " by " + esc(S.profiles[d.reviewedBy]?.name || "the team") : ""}${d.reviewedAt ? " · " + ago(d.reviewedAt) : ""}</span>` : "";
+  return `<article class="draft ${st === "pending" ? "pending" : ""}" data-draft-card="${esc(d.id)}">
+    <div class="draft-head">${who ? `<span class="who-for">${who}</span>` : ""}<span class="pill">${esc(kindLabel(d.kind))}</span><span class="pill">${esc(d.channel || "message")}</span><span class="pill">${d.language === "ar" ? "العربية" : "English"}</span><span class="pill ${DRAFT_STATUS[st].cls}">${DRAFT_STATUS[st].label}</span><span style="color:var(--muted);font-size:12px">${ago(d.createdAt)}</span></div>
+    ${l && l.claudePaused ? `<div class="note-box warn"><b>Claude is paused on this lead.</b> It shouldn't be drafting for it.</div>` : ""}
+    ${d.inReplyTo ? `<div><span class="lbl">Customer wrote</span><div class="said" dir="auto">${esc(d.inReplyTo)}</div></div>` : ""}
+    <div><span class="lbl">Claude's draft${d.subject ? " · Subject: " + esc(d.subject) : ""}</span><div class="copybox" dir="auto" id="${opts.drawer ? "dbody-" : "body-"}${esc(d.id)}">${esc(d.body || "")}</div></div>
+    ${d.reasoning ? `<div class="why"><b>Why:</b> <span dir="auto">${esc(d.reasoning)}</span></div>` : ""}
+    <div class="actions"><button class="btn small" type="button" data-copy-draft="${esc(d.id)}">Copy</button>${wa}</div>
+    <div class="review">
+      <label class="lbl" for="${fbId}">Your feedback for Claude${st === "pending" ? " (needed for Needs changes or Wrong)" : ""}</label>
+      <textarea id="${fbId}" data-fb="${esc(d.id)}" rows="2" dir="auto" placeholder="e.g. Too long. Ask for the venue first. Don't mention the portfolio yet." ${dis}>${esc(fb)}</textarea>
+      <div class="actions" style="align-items:center">
+        <button class="btn small good ${st === "good" ? "on" : ""}" type="button" data-review="good" data-draft="${esc(d.id)}" ${dis}>Good</button>
+        <button class="btn small mid ${st === "needs_changes" ? "on" : ""}" type="button" data-review="needs_changes" data-draft="${esc(d.id)}" ${dis}>Needs changes</button>
+        <button class="btn small bad ${st === "wrong" ? "on" : ""}" type="button" data-review="wrong" data-draft="${esc(d.id)}" ${dis}>Wrong</button>
+        ${reviewedLine}
+      </div>
+    </div>
+  </article>`;
+}
+function viewTrial() {
+  const all = S.drafts;
+  const weekAgo = Date.now() - 7 * 86400000;
+  const r = readiness(all), r7 = readiness(all.filter((d) => (d.createdAt || 0) >= weekAgo));
+  const byKind = DRAFT_KINDS.map((k) => ({ k, r: readiness(all.filter((d) => (DRAFT_KINDS.some((x) => x.id === d.kind) ? d.kind : "other") === k.id)) })).filter((x) => x.r.total);
+  const ready = r7.reviewed >= 20 && r7.pct >= 90;
+  let list = all.filter((d) => (!S.dKind || d.kind === S.dKind) && (S.dShow === "all" || (S.dShow === "pending" ? draftStatus(d) === "pending" : draftStatus(d) !== "pending")));
+  list = list.slice().sort((a, b) => {
+    const pa = draftStatus(a) === "pending", pb = draftStatus(b) === "pending";
+    if (pa !== pb) return pa ? -1 : 1;
+    return pa ? (b.createdAt || 0) - (a.createdAt || 0) : (b.reviewedAt || 0) - (a.reviewedAt || 0);
+  });
+  const pctTxt = (x) => x.pct === null ? "—" : x.pct + "%";
+  return `<h1 class="view-title">Trial</h1><p class="sub">Every message Claude would send is saved here as a draft${isTrial() ? " and nothing goes to the customer" : ""}. Rate each one: Good, Needs changes or Wrong, with a short note. Claude reads your notes before every run.</p>
+  <div class="kpis">
+    <div class="kpi ${r.pending ? "alert" : ""}"><div class="label">To review</div><div class="value num">${r.pending}</div><div class="hint">${r.total} drafts in total</div></div>
+    <div class="kpi"><div class="label">Good, all time</div><div class="value num">${pctTxt(r)}</div><div class="hint">${r.good} of ${r.reviewed} reviewed</div></div>
+    <div class="kpi"><div class="label">Good, last 7 days</div><div class="value num">${pctTxt(r7)}</div><div class="hint">${r7.good} of ${r7.reviewed} reviewed</div></div>
+    <div class="kpi"><div class="label">Wrong, all time</div><div class="value num">${r.wrong}</div><div class="hint">${r.needs} need${r.needs === 1 ? "s" : ""} changes</div></div>
+  </div>
+  <div class="grid2" style="margin-bottom:20px">
+    <section class="card"><h2>Ready for live?</h2>
+      <p style="margin:0 0 8px">${ready ? `<b style="color:var(--good)">Drafts were good ${r7.pct}% of the time this week.</b> You could let Claude send follow-ups itself. Keep first replies and prices on review for longer.` : `<b>Keep reviewing.</b> A sensible bar: about 9 good drafts in 10 over the last week, with at least 20 rated, before Claude sends anything itself.`}</p>
+      <p style="margin:0;color:var(--muted);font-size:13px">Switching to Live is the owner's call, in Settings.</p></section>
+    <section class="card"><h2>Good drafts by type</h2>${byKind.length ? `<div class="table-wrap" style="border:0"><table><thead><tr><th>Type</th><th>Drafts</th><th>Rated</th><th>Good</th><th>Changes</th><th>Wrong</th></tr></thead><tbody>${byKind.map(({ k, r: x }) => `<tr style="cursor:default"><td>${esc(k.label)}</td><td class="num">${x.total}</td><td class="num">${x.reviewed}</td><td class="num">${pctTxt(x)}</td><td class="num">${x.needs}</td><td class="num">${x.wrong}</td></tr>`).join("")}</tbody></table></div>` : `<div class="empty">No drafts yet.</div>`}</section>
+  </div>
+  <div class="toolbar">
+    <div class="seg" role="group" aria-label="Show">${[["pending", `To review (${r.pending})`], ["reviewed", `Rated (${r.reviewed})`], ["all", "All"]].map(([id, label]) => `<button type="button" data-dshow="${id}" aria-pressed="${S.dShow === id}">${label}</button>`).join("")}</div>
+    <select id="dKind" aria-label="Type of message"><option value="">All types</option>${DRAFT_KINDS.map((k) => `<option value="${k.id}" ${S.dKind === k.id ? "selected" : ""}>${k.label}</option>`).join("")}</select>
+  </div>
+  <div class="drafts">${list.map((d) => draftCard(d)).join("") || `<div class="card empty">${!S.draftsReady && !S.failed ? "Loading…" : S.dShow === "pending" ? "Nothing to review. When Claude runs, its drafts appear here." : "No drafts here yet."}</div>`}</div>`;
 }
 
 function paymentPills(l) {
@@ -429,7 +651,7 @@ function viewPipeline() {
     const deals = S.leads.filter((l) => l.stage === s.id);
     const total = deals.reduce((a, l) => a + (Number(l.priceAED) || 0), 0);
     return `<div class="col" data-stage="${s.id}"><div class="col-head"><b>${s.label}</b><span class="num">${deals.length}${total ? " · " + aed(total).replace("AED ", "") : ""}</span></div>
-      ${deals.map((l) => `<div class="deal" draggable="${S.writable}" data-lead="${esc(l.id)}"><b>${esc(leadTitle(l))}</b><div class="meta">${esc([l.eventType, l.eventDate && fmtDate(l.eventDate)].filter(Boolean).join(" · ") || "No event details")}</div><div class="foot"><span class="num">${l.priceAED ? aed(l.priceAED) : ""}</span>${temp(l)}</div></div>`).join("") || `<div class="empty" style="padding:8px 4px">Empty</div>`}
+      ${deals.map((l) => `<div class="deal" draggable="${S.writable}" data-lead="${esc(l.id)}"><b>${esc(leadTitle(l))}</b><div class="meta">${esc([l.eventType, l.eventDate && fmtDate(l.eventDate)].filter(Boolean).join(" · ") || "No event details")}</div><div class="foot"><span class="num">${l.priceAED ? aed(l.priceAED) : ""}</span>${temp(l)}</div>${(() => { const f = [validityPill(l), l.claudePaused ? `<span class="pill warn">Claude paused</span>` : "", l.priceToSend ? `<span class="pill good">Price to send</span>` : ""].filter(Boolean).join(" "); return f ? `<div class="flags">${f}</div>` : ""; })()}</div>`).join("") || `<div class="empty" style="padding:8px 4px">Empty</div>`}
     </div>`;
   }).join("")}</div>`;
 }
@@ -441,7 +663,7 @@ function filteredLeads() {
     if (S.fStage && S.fStage !== "open" && S.fStage !== "all" && l.stage !== S.fStage) return false;
     if (S.fSource && l.source !== S.fSource) return false;
     if (S.fSegment && l.segment !== S.fSegment) return false;
-    if (q && ![l.name, l.company, l.phone, l.email, l.eventType, l.venue, l.requirements].join(" ").toLowerCase().includes(q)) return false;
+    if (q && ![l.name, l.company, l.phone, l.email, l.eventType, l.venue, l.requirements, l.campaign, l.crew, l.kit].join(" ").toLowerCase().includes(q)) return false;
     return true;
   });
 }
@@ -454,10 +676,52 @@ function viewLeads() {
     <select id="fStage" aria-label="Stage"><option value="open" ${S.fStage === "open" ? "selected" : ""}>Open deals</option><option value="all" ${S.fStage === "all" ? "selected" : ""}>All stages</option>${STAGES.map((s) => `<option value="${s.id}" ${S.fStage === s.id ? "selected" : ""}>${s.label}</option>`).join("")}</select>
     <select id="fSource" aria-label="Source">${opt(SOURCES, S.fSource, "All sources")}</select>
     <select id="fSegment" aria-label="Segment">${opt(SEGMENTS, S.fSegment, "All segments")}</select>
+    ${S.downloads ? `<button class="btn" id="exportLeads" type="button" ${S.leads.length ? "" : "disabled"}>Export all leads (CSV)</button>` : ""}
   </div>
-  <div class="table-wrap"><table><thead><tr><th>Lead</th><th>Stage</th><th>Event</th><th>Date</th><th>Emirate</th><th>Price</th><th>Next step</th><th>Source</th><th>Updated</th></tr></thead><tbody>
-  ${rows.map((l) => `<tr data-lead="${esc(l.id)}"><td><b>${esc(leadTitle(l))}</b> ${temp(l)}</td><td>${stagePill(l)}</td><td>${esc(l.eventType || "")}</td><td class="num">${l.eventDate ? fmtDate(l.eventDate) : ""}</td><td>${esc(l.emirate || "")}</td><td class="num">${l.priceAED ? aed(l.priceAED) : ""}</td><td>${esc(l.nextAction || "")}${l.nextActionDate ? ` <span class="pill ${l.nextActionDate < todayISO() ? "bad" : ""}">${fmtDate(l.nextActionDate)}</span>` : ""}</td><td>${esc(l.source || "")}</td><td>${ago(l.updatedAt)}</td></tr>`).join("") || `<tr><td colspan="9" class="empty">${S.ready ? "No leads match." : "Loading…"}</td></tr>`}
+  <div class="table-wrap"><table><thead><tr><th>Lead</th><th>Stage</th><th>Event</th><th>Date</th><th>Emirate</th><th>Price</th><th>Quote</th><th>Next step</th><th>Source</th><th>Updated</th></tr></thead><tbody>
+  ${rows.map((l) => { const c = l.eventDate && l.stage !== "lost" ? clashesFor(l) : []; return `<tr data-lead="${esc(l.id)}"><td><b>${esc(leadTitle(l))}</b> ${temp(l)}${l.claudePaused ? ` <span class="pill warn">Claude paused</span>` : ""}</td><td>${stagePill(l)}</td><td>${esc(l.eventType || "")}</td><td class="num">${l.eventDate ? fmtDate(l.eventDate) : ""}${c.length ? ` <span class="pill bad" title="${esc(clashNames(c))}">Clash</span>` : ""}</td><td>${esc(l.emirate || "")}</td><td class="num">${l.priceAED ? aed(l.priceAED) : ""}</td><td>${validityPill(l) || (l.priceToSend ? `<span class="pill good">${isTrial() ? "Claude to draft" : "Claude to send"}</span>` : priceUnsent(l) ? `<span class="pill warn">Not marked sent</span>` : "")}</td><td>${esc(l.nextAction || "")}${l.nextActionDate ? ` <span class="pill ${l.nextActionDate < todayISO() ? "bad" : ""}">${fmtDate(l.nextActionDate)}</span>` : ""}</td><td>${esc(l.source || "")}${l.campaign ? `<div style="color:var(--muted);font-size:12px">${esc(l.campaign)}</div>` : ""}</td><td>${ago(l.updatedAt)}</td></tr>`; }).join("") || `<tr><td colspan="10" class="empty">${S.ready ? "No leads match." : "Loading…"}</td></tr>`}
   </tbody></table></div>`;
+}
+
+// ---------- CSV export (downloads capability) ----------
+const csvTime = (ms) => ms ? new Date(ms).toLocaleString("sv-SE", { timeZone: "Asia/Dubai" }).slice(0, 16) : "";
+function csvCell(v) {
+  let s = v == null ? "" : Array.isArray(v) ? v.join("; ") : String(v);
+  // Stop spreadsheet apps from running cell text as a formula (phone numbers like +971... are left alone).
+  if (/^[=@\t\r]/.test(s) || (/^[+-]/.test(s) && !/^[+-]?[\d\s().-]+$/.test(s))) s = "'" + s;
+  return '"' + s.replace(/"/g, '""') + '"';
+}
+const toCSV = (cols, rows) => [cols.map(([, h]) => csvCell(h)).join(","), ...rows.map((r) => cols.map(([k, , f]) => csvCell(f ? f(r[k], r) : r[k])).join(","))].join("\r\n");
+const LEAD_CSV = [
+  ["id", "Lead id"], ["name", "Contact name"], ["company", "Company"], ["phone", "Phone"], ["email", "Email"], ["language", "Language"],
+  ["source", "Source"], ["campaign", "Campaign"], ["segment", "Segment"], ["stage", "Stage", (v) => STAGE[v]?.label || v],
+  ["eventType", "Event type"], ["eventDate", "Event date"], ["venue", "Venue"], ["emirate", "Emirate"], ["guests", "Guests"],
+  ["setting", "Indoor / outdoor"], ["services", "Services"], ["requirements", "Requirements"], ["budgetAED", "Customer budget (AED)"],
+  ["priceAED", "Price (AED excl. VAT)"], ["quoteDetails", "Quote wording"], ["priceToSend", "Price waiting for Claude"],
+  ["quoteSentAt", "Quote sent", csvTime], ["quoteValidUntil", "Quote valid until"], ["dateCheckedBy", "Date and kit checked by"],
+  ["crew", "Crew"], ["kit", "Kit"], ["depositStatus", "Deposit"], ["balanceStatus", "Balance"], ["lostReason", "Lost reason"],
+  ["priority", "Temperature"], ["nextAction", "Next step"], ["nextActionDate", "Next step date"], ["claudePaused", "Claude paused"],
+  ["marketingOptIn", "Agreed to offers"], ["doNotContact", "Do not contact"], ["createdAt", "Created", csvTime],
+  ["firstReplyAt", "First reply", csvTime], ["lastContactAt", "Last contact", csvTime], ["updatedAt", "Updated", csvTime],
+];
+const PROSPECT_CSV = [
+  ["id", "Prospect id"], ["company", "Company"], ["segment", "Segment"], ["emirate", "Emirate"], ["website", "Website"],
+  ["contactName", "Contact name"], ["role", "Role"], ["email", "Business email"], ["phone", "Business phone"], ["sourceUrl", "Found at"],
+  ["whyFit", "Why they fit"], ["status", "Status", (v) => PROSPECT_STATUSES.find((s) => s.id === v)?.label || v],
+  ["touches", "Touches"], ["lastOutreachAt", "Last outreach", csvTime], ["notes", "Notes"], ["createdAt", "Added", csvTime], ["updatedAt", "Updated", csvTime],
+];
+async function exportCSV(kind) {
+  if (!S.downloads) return;
+  const data = "\ufeff" + (kind === "leads" ? toCSV(LEAD_CSV, S.leads) : toCSV(PROSPECT_CSV, S.prospects));
+  const filename = `echolight-${kind}-${todayISO()}.csv`;
+  try { await S.downloads.save({ filename, data }); toast(`Export ready: ${filename}`); }
+  catch (e) {
+    const c = e?.code;
+    if (c === "declined") toast("Export cancelled.");
+    else if (c === "rate_limited") toast("A save prompt is already open. Finish that one first.");
+    else if (c === "too_large") toast("The file is too large to save here.");
+    else { toast("Exporting isn't available in this view."); S.downloads = null; render(); }
+  }
 }
 
 function viewProspects() {
@@ -466,11 +730,12 @@ function viewProspects() {
   const counts = Object.fromEntries(PROSPECT_STATUSES.map((s) => [s.id, S.prospects.filter((p) => p.status === s.id).length]));
   const auto = S.settings.autopilot;
   return `<h1 class="view-title">Prospects</h1>
-  <p class="sub">Companies Claude or the team found that could need EchoLight. Outreach autopilot is <b>${auto.outreach ? "on" : "off"}</b>${auto.outreach ? (auto.outreachNeedsApproval ? ": Claude only contacts prospects you approve" : ": Claude contacts new prospects without approval") : ""}, max ${esc(auto.outreachDailyCap)} a day. Change it in Settings.</p>
+  <p class="sub">Companies Claude or the team found that could need EchoLight. Outreach is by email to business addresses only, with an unsubscribe line, never by WhatsApp. Outreach autopilot is <b>${auto.outreach ? "on" : "off"}</b>${auto.outreach ? (isTrial() ? ": in trial mode Claude only drafts the emails for you to review" : auto.outreachNeedsApproval ? ": Claude only emails prospects you approve" : ": Claude emails new prospects without approval") : ""}, max ${esc(auto.outreachDailyCap)} a day. Change it in Settings.</p>
   <div class="toolbar">
     <input type="search" id="pq" placeholder="Search company, contact, segment…" value="${esc(S.pq)}" aria-label="Search prospects">
     <select id="pStatus" aria-label="Status"><option value="">All statuses</option>${PROSPECT_STATUSES.map((s) => `<option value="${s.id}" ${S.pStatus === s.id ? "selected" : ""}>${s.label} (${counts[s.id]})</option>`).join("")}</select>
     <button class="btn" id="addProspect" type="button" ${S.writable && S.db ? "" : "disabled"}>+ Add prospect</button>
+    ${S.downloads ? `<button class="btn" id="exportProspects" type="button" ${S.prospects.length ? "" : "disabled"}>Export prospects (CSV)</button>` : ""}
   </div>
   <div class="table-wrap"><table><thead><tr><th>Company</th><th>Segment</th><th>Contact</th><th>Why they fit</th><th>Status</th><th>Last touch</th><th></th></tr></thead><tbody>
   ${rows.map((p) => `<tr data-prospect="${esc(p.id)}"><td><b>${esc(p.company || "")}</b><div style="color:var(--muted);font-size:12px">${esc(p.emirate || "")}${p.website ? " · " + esc(p.website) : ""}</div></td><td>${esc(p.segment || "")}</td><td>${esc(p.contactName || "")}${p.role ? `<div style="color:var(--muted);font-size:12px">${esc(p.role)}</div>` : ""}</td><td class="wrap">${esc(p.whyFit || "")}</td><td><span class="pill ${p.status === "replied" || p.status === "converted" ? "good" : p.status === "do_not_contact" || p.status === "not_interested" ? "bad" : p.status === "found" ? "accent" : ""}">${esc(PROSPECT_STATUSES.find((s) => s.id === p.status)?.label || p.status)}</span>${p.addedBy === "claude" ? ` <span class="pill claude">Claude</span>` : ""}</td><td>${p.lastOutreachAt ? ago(p.lastOutreachAt) : "—"}${p.touches ? ` · ${p.touches}×` : ""}</td>
@@ -483,10 +748,14 @@ function viewShows() {
   const groups = {};
   shows.forEach((l) => { const k = l.eventDate.slice(0, 7); (groups[k] ||= []).push(l); });
   const monthName = (k) => new Date(k + "-15T12:00:00").toLocaleDateString("en-GB", { month: "long", year: "numeric" });
-  return `<h1 class="view-title">Shows</h1><p class="sub">Booked, confirmed and recent events, with payment status. Balance is due on the event date, before the show starts.</p>
+  return `<h1 class="view-title">Shows</h1><p class="sub">Booked, confirmed and recent events, with payment status, crew and kit. Balance is due on the event date, before the show starts. Events on the same date are flagged so you can check crew and equipment.</p>
   ${Object.keys(groups).map((k) => `<div class="month-group"><h2>${monthName(k)}</h2><div class="card"><div class="list">${groups[k].map((l) => {
     const d = new Date(l.eventDate + "T12:00:00");
-    return `<div class="row" data-lead="${esc(l.id)}"><div class="show-date">${d.getDate()}<small>${d.toLocaleDateString("en-GB", { weekday: "short" })}</small></div><div class="row-main"><b>${esc(leadTitle(l))}</b><span>${esc([l.eventType, l.venue, l.emirate, l.guests && l.guests + " guests"].filter(Boolean).join(" · "))}</span><span>${esc((l.services || []).join(", "))}</span></div><div class="row-side"><div class="num">${l.priceAED ? aed(l.priceAED) : ""}</div><div>${paymentPills(l)}</div></div></div>`;
+    const upcoming = daysUntil(l.eventDate) >= 0 && l.stage !== "completed";
+    const c = l.stage !== "completed" ? clashesFor(l) : [];
+    const flags = [c.length ? `<span class="pill bad wrap" title="${esc(clashNames(c))}">Same date as ${esc(c.map((o) => o.name || o.company || "another lead").join(", "))}</span>` : "", upcoming && !l.crew ? `<span class="pill warn">No crew assigned</span>` : "", l.claudePaused ? `<span class="pill warn">Claude paused</span>` : ""].filter(Boolean).join(" ");
+    const prod = [l.crew && "Crew: " + l.crew, l.kit && "Kit: " + l.kit].filter(Boolean).join(" · ");
+    return `<div class="row" data-lead="${esc(l.id)}"><div class="show-date">${d.getDate()}<small>${d.toLocaleDateString("en-GB", { weekday: "short" })}</small></div><div class="row-main"><b>${esc(leadTitle(l))}</b><span>${esc([l.eventType, l.venue, l.emirate, l.guests && l.guests + " guests"].filter(Boolean).join(" · "))}</span><span>${esc((l.services || []).join(", "))}</span>${prod ? `<span dir="auto">${esc(prod)}</span>` : ""}${flags ? `<div class="flags">${flags}</div>` : ""}</div><div class="row-side"><div class="num">${l.priceAED ? aed(l.priceAED) : ""}</div><div>${paymentPills(l)}</div></div></div>`;
   }).join("")}</div></div></div>`).join("") || `<div class="card empty">${S.ready ? "No booked shows yet. Deals appear here once they reach Booked." : "Loading…"}</div>`}`;
 }
 
@@ -498,8 +767,8 @@ function viewReports() {
   const maxF = Math.max(1, ...fCounts.map((x) => x.n));
   const won = leads.filter(isWon), lost = leads.filter((l) => l.stage === "lost");
   const winRate = won.length + lost.length ? Math.round(100 * won.length / (won.length + lost.length)) : null;
-  const group = (key, list) => { const m = {}; list.forEach((l) => { const k = l[key] || "Unknown"; m[k] ||= { n: 0, won: 0, value: 0 }; m[k].n++; if (isWon(l)) { m[k].won++; m[k].value += Number(l.priceAED) || 0; } }); return Object.entries(m).sort((a, b) => b[1].n - a[1].n); };
-  const src = group("source", leads), seg = group("segment", leads);
+  const group = (key, list, none = "Unknown") => { const m = {}; list.forEach((l) => { const k = String(l[key] || "").trim() || none; m[k] ||= { n: 0, won: 0, value: 0 }; m[k].n++; if (isWon(l)) { m[k].won++; m[k].value += Number(l.priceAED) || 0; } }); return Object.entries(m).sort((a, b) => b[1].n - a[1].n); };
+  const src = group("source", leads), seg = group("segment", leads), camp = group("campaign", leads, "No campaign recorded");
   const lostR = {}; lost.forEach((l) => { const k = l.lostReason || "Not recorded"; lostR[k] = (lostR[k] || 0) + 1; });
   const months = {}; won.forEach((l) => { if (!l.eventDate) return; const k = l.eventDate.slice(0, 7); months[k] = (months[k] || 0) + (Number(l.priceAED) || 0); });
   const mKeys = Object.keys(months).sort().slice(-12); const maxM = Math.max(1, ...mKeys.map((k) => months[k]));
@@ -507,59 +776,89 @@ function viewReports() {
   const avgDeal = won.length ? won.reduce((s, l) => s + (Number(l.priceAED) || 0), 0) / won.length : 0;
   const quoted = leads.filter((l) => l.quoteSentAt && l.priceRequestedAt);
   const avgPriceHrs = quoted.length ? Math.round(quoted.reduce((s, l) => s + (l.quoteSentAt - l.priceRequestedAt), 0) / quoted.length / 3600000) : null;
+  const replied = leads.filter((l) => l.firstReplyAt && l.createdAt && l.firstReplyAt >= l.createdAt);
+  const avgReply = replied.length ? replied.reduce((s, l) => s + (l.firstReplyAt - l.createdAt), 0) / replied.length : null;
+  const expired = leads.filter((l) => ["quoted", "negotiating"].includes(l.stage) && quoteValidity(l)?.expired).sort((a, b) => a.quoteValidUntil.localeCompare(b.quoteValidUntil));
+  const dr = readiness(S.drafts), dr7 = readiness(S.drafts.filter((d) => (d.createdAt || 0) >= Date.now() - 7 * 86400000));
   return `<h1 class="view-title">Reports</h1><p class="sub">All time, AED excl. VAT.</p>
   <div class="kpis">
     <div class="kpi"><div class="label">Leads</div><div class="value num">${leads.length}</div></div>
     <div class="kpi"><div class="label">Win rate</div><div class="value num">${winRate === null ? "—" : winRate + "%"}</div><div class="hint">Won ÷ (won + lost)</div></div>
     <div class="kpi"><div class="label">Average deal</div><div class="value num">${avgDeal ? aed(avgDeal).replace("AED ", "") : "—"}</div></div>
+    <div class="kpi"><div class="label">Average first reply</div><div class="value num">${avgReply === null ? "—" : fmtDuration(avgReply)}</div><div class="hint">${replied.length ? `Enquiry to our first reply, ${replied.length} lead${replied.length > 1 ? "s" : ""}` : "Recorded when the first reply is logged"}</div></div>
     <div class="kpi"><div class="label">Time to price</div><div class="value num">${avgPriceHrs === null ? "—" : avgPriceHrs + "h"}</div><div class="hint">Request to quote sent</div></div>
+    <div class="kpi ${expired.length ? "alert" : ""}"><div class="label">Quotes expired, no decision</div><div class="value num">${expired.length}</div><div class="hint">Still open after the ${QUOTE_VALID_DAYS} days</div></div>
   </div>
   <div class="grid2">
     <section class="card"><h2>Sales funnel</h2><div class="bars">${bars(fCounts.map((x) => [STAGE[x.st].label, x.n, x.n]), maxF)}</div></section>
     <section class="card"><h2>Won revenue by event month</h2><div class="bars">${mKeys.length ? bars(mKeys.map((k) => [new Date(k + "-15T12:00:00").toLocaleDateString("en-GB", { month: "short", year: "2-digit" }), months[k], aed(months[k]).replace("AED ", "")]), maxM) : `<div class="empty">No won deals with event dates yet.</div>`}</div></section>
     <section class="card"><h2>Leads by source</h2><div class="bars">${src.length ? bars(src.map(([k, v]) => [k, v.n, `${v.n} · ${v.won} won`]), Math.max(...src.map(([, v]) => v.n)), "cool") : `<div class="empty">No leads yet.</div>`}</div></section>
     <section class="card"><h2>Leads by segment</h2><div class="bars">${seg.length ? bars(seg.map(([k, v]) => [k, v.n, `${v.n} · ${v.won} won`]), Math.max(...seg.map(([, v]) => v.n)), "cool") : `<div class="empty">No leads yet.</div>`}</div></section>
+    <section class="card"><h2>Leads and won value by campaign</h2><div class="bars">${camp.length ? bars(camp.map(([k, v]) => [k, v.n, `${v.n} · ${v.value ? aed(v.value).replace("AED ", "") : "0"} won`]), Math.max(...camp.map(([, v]) => v.n)), "cool") : `<div class="empty">No leads yet.</div>`}</div></section>
     <section class="card"><h2>Why deals were lost</h2><div class="bars">${Object.keys(lostR).length ? bars(Object.entries(lostR).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, v, v]), Math.max(...Object.values(lostR))) : `<div class="empty">No lost deals recorded.</div>`}</div></section>
+    <section class="card"><h2>Quotes expired without a decision</h2><div class="list">${expired.map((l) => leadRow(l, `${validityPill(l)}<div class="num" style="color:var(--muted)">${esc(aed(l.priceAED))}</div>`)).join("") || `<div class="empty">None. Every open quote is still valid or decided.</div>`}</div></section>
+    <section class="card"><h2>Claude's drafts</h2>${dr.total ? `<div class="money"><div><span class="lbl">Good, all time</span><b>${dr.pct === null ? "—" : dr.pct + "%"}</b><span class="lbl">${dr.good} of ${dr.reviewed} rated</span></div><div><span class="lbl">Good, last 7 days</span><b>${dr7.pct === null ? "—" : dr7.pct + "%"}</b><span class="lbl">${dr7.good} of ${dr7.reviewed} rated</span></div><div><span class="lbl">Waiting for review</span><b>${dr.pending}</b><span class="lbl">${dr.wrong} wrong · ${dr.needs} need${dr.needs === 1 ? "s" : ""} changes</span></div></div><p style="margin:10px 0 0"><a href="#trial" data-go="trial">Review drafts in the Trial tab</a></p>` : `<div class="empty">No drafts yet. In trial mode every message Claude would send is saved as a draft for you to rate.</div>`}</section>
   </div>`;
 }
 
 function viewMessages() {
-  return `<h1 class="view-title">Messages</h1><p class="sub">Ready-to-send messages for every stage. Claude uses these too. Placeholders: {name}, {company}, {event}, {date}, {price}, {venue}.</p>
+  return `<h1 class="view-title">Messages</h1><p class="sub">Ready-to-send messages for every stage. Claude uses these too. Placeholders: {name}, {company}, {event}, {date}, {venue}, {price}, {validUntil} (the quote's last valid day, ${QUOTE_VALID_DAYS} days after it is sent). Review and referral messages are only offered once the event is done.</p>
   <div class="toolbar"><button class="btn" id="addTemplate" type="button" ${S.writable && S.db ? "" : "disabled"}>+ New message</button></div>
-  <div class="grid2">${S.templates.map((t) => `<section class="card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><h2 style="margin:0">${esc(t.name)}</h2><div style="display:flex;gap:6px;margin:6px 0 10px"><span class="pill">${esc(t.channel || "")}</span><span class="pill">${t.language === "ar" ? "العربية" : "English"}</span>${t.stage ? `<span class="pill">${esc(STAGE[t.stage]?.label || t.stage)}</span>` : ""}</div></div><button class="btn small" data-tedit="${esc(t.id)}" type="button" ${S.writable ? "" : "disabled"}>Edit</button></div>${t.subject ? `<div class="lbl">Subject: ${esc(t.subject)}</div>` : ""}<div class="copybox" dir="auto">${esc(t.body)}</div></section>`).join("") || `<div class="card empty">${S.ready ? "No messages yet." : "Loading…"}</div>`}</div>`;
+  <div class="grid2">${S.templates.map((t) => `<section class="card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><h2 style="margin:0">${esc(t.name)}</h2><div style="display:flex;gap:6px;margin:6px 0 10px"><span class="pill">${esc(t.channel || "")}</span><span class="pill">${t.language === "ar" ? "العربية" : "English"}</span>${t.stage ? `<span class="pill">${esc(STAGE[t.stage]?.label || t.stage)}</span>` : ""}</div></div><button class="btn small" data-tedit="${esc(t.id)}" type="button" ${S.writable ? "" : "disabled"}>Edit</button></div>${t.subject ? `<div class="lbl">Subject: ${esc(t.subject)}</div>` : ""}<div class="copybox" dir="auto">${esc(t.body)}</div></section>`).join("") || `<div class="card empty">${S.ready ? "No messages yet. Ask Claude to load the EchoLight message library, or add one with + New message." : "Loading…"}</div>`}</div>`;
 }
 
 function viewSettings() {
   const a = S.settings.autopilot;
   const ed = S.canEdit ? "" : "disabled";
+  const trial = isTrial();
   const sw = (k, label, hint) => `<label class="switch"><span><b>${label}</b><div style="color:var(--muted);font-size:13px">${hint}</div></span><input type="checkbox" data-auto="${k}" ${a[k] ? "checked" : ""} ${ed}></label>`;
-  return `<h1 class="view-title">Settings</h1><p class="sub">These switches tell Claude what it may do on its own. Claude reads them before every run.${S.canEdit ? "" : " Only the owner and editors can change them."}</p>
+  return `<h1 class="view-title">Settings</h1><p class="sub">These settings tell Claude what it may do. Claude reads them before every run.${S.canEdit ? "" : " Only the owner and editors can change them."}</p>
   <div class="grid2">
+  <section class="card mode-card"><h2>Mode</h2>
+    <div class="seg" role="group" aria-label="Mode"><button type="button" data-mode="trial" aria-pressed="${trial}" ${ed}>Trial: drafts only</button><button type="button" data-mode="live" aria-pressed="${!trial}" ${ed}>Live: Claude sends</button></div>
+    ${trial ? `<div class="note-box info"><b>Trial is on.</b> Claude sends nothing to anyone. It reads chats, updates the CRM and writes every message it would send as a draft in the Trial tab for you to rate.</div>`
+      : `<div class="note-box bad"><b>Live is on.</b> Claude sends messages to customers and prospects itself, following the switches below. Switch back to Trial at any time to stop it sending.</div>`}
+    <p style="margin:0;color:var(--muted);font-size:13px">Live lets Claude send real messages. Only switch once the drafts in the Trial tab are reliably good.</p>
+  </section>
   <section class="card"><h2>Claude autopilot</h2>
-    ${sw("inboundReplies", "Reply to incoming enquiries", "Claude answers people who message EchoLight, qualifies them and logs everything here.")}
-    ${sw("followUps", "Send follow-ups", "Claude follows up leads whose next step is due, using the Messages library.")}
-    ${sw("outreach", "Outbound prospecting", "Claude finds companies that could need EchoLight and emails them.")}
-    ${sw("outreachNeedsApproval", "Approve prospects before outreach", "Claude only contacts prospects marked Approved.")}
-    <div class="switch"><span><b>Daily outreach limit</b><div style="color:var(--muted);font-size:13px">Most new prospects Claude may contact per day.</div></span><input type="number" min="0" max="100" id="cap" value="${esc(a.outreachDailyCap)}" style="width:90px" ${ed}></div>
+    ${trial ? `<p style="margin:0 0 4px;color:var(--muted);font-size:13px">In trial mode these switches decide what Claude drafts. Nothing is sent either way.</p>` : ""}
+    ${sw("inboundReplies", trial ? "Draft replies to incoming enquiries" : "Reply to incoming enquiries", trial ? "Claude drafts replies to people who message EchoLight, and logs the details here." : "Claude answers people who message EchoLight, qualifies them and logs everything here.")}
+    ${sw("followUps", trial ? "Draft follow-ups" : "Send follow-ups", `Claude follows up quotes on day 1, on day ${QUOTE_VALID_DAYS} (the day the quote expires) and on day 7 (offer to refresh the quote), using the Messages library.`)}
+    ${sw("outreach", "Outbound prospecting", "Claude finds companies that could need EchoLight and " + (trial ? "drafts" : "sends") + " emails to their business addresses, with an unsubscribe line. Never WhatsApp. Off unless you turn it on.")}
+    ${sw("outreachNeedsApproval", "Approve prospects before outreach", "Claude only emails prospects marked Approved.")}
+    <div class="switch"><span><b>Daily outreach limit</b><div style="color:var(--muted);font-size:13px">Most new prospects Claude may email per day.</div></span><input type="number" min="0" max="100" id="cap" value="${esc(a.outreachDailyCap)}" style="width:90px" ${ed}></div>
   </section>
   <section class="card"><h2>Target segments for prospecting</h2><div class="checks">${SEGMENTS.map((s) => `<label><input type="checkbox" data-seg="${esc(s)}" ${(S.settings.targetSegments || []).includes(s) ? "checked" : ""} ${ed}>${esc(s)}</label>`).join("")}</div>
-    <h2 style="margin-top:18px">Instructions for Claude</h2><textarea id="setNotes" rows="5" placeholder="e.g. Focus on hotels in Abu Dhabi this month. Don't contact X." ${ed}>${esc(S.settings.notes || "")}</textarea>
+    <h2 style="margin-top:18px"><label for="setNotes">Instructions for Claude</label></h2><textarea id="setNotes" rows="5" placeholder="e.g. Focus on hotels in Abu Dhabi this month. Don't contact X." ${ed}>${esc(S.notesDraft ?? S.settings.notes ?? "")}</textarea>
     <div style="margin-top:8px"><button class="btn primary" id="saveNotes" type="button" ${ed}>Save instructions</button></div>
   </section>
   <section class="card"><h2>House rules (fixed)</h2><ul style="margin:0;padding-inline-start:18px;display:flex;flex-direction:column;gap:6px">
-    <li>Only the team sets prices. Claude asks, waits, then passes the price on word for word.</li>
+    <li>Only the team sets prices, and only through the price form in this CRM. Claude asks, waits, then passes the price on word for word.</li>
+    <li>Before a price is entered, someone checks the date, crew and kit, and their name is recorded.</li>
     <li>Prices are excl. VAT; 5% VAT is added on top.</li>
+    <li>Quotes are valid for ${QUOTE_VALID_DAYS} days from the day they are sent. After that the team re-confirms the price before the customer can book.</li>
     <li>50% deposit to confirm; 50% on the event date before the show starts.</li>
     <li>Payment only to the company account on the quotation or invoice.</li>
     <li>Anywhere in the UAE; no events abroad. No generators.</li>
-    <li>Leads marked "do not contact" are never messaged again.</li>
+    <li>Claude writes as the EchoLight team. If a customer sincerely asks whether they're talking to a person, Claude answers honestly, offers a call with Kareem and flags the lead for the team.</li>
+    <li>Nobody is contacted on WhatsApp unless they wrote to EchoLight first. Outreach is email to business addresses only.</li>
+    <li>Review and referral requests only after the event is done.</li>
+    <li>Leads marked "do not contact" are never messaged again. Leads with Claude paused are handled by the team only.</li>
   </ul></section>
   </div>`;
 }
 
 // ---------- View events ----------
 document.addEventListener("click", async (e) => {
-  const go = e.target.closest("[data-go]"); if (go) { e.preventDefault(); S.view = go.dataset.go; render(); return; }
+  const go = e.target.closest("[data-go]"); if (go) { e.preventDefault(); if (S.openLead && go.closest(".drawer")) closeDrawer(); goTo(go.dataset.go); return; }
+  const ol = e.target.closest("[data-open-lead]"); if (ol) { openDrawer(ol.dataset.openLead); return; }
+  const op = e.target.closest("[data-open-prospect]"); if (op) { const p = S.prospects.find((x) => x.id === op.dataset.openProspect); if (p) openProspectModal(p); return; }
+  const ds = e.target.closest("[data-dshow]"); if (ds) { S.dShow = ds.dataset.dshow; render(); return; }
+  const rv = e.target.closest("[data-review]"); if (rv) { reviewDraft(rv.dataset.draft, rv.dataset.review); return; }
+  const cd = e.target.closest("[data-copy-draft]"); if (cd) { const d = S.drafts.find((x) => x.id === cd.dataset.copyDraft); if (d) copyText(d.body || "", cd.closest(".draft")?.querySelector(".copybox")); return; }
+  const md = e.target.closest("[data-mode]"); if (md) { setMode(md.dataset.mode); return; }
+  if (e.target.closest("#exportLeads")) { exportCSV("leads"); return; }
+  if (e.target.closest("#exportProspects")) { exportCSV("prospects"); return; }
   const leadEl = e.target.closest("[data-lead]");
   if (leadEl && !e.target.closest("button") && $("#view").contains(leadEl)) { openDrawer(leadEl.dataset.lead); return; }
   const pa = e.target.closest("[data-papprove]"); if (pa) { const p = S.prospects.find((x) => x.id === pa.dataset.papprove); await write(() => S.db.doc("prospects/" + p.id).update({ status: "approved", updatedAt: Date.now() })); toast("Approved for outreach"); return; }
@@ -569,9 +868,32 @@ document.addEventListener("click", async (e) => {
   if (e.target.closest("#addProspect")) { openProspectModal(null); return; }
   if (e.target.closest("#addTemplate")) { openTemplateModal(null); return; }
   const te = e.target.closest("[data-tedit]"); if (te) { openTemplateModal(S.templates.find((t) => t.id === te.dataset.tedit)); return; }
-  if (e.target.closest("#saveNotes")) { if (await saveSettings({ notes: $("#setNotes").value })) toast("Instructions saved"); return; }
+  if (e.target.closest("#saveNotes")) { if (await saveSettings({ notes: $("#setNotes").value })) { S.notesDraft = undefined; toast("Instructions saved"); } return; }
 });
+async function copyText(text, box) {
+  try { await navigator.clipboard.writeText(text); toast("Copied"); }
+  catch (err) { if (box) { const r = document.createRange(); r.selectNodeContents(box); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); } toast("Selected. Press Ctrl+C to copy."); }
+}
+async function reviewDraft(id, status) {
+  const d = S.drafts.find((x) => x.id === id); if (!d || !DRAFT_STATUS[status]) return;
+  const feedback = String(S.fb[id] ?? d.feedback ?? "").trim();
+  if (status !== "good" && !feedback) {
+    toast("Add a short note on what to change, so Claude can learn from it.");
+    const box = document.querySelector(`[data-fb="${CSS.escape(id)}"]`); if (box) box.focus();
+    return;
+  }
+  const ok = await write(() => S.db.doc("drafts/" + id).update({ status, feedback, reviewedAt: Date.now(), reviewedBy: S.me?.id || null }));
+  if (ok) { delete S.fb[id]; toast(status === "good" ? "Rated good" : status === "wrong" ? "Rated wrong. Claude will read your note." : "Rated needs changes. Claude will read your note."); }
+}
+function setMode(mode) {
+  if (!S.canEdit || (mode !== "trial" && mode !== "live") || mode === S.settings.mode) return;
+  const patch = { mode, modeChangedAt: Date.now(), modeChangedBy: S.me?.id || null };
+  if (mode === "trial") { saveSettings(patch).then((ok) => ok && toast("Trial mode on. Claude drafts only.")); return; }
+  openConfirm("Switch to Live?", "In Live mode Claude sends messages to customers and prospects itself, following the autopilot switches. Only switch once the drafts in the Trial tab are reliably good. You can switch back to Trial at any time.", "Switch to Live", async () => { if (await saveSettings(patch)) toast("Live mode on. Claude may now send messages."); });
+}
 document.addEventListener("input", (e) => {
+  if (e.target.dataset?.fb) { S.fb[e.target.dataset.fb] = e.target.value; return; }
+  if (e.target.id === "setNotes") { S.notesDraft = e.target.value; return; }
   if (e.target.id === "q") { S.q = e.target.value; const pos = e.target.selectionStart; render(); const q = $("#q"); q.focus(); q.setSelectionRange(pos, pos); }
   if (e.target.id === "pq") { S.pq = e.target.value; const pos = e.target.selectionStart; render(); const q = $("#pq"); q.focus(); q.setSelectionRange(pos, pos); }
 });
@@ -581,6 +903,7 @@ document.addEventListener("change", async (e) => {
   if (id === "fSource") { S.fSource = e.target.value; render(); }
   if (id === "fSegment") { S.fSegment = e.target.value; render(); }
   if (id === "pStatus") { S.pStatus = e.target.value; render(); }
+  if (id === "dKind") { S.dKind = e.target.value; render(); }
   if (e.target.dataset.auto) { if (await saveSettings({ autopilot: { ...S.settings.autopilot, [e.target.dataset.auto]: e.target.checked } })) toast("Saved"); }
   if (id === "cap") { if (await saveSettings({ autopilot: { ...S.settings.autopilot, outreachDailyCap: Math.max(0, Math.min(100, Number(e.target.value) || 0)) } })) toast("Saved"); }
   if (e.target.dataset.seg) { const set = new Set(S.settings.targetSegments || []); e.target.checked ? set.add(e.target.dataset.seg) : set.delete(e.target.dataset.seg); await saveSettings({ targetSegments: [...set] }); }
@@ -606,7 +929,11 @@ document.addEventListener("drop", async (e) => {
 // Stage changes that need extra input
 function requestStage(lead, stage) {
   if (lead.stage === stage) return;
-  if (stage === "quoted") return openPriceModal(lead);
+  if (stage === "quoted") {
+    // "Quote sent" means the customer has the price: mark an entered price as sent, or enter one first.
+    if (lead.priceAED) return openConfirm("Mark the quote as sent?", `Only if the customer already has the price. It stays valid for ${QUOTE_VALID_DAYS} days, until ${fmtDate(addDays(todayISO(), QUOTE_VALID_DAYS))}.`, "Mark quote sent", () => markQuoteSent(lead));
+    return openPriceModal(lead);
+  }
   if (stage === "lost") return openLostModal(lead);
   setStage(lead, stage);
 }
@@ -630,7 +957,8 @@ const FIELD_GROUPS = [
     { k: "name", label: "Contact name" }, { k: "company", label: "Company" }, { k: "phone", label: "Phone / WhatsApp", type: "tel" },
     { k: "email", label: "Email", type: "email" }, { k: "decisionMaker", label: "Decision maker" },
     { k: "language", label: "Language", type: "select", options: [["", "—"], ["en", "English"], ["ar", "Arabic"]] },
-    { k: "source", label: "Source", type: "select", options: SOURCES }, { k: "segment", label: "Segment", type: "select", options: SEGMENTS },
+    { k: "source", label: "Source", type: "select", options: SOURCES }, { k: "campaign", label: "Campaign (ad, reel or post)", list: "campaignList" },
+    { k: "segment", label: "Segment", type: "select", options: SEGMENTS },
   ]},
   { title: "Event", fields: [
     { k: "eventType", label: "Event type" }, { k: "eventDate", label: "Event date", type: "date" }, { k: "venue", label: "Venue" },
@@ -641,7 +969,14 @@ const FIELD_GROUPS = [
     { k: "services", label: "Services wanted", type: "checks", options: SERVICES, full: true },
     { k: "requirements", label: "Requirements and notes", type: "textarea", full: true },
   ]},
+  { title: "Production", fields: [
+    { k: "dateCheckedBy", label: "Date and kit checked by" },
+    { k: "crew", label: "Crew (technicians assigned)", type: "textarea", full: true },
+    { k: "kit", label: "Kit (LED sqm, lasers, sound, etc.)", type: "textarea", full: true },
+  ]},
 ];
+const campaignOptions = () => [...new Set(S.leads.map((l) => String(l.campaign || "").trim()).filter(Boolean))].sort();
+const campaignDatalist = () => `<datalist id="campaignList">${campaignOptions().map((c) => `<option value="${esc(c)}"></option>`).join("")}</datalist>`;
 function fieldHTML(f, l) {
   const v = l[f.k];
   const dis = S.writable ? "" : "disabled";
@@ -653,77 +988,136 @@ function fieldHTML(f, l) {
   }
   if (f.type === "checks") return `<div class="field full"><span class="lbl">${f.label}</span><div class="checks" data-k="${f.k}">${f.options.map((o) => `<label><input type="checkbox" value="${esc(o)}" ${(v || []).includes(o) ? "checked" : ""} ${dis}>${esc(o)}</label>`).join("")}</div></div>`;
   if (f.type === "textarea") return `<div class="field full"><label for="${id}">${f.label}</label><textarea id="${id}" data-k="${f.k}" dir="auto" rows="4" ${dis}>${esc(v || "")}</textarea></div>`;
-  return `<div class="field ${f.full ? "full" : ""}"><label for="${id}">${f.label}</label><input id="${id}" data-k="${f.k}" type="${f.type || "text"}" dir="auto" value="${esc(v ?? "")}" ${dis}></div>`;
+  return `<div class="field ${f.full ? "full" : ""}"><label for="${id}">${f.label}</label><input id="${id}" data-k="${f.k}" type="${f.type || "text"}" dir="auto" value="${esc(v ?? "")}" ${f.list ? `list="${f.list}" autocomplete="off"` : ""} ${dis}></div>`;
 }
 
 function drawDrawer() {
   const l = lead(); if (!l) { closeDrawer(); return; }
   const dis = S.writable ? "" : "disabled";
   const cur = STAGE[l.stage]?.i ?? 0;
-  const vatTotal = l.priceAED ? Number(l.priceAED) * (1 + VAT) : null;
   $("#drawerRoot").innerHTML = `<div class="scrim" data-close></div>
   <aside class="drawer" role="dialog" aria-modal="true" aria-label="Lead details">
-    <div class="drawer-head"><div style="flex:1;min-width:0"><div id="dHeadMeta"></div><h3 id="dTitle">${esc(leadTitle(l))}</h3></div><button class="btn ghost" data-close type="button" aria-label="Close">✕</button></div>
+    <div class="drawer-head"><div style="flex:1;min-width:0"><div id="dHeadMeta"></div><h3 id="dTitle">${esc(leadTitle(l))}</h3><div class="drawer-tools" id="dTools"></div></div><button class="btn ghost" data-close type="button" aria-label="Close">✕</button></div>
     <div class="drawer-body">
       <section class="section"><span class="lbl">Stage</span><div class="stage-track" id="dStages">${STAGES.map((s) => `<button type="button" data-stage="${s.id}" class="${s.id === l.stage ? "current" : (l.stage !== "lost" && s.i < cur && s.id !== "lost") ? "done" : ""}" ${dis}>${s.label}</button>`).join("")}</div></section>
-      <section class="section"><span class="lbl">Next step</span><div class="fields"><div class="field"><input id="f-nextAction" data-k="nextAction" value="${esc(l.nextAction || "")}" placeholder="e.g. Send quote, call back" ${dis}></div><div class="field"><input id="f-nextActionDate" data-k="nextActionDate" type="date" value="${esc(l.nextActionDate || "")}" aria-label="Next step date" ${dis}></div></div>
+      <div class="section" id="dAlerts" hidden></div>
+      <section class="section"><span class="lbl">Next step</span><div class="fields"><div class="field"><input id="f-nextAction" data-k="nextAction" value="${esc(l.nextAction || "")}" placeholder="e.g. Send quote, call back" aria-label="Next step" ${dis}></div><div class="field"><input id="f-nextActionDate" data-k="nextActionDate" type="date" value="${esc(l.nextActionDate || "")}" aria-label="Next step date" ${dis}></div></div>
         <div class="actions"><button class="btn small" data-snooze="1" type="button" ${dis}>Tomorrow</button><button class="btn small" data-snooze="3" type="button" ${dis}>In 3 days</button><button class="btn small" data-snooze="7" type="button" ${dis}>Next week</button><button class="btn small" id="assignMe" type="button" ${dis}>Assign to me</button></div></section>
       <section class="section"><span class="lbl">Price and payment (AED, excl. VAT)</span><div class="money" id="dMoney"></div>
         <div class="actions" id="dMoneyActions"></div></section>
+      <section class="section" id="dDraftsWrap" hidden><span class="lbl">Claude's drafts</span><div class="drafts" id="dDrafts"></div></section>
       <section class="section"><span class="lbl">Message this lead</span>
-        <div class="fields"><div class="field"><select id="tplPick" aria-label="Message">${S.templates.map((t) => `<option value="${esc(t.id)}">${esc(t.name)} · ${t.language === "ar" ? "AR" : "EN"} · ${esc(t.channel)}</option>`).join("")}</select></div></div>
+        <div class="fields"><div class="field"><select id="tplPick" aria-label="Message"></select></div></div>
+        <div id="tplNote"></div>
         <div class="copybox" id="tplPreview" dir="auto"></div>
         <div class="actions"><button class="btn small" id="tplCopy" type="button">Copy</button><a class="btn small" id="tplWa" target="_blank" rel="noopener">Open WhatsApp</a><button class="btn small" id="tplLog" type="button" ${dis}>Log as sent</button></div>
-        <div style="color:var(--muted);font-size:12px">Phone: <span class="num">${esc(l.phone || "—")}</span> · Email: ${esc(l.email || "—")}</div></section>
+        <div style="color:var(--muted);font-size:12px;overflow-wrap:anywhere">Phone: <span class="num">${esc(l.phone || "—")}</span> · Email: ${esc(l.email || "—")}</div></section>
       ${FIELD_GROUPS.map((g) => `<section class="section"><span class="lbl">${g.title}</span><div class="fields">${g.fields.map((f) => fieldHTML(f, l)).join("")}</div></section>`).join("")}
+      ${campaignDatalist()}
       <section class="section"><span class="lbl">Consent</span><div class="checks"><label><input type="checkbox" data-k="marketingOptIn" ${l.marketingOptIn ? "checked" : ""} ${dis}>Agreed to offers and updates</label><label><input type="checkbox" data-k="doNotContact" ${l.doNotContact ? "checked" : ""} ${dis}>Do not contact</label></div></section>
       <section class="section"><span class="lbl">Activity</span>
-        <div class="fields"><div class="field full"><textarea id="noteText" rows="2" dir="auto" placeholder="Add a note, call summary or what the customer said…" ${dis}></textarea></div></div>
-        <div class="actions"><select id="noteType" style="width:auto" ${dis}><option value="note">Note</option><option value="call">Call</option><option value="whatsapp">WhatsApp</option><option value="email">Email</option><option value="meeting">Meeting</option><option value="site_visit">Site visit</option></select><button class="btn primary small" id="addNote" type="button" ${dis}>Add to timeline</button></div>
+        <div class="fields"><div class="field full"><textarea id="noteText" rows="2" dir="auto" placeholder="Add a note, call summary or what the customer said…" aria-label="New note" ${dis}></textarea></div></div>
+        <div class="actions"><select id="noteType" style="width:auto" aria-label="Type of note" ${dis}><option value="note">Note</option><option value="call">Call</option><option value="whatsapp">WhatsApp</option><option value="email">Email</option><option value="meeting">Meeting</option><option value="site_visit">Site visit</option></select><button class="btn primary small" id="addNote" type="button" ${dis}>Add to timeline</button></div>
         <div class="timeline" id="dTimeline"></div></section>
       <section class="section"><div class="actions"><button class="btn small ghost danger" id="delLead" type="button" ${dis}>Delete lead</button></div></section>
     </div>
   </aside>`;
   refreshDrawer(true);
 }
+// Review and referral messages only once the event is done.
+const allowedTemplates = (l) => S.templates.filter((t) => t.stage !== "completed" || l.stage === "completed");
+function drawerAlerts(l) {
+  const out = [];
+  if (l.claudePaused) out.push(["warn", "Claude is paused on this lead.", "It won't draft or send anything here. The team handles this customer."]);
+  if (l.doNotContact) out.push(["bad", "Do not contact.", "This person asked not to be messaged again, on any channel."]);
+  const c = clashesFor(l);
+  if (c.length) out.push(["bad", `Date clash on ${fmtDate(l.eventDate)}.`, `Also on this date: ${clashNames(c)}. Check crew and kit before pricing or confirming.`]);
+  if (l.stage === "awaiting_price" && !l.priceAED && !l.dateCheckedBy) out.push(["warn", "Check the date, crew and kit before pricing.", "The price form asks who checked."]);
+  if (l.priceToSend && l.stage !== "lost") out.push(["info", "Price waiting for Claude.", isTrial() ? "On its next run Claude drafts the price message for you to review in the Trial tab. Nothing is sent in trial mode." : "On its next run Claude sends this price to the customer."]);
+  else if (priceUnsent(l)) out.push(["warn", "This price isn't marked as sent.", "Once the customer has it, press Mark quote sent. The quote then stays valid for " + QUOTE_VALID_DAYS + " days."]);
+  const v = quoteValidity(l);
+  if (v?.expired) out.push(["bad", `Quote expired ${-v.d}d ago.`, "The team re-confirms the price and availability before the customer can book. Use Change price to enter it again (same or new)."]);
+  return out.map(([cls, b, t]) => `<div class="note-box ${cls}"><b>${esc(b)}</b> ${esc(t)}</div>`).join("");
+}
 function refreshDrawer(initial) {
   const l = lead(); if (!S.openLead) return; if (!l) { if (S.ready) closeDrawer(); return; }
   if (!$("#dTitle")) return;
-  $("#dTitle").textContent = leadTitle(l);
-  $("#dHeadMeta").innerHTML = `${stagePill(l)} ${temp(l)} <span style="color:var(--muted);font-size:12px">Added ${ago(l.createdAt)}${l.assignedTo ? " · " + esc(S.profiles[l.assignedTo]?.name || "Assigned") : ""}</span>`;
-  const cur = STAGE[l.stage]?.i ?? 0;
-  document.querySelectorAll("#dStages button").forEach((b) => { const s = STAGE[b.dataset.stage]; b.className = s.id === l.stage ? "current" : (l.stage !== "lost" && s.i < cur && s.id !== "lost") ? "done" : ""; });
-  // Sync inputs that aren't being edited
-  document.querySelectorAll(".drawer [data-k]").forEach((el) => {
-    if (el.contains(document.activeElement) && !initial) return;
-    const k = el.dataset.k, v = l[k];
-    if (el.classList.contains("checks")) el.querySelectorAll("input").forEach((c) => { c.checked = (v || []).includes(c.value); });
-    else if (el.type === "checkbox") el.checked = !!v;
-    else el.value = v ?? "";
-  });
-  const price = l.priceAED ? Number(l.priceAED) : null;
-  $("#dMoney").innerHTML = `<div><span class="lbl">Price</span><b>${price ? aed(price) : "Not priced"}</b></div><div><span class="lbl">Incl. 5% VAT</span><b>${price ? aed(price * (1 + VAT)) : "—"}</b></div><div><span class="lbl">Deposit 50%</span><b>${price ? aed(price * (1 + VAT) / 2) : "—"}</b><span class="pill ${l.depositStatus === "received" ? "good" : ""}">${l.depositStatus === "received" ? "Received" : l.depositStatus === "requested" ? "Requested" : "Not due"}</span></div><div><span class="lbl">Balance 50%</span><b>${price ? aed(price * (1 + VAT) / 2) : "—"}</b><span class="pill ${l.balanceStatus === "received" ? "good" : ""}">${l.balanceStatus === "received" ? "Received" : l.balanceStatus === "due_on_event" ? "Due on event day" : "Not due"}</span></div>${l.quoteDetails ? `<div style="grid-column:1/-1"><span class="lbl">Quote as sent</span><p style="margin:4px 0 0;white-space:pre-wrap" dir="auto">${esc(l.quoteDetails)}</p></div>` : ""}`;
   const dis = S.writable ? "" : "disabled";
-  $("#dMoneyActions").innerHTML = `<button class="btn small primary" id="setPrice" type="button" ${dis}>${price ? "Change price" : "Enter price"}</button>${l.stage !== "awaiting_price" && !price ? `<button class="btn small" id="needPrice" type="button" ${dis}>Ask team for price</button>` : ""}${l.depositStatus !== "received" && price ? `<button class="btn small" id="depPaid" type="button" ${dis}>Deposit received</button>` : ""}${l.depositStatus === "received" && l.balanceStatus !== "received" ? `<button class="btn small" id="balPaid" type="button" ${dis}>Balance received</button>` : ""}${l.stage !== "lost" ? `<button class="btn small ghost danger" id="markLost" type="button" ${dis}>Mark lost</button>` : ""}`;
+  keepFocus(() => {
+    $("#dTitle").textContent = leadTitle(l);
+    const firstReply = l.firstReplyAt && l.createdAt ? " · First reply after " + fmtDuration(l.firstReplyAt - l.createdAt) : "";
+    $("#dHeadMeta").innerHTML = `${stagePill(l)} ${temp(l)} ${l.claudePaused ? `<span class="pill warn">Claude paused</span>` : ""} <span style="color:var(--muted);font-size:12px">Added ${ago(l.createdAt)}${l.assignedTo ? " · " + esc(S.profiles[l.assignedTo]?.name || "Assigned") : ""}${firstReply}${l.campaign ? " · " + esc(l.campaign) : ""}</span>`;
+    $("#dTools").innerHTML = `<button class="btn small ${l.claudePaused ? "primary" : ""}" id="pauseClaude" type="button" aria-pressed="${!!l.claudePaused}" ${dis}>${l.claudePaused ? "Resume Claude" : "Pause Claude on this lead"}</button>`;
+    const cur = STAGE[l.stage]?.i ?? 0;
+    document.querySelectorAll("#dStages button").forEach((b) => { const s = STAGE[b.dataset.stage]; b.className = s.id === l.stage ? "current" : (l.stage !== "lost" && s.i < cur && s.id !== "lost") ? "done" : ""; });
+    // Sync inputs that aren't being edited
+    document.querySelectorAll(".drawer [data-k]").forEach((el) => {
+      if (el.contains(document.activeElement) && !initial) return;
+      const k = el.dataset.k, v = l[k];
+      if (el.classList.contains("checks")) el.querySelectorAll("input").forEach((c) => { c.checked = (v || []).includes(c.value); });
+      else if (el.type === "checkbox") el.checked = !!v;
+      else el.value = v ?? "";
+    });
+    const alerts = drawerAlerts(l); const al = $("#dAlerts"); al.innerHTML = alerts; al.hidden = !alerts;
+    const price = l.priceAED ? Number(l.priceAED) : null;
+    const quoteCell = l.quoteSentAt ? `<b>Sent ${new Date(l.quoteSentAt).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}</b>${validityPill(l) || (l.quoteValidUntil ? `<span class="pill">Valid until ${fmtDate(l.quoteValidUntil)}</span>` : "")}` : `<b>Not sent</b>`;
+    $("#dMoney").innerHTML = `<div><span class="lbl">Price</span><b>${price ? aed(price) : "Not priced"}</b>${l.dateCheckedBy ? `<span class="lbl">Date and kit checked by ${esc(l.dateCheckedBy)}</span>` : ""}</div><div><span class="lbl">Quote</span>${quoteCell}${priceUnsent(l) && l.quoteSentAt ? `<span class="pill warn">New price not sent</span>` : ""}</div><div><span class="lbl">Incl. 5% VAT</span><b>${price ? aed(price * (1 + VAT)) : "—"}</b></div><div><span class="lbl">Deposit 50%</span><b>${price ? aed(price * (1 + VAT) / 2) : "—"}</b><span class="pill ${l.depositStatus === "received" ? "good" : ""}">${l.depositStatus === "received" ? "Received" : l.depositStatus === "requested" ? "Requested" : "Not due"}</span></div><div><span class="lbl">Balance 50%</span><b>${price ? aed(price * (1 + VAT) / 2) : "—"}</b><span class="pill ${l.balanceStatus === "received" ? "good" : ""}">${l.balanceStatus === "received" ? "Received" : l.balanceStatus === "due_on_event" ? "Due on event day" : "Not due"}</span></div>${l.quoteDetails ? `<div style="grid-column:1/-1"><span class="lbl">Price wording for the customer</span><p style="margin:4px 0 0;white-space:pre-wrap;overflow-wrap:anywhere" dir="auto">${esc(l.quoteDetails)}</p></div>` : ""}`;
+    $("#dMoneyActions").innerHTML = `<button class="btn small primary" id="setPrice" type="button" ${dis}>${price ? "Change price" : "Enter price"}</button>${priceUnsent(l) ? `<button class="btn small" id="markSent" type="button" ${dis}>Mark quote sent</button>` : ""}${l.stage !== "awaiting_price" && !price ? `<button class="btn small" id="needPrice" type="button" ${dis}>Ask team for price</button>` : ""}${l.depositStatus !== "received" && price ? `<button class="btn small" id="depPaid" type="button" ${dis}>Deposit received</button>` : ""}${l.depositStatus === "received" && l.balanceStatus !== "received" ? `<button class="btn small" id="balPaid" type="button" ${dis}>Balance received</button>` : ""}${l.stage !== "lost" ? `<button class="btn small ghost danger" id="markLost" type="button" ${dis}>Mark lost</button>` : ""}`;
+    const drafts = S.drafts.filter((d) => d.leadId === l.id).sort((a, b) => ((draftStatus(a) === "pending") === (draftStatus(b) === "pending") ? (b.createdAt || 0) - (a.createdAt || 0) : draftStatus(a) === "pending" ? -1 : 1));
+    $("#dDraftsWrap").hidden = !drafts.length;
+    $("#dDrafts").innerHTML = drafts.slice(0, 10).map((d) => draftCard(d, { drawer: true })).join("") + (drafts.length > 10 ? `<a href="#trial" data-go="trial">See all ${drafts.length} drafts in the Trial tab</a>` : "");
+    // Message picker: rebuild only when the allowed list changes, keeping the choice.
+    const pick = $("#tplPick"); const allowed = allowedTemplates(l);
+    const sig = allowed.map((t) => t.id + ":" + t.name + ":" + t.language).join("|");
+    if (pick.dataset.sig !== sig) {
+      const prev = pick.value;
+      pick.innerHTML = allowed.map((t) => `<option value="${esc(t.id)}">${esc(t.name)} · ${t.language === "ar" ? "AR" : "EN"} · ${esc(t.channel)}</option>`).join("") || `<option value="">No messages yet</option>`;
+      pick.dataset.sig = sig;
+      const lang = l.language === "ar" ? "ar" : "en";
+      const def = allowed.some((t) => t.id === prev) ? prev : (allowed.find((t) => t.stage === l.stage && t.language === lang) || allowed.find((t) => t.language === lang) || allowed[0])?.id;
+      if (def) pick.value = def;
+    }
+  });
   updateTemplatePreview();
   renderTimeline();
 }
-function fillTemplate(text, l) {
-  return String(text || "").replace(/\{name\}/g, (l.name || "").split(" ")[0] || "").replace(/\{company\}/g, l.company || "your company").replace(/\{event\}/g, l.eventType || "event").replace(/\{date\}/g, l.eventDate ? fmtDate(l.eventDate) : "").replace(/\{venue\}/g, l.venue || "").replace(/\{price\}/g, l.quoteDetails || (l.priceAED ? aed(l.priceAED) + " + 5% VAT" : ""));
+function fillTemplate(text, l, lang) {
+  const ar = lang === "ar";
+  const date = (iso) => ar ? fmtDateAr(iso) : fmtDate(iso);
+  const first = String(l.name || "").trim().split(/\s+/)[0] || "";
+  let s = String(text || "");
+  // No name on file: drop the placeholder cleanly ("Hi {name}, thanks" → "Hi, thanks").
+  s = first ? s.replace(/\{name\}/g, first) : s.replace(/,?[  ]?\{name\}/g, "");
+  return s.replace(/\{company\}/g, l.company || (ar ? "شركتكم" : "your company"))
+    .replace(/\{event\}/g, l.eventType || (ar ? "فعاليتكم" : "event"))
+    .replace(/\{date\}/g, l.eventDate ? date(l.eventDate) : (ar ? "الموعد المحدد" : "the date you mentioned"))
+    .replace(/\{venue\}/g, l.venue || (ar ? "المكان" : "the venue"))
+    .replace(/\{price\}/g, l.quoteDetails || (l.priceAED ? aed(l.priceAED) + " + 5% VAT" : (ar ? "[السعر من الفريق]" : "[price from the team]")))
+    .replace(/\{validUntil\}/g, date(validUntilFor(l)));
 }
 function updateTemplatePreview() {
   const l = lead(); const pick = $("#tplPick"); if (!l || !pick) return;
-  const t = S.templates.find((x) => x.id === pick.value) || S.templates[0];
-  const body = t ? fillTemplate(t.body, l) : "Add messages in the Messages tab.";
+  const t = S.templates.find((x) => x.id === pick.value);
+  const hasPrice = !!t && /\{price\}/.test(t.body || "");
+  const v = quoteValidity(l);
+  let block = "";
+  if (l.doNotContact) block = "This person asked not to be contacted.";
+  else if (hasPrice && !l.priceAED) block = "There's no price yet. The team enters it first with Enter price.";
+  else if (hasPrice && v?.expired) block = `This quote expired ${-v.d}d ago. Don't send it again as valid: re-confirm the price first with Change price.`;
+  S.tplBlocked = !!block || !t;
+  $("#tplNote").innerHTML = block ? `<div class="note-box bad"><b>Don't send.</b> ${esc(block)}</div>` : (t?.subject ? `<div class="lbl" dir="auto">Subject: ${esc(fillTemplate(t.subject, l, t.language))}</div>` : "");
+  const body = t ? fillTemplate(t.body, l, t.language) : "Add messages in the Messages tab.";
   $("#tplPreview").textContent = body;
+  $("#tplCopy").disabled = S.tplBlocked;
+  $("#tplLog").disabled = S.tplBlocked || !S.writable;
   const wa = $("#tplWa"); const ph = digits(l.phone);
-  if (ph && t) { wa.href = `https://wa.me/${ph}?text=${encodeURIComponent(body)}`; wa.removeAttribute("aria-disabled"); wa.style.opacity = ""; }
-  else { wa.removeAttribute("href"); wa.setAttribute("aria-disabled", "true"); wa.style.opacity = ".5"; }
+  if (ph && t && !S.tplBlocked) { wa.href = `https://wa.me/${ph}?text=${encodeURIComponent(body)}`; wa.removeAttribute("aria-disabled"); wa.style.opacity = ""; wa.style.pointerEvents = ""; }
+  else { wa.removeAttribute("href"); wa.setAttribute("aria-disabled", "true"); wa.style.opacity = ".5"; wa.style.pointerEvents = "none"; }
 }
 function renderTimeline() {
   const el = $("#dTimeline"); if (!el) return;
   const l = lead();
-  el.innerHTML = S.activities.map((a) => `<div class="act"><div class="when"><span class="pill">${esc(a.type)}</span>${byLabel(a.by)}<span>${new Date(a.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span></div><p dir="auto">${esc(a.text)}</p></div>`).join("") || `<div class="empty">No activity yet.${l ? " Notes, calls, messages and stage changes appear here." : ""}</div>`;
+  el.innerHTML = S.activities.map((a) => `<div class="act"><div class="when"><span class="pill ${a.type === "draft" ? "claude" : ""}">${esc(ACT_LABELS[a.type] || (a.type ? a.type[0].toUpperCase() + a.type.slice(1) : "Note"))}</span>${byLabel(a.by)}<span>${new Date(a.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span></div><p dir="auto">${esc(a.text)}</p></div>`).join("") || `<div class="empty">No activity yet.${l ? " Notes, calls, messages and stage changes appear here." : ""}</div>`;
 }
 
 $("#drawerRoot").addEventListener("click", async (e) => {
@@ -733,6 +1127,12 @@ $("#drawerRoot").addEventListener("click", async (e) => {
   const sn = e.target.closest("[data-snooze]"); if (sn) { await updateLead(l.id, { nextActionDate: addDays(todayISO(), Number(sn.dataset.snooze)) }); return; }
   if (e.target.closest("#assignMe")) { if (S.me?.id) await updateLead(l.id, { assignedTo: S.me.id }); return; }
   if (e.target.closest("#setPrice")) { openPriceModal(l); return; }
+  if (e.target.closest("#markSent")) { await markQuoteSent(l); return; }
+  if (e.target.closest("#pauseClaude")) {
+    const v = !l.claudePaused;
+    if (await updateLead(l.id, { claudePaused: v }, { type: "note", text: v ? "Claude paused on this lead. The team handles this customer." : "Claude resumed on this lead." })) toast(v ? "Claude paused on this lead" : "Claude resumed on this lead");
+    return;
+  }
   if (e.target.closest("#needPrice")) { setStage(l, "awaiting_price"); return; }
   if (e.target.closest("#depPaid")) { setStage(l, "confirmed", {}, "50% deposit received"); return; }
   if (e.target.closest("#balPaid")) {
@@ -755,17 +1155,26 @@ $("#drawerRoot").addEventListener("click", async (e) => {
     return;
   }
   if (e.target.closest("#tplCopy")) {
-    const text = $("#tplPreview").textContent;
-    try { await navigator.clipboard.writeText(text); toast("Copied"); } catch (err) { const r = document.createRange(); r.selectNodeContents($("#tplPreview")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("Selected. Press Ctrl+C to copy."); }
+    if (S.tplBlocked) return;
+    const t = S.templates.find((x) => x.id === $("#tplPick").value);
+    const subject = t?.subject ? `Subject: ${fillTemplate(t.subject, l, t.language)}\n\n` : "";
+    copyText(subject + $("#tplPreview").textContent, $("#tplPreview"));
     return;
   }
   if (e.target.closest("#tplLog")) {
     const t = S.templates.find((x) => x.id === $("#tplPick").value);
-    await write(async () => {
-      await addActivity(l.id, t?.channel === "email" ? "email" : "whatsapp", `Sent "${t?.name || "message"}":\n${$("#tplPreview").textContent}`);
-      await S.db.doc("leads/" + l.id).update({ lastContactAt: Date.now(), updatedAt: Date.now() });
+    if (!t || S.tplBlocked) return;
+    const sendsPrice = /\{price\}/.test(t.body || "") && priceUnsent(l);
+    const now = Date.now();
+    const ok = await write(async () => {
+      await addActivity(l.id, t.channel === "email" ? "email" : "whatsapp", `Sent "${t.name || "message"}":\n${$("#tplPreview").textContent}`);
+      const patch = { lastContactAt: now, updatedAt: now };
+      if (!l.firstReplyAt) patch.firstReplyAt = now;
+      await S.db.doc("leads/" + l.id).update(patch);
     });
-    toast("Logged");
+    if (!ok) return;
+    if (sendsPrice) await markQuoteSent(l, `Price sent by the team ("${t.name}")`);
+    else toast("Logged");
     return;
   }
   if (e.target.closest("#delLead")) { openConfirm("Delete this lead?", "The lead is removed for everyone. Its timeline stays in storage but won't be shown.", "Delete", async () => { await write(() => S.db.doc("leads/" + l.id).delete()); closeDrawer(); toast("Lead deleted"); }); return; }
@@ -783,7 +1192,7 @@ $("#drawerRoot").addEventListener("change", async (e) => {
   else v = host.value.trim();
   if (JSON.stringify(v) === JSON.stringify(l[k] ?? (Array.isArray(v) ? [] : v === null ? null : ""))) return;
   const patch = { [k]: v };
-  if (k === "doNotContact" && v) { patch.nextAction = "Do not contact"; patch.nextActionDate = ""; }
+  if (k === "doNotContact" && v) { patch.nextAction = "Do not contact"; patch.nextActionDate = ""; patch.priceToSend = false; }
   await updateLead(l.id, patch);
 });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") { if ($("#modalRoot").innerHTML) closeModal(); else if (S.openLead) closeDrawer(); } });
@@ -811,6 +1220,7 @@ function openLeadModal() {
       <div class="field"><label for="m-phone">Phone / WhatsApp</label><input id="m-phone" name="phone" type="tel" placeholder="+971 5…"></div>
       <div class="field"><label for="m-email">Email</label><input id="m-email" name="email" type="email"></div>
       <div class="field"><label for="m-source">Source</label><select id="m-source" name="source">${opt(SOURCES)}</select></div>
+      <div class="field"><label for="m-campaign">Campaign (ad, reel or post)</label><input id="m-campaign" name="campaign" dir="auto" list="campaignList" autocomplete="off" placeholder="e.g. IG reel – laser wedding Oct">${campaignDatalist()}</div>
       <div class="field"><label for="m-segment">Segment</label><select id="m-segment" name="segment">${opt(SEGMENTS)}</select></div>
       <div class="field"><label for="m-eventType">Event type</label><input id="m-eventType" name="eventType" dir="auto" placeholder="Wedding, gala dinner, car launch…"></div>
       <div class="field"><label for="m-eventDate">Event date</label><input id="m-eventDate" name="eventDate" type="date"></div>
@@ -818,7 +1228,7 @@ function openLeadModal() {
     </div>
     <div class="actions"><button class="btn primary" type="submit">Add lead</button><button class="btn" type="button" data-cancel>Cancel</button></div>`,
   async (fd) => {
-    const f = Object.fromEntries(fd.entries());
+    const f = Object.fromEntries([...fd.entries()].map(([k, v]) => [k, String(v).trim()]));
     const ref = S.db.collection("leads").doc();
     const ok = await write(async () => { await ref.set(newLeadDoc(f)); await addActivity(ref.id, "note", "Lead created"); });
     if (ok) { toast("Lead added"); openDrawer(ref.id); }
@@ -827,23 +1237,38 @@ function openLeadModal() {
 }
 
 function openPriceModal(l) {
+  const c = clashesFor(l);
+  const lang = l.language === "ar" ? "Arabic" : l.language === "en" ? "English" : "";
   openModal(`<h3>Price for ${esc(l.name || "this lead")}</h3>
-    <p style="margin:0;color:var(--muted)">Enter the price excl. VAT and the exact wording to send. Claude passes the wording to the customer as written.</p>
-    <div class="field"><label for="m-price">Price (AED, excl. VAT)</label><input id="m-price" name="price" type="number" min="0" step="1" value="${esc(l.priceAED ?? "")}" required></div>
+    <p style="margin:0;color:var(--muted)">Enter the price excl. VAT and the exact words the customer will read. Claude passes the wording on as written.${lang ? ` This customer writes in ${lang}, so write it in ${lang}.` : ""}</p>
+    ${c.length ? `<div class="note-box bad"><b>Date clash.</b> Also on ${esc(fmtDate(l.eventDate))}: ${esc(clashNames(c))}. Check crew and kit before you price.</div>` : ""}
+    <div class="field"><label for="m-price">Price (AED, excl. VAT)</label><input id="m-price" name="price" type="number" min="1" step="1" value="${esc(l.priceAED ?? "")}" required></div>
     <div class="field"><label for="m-details">What the customer will read</label><textarea id="m-details" name="details" rows="4" dir="auto" placeholder="AED 28,000 + 5% VAT: lighting, 6x3m LED wall, sound, stage, setup and 2 technicians">${esc(l.quoteDetails || "")}</textarea></div>
-    <div class="checks"><label><input type="checkbox" name="sent" ${l.stage === "awaiting_price" ? "" : "checked"}>I've already sent this price to the customer myself</label></div>
-    <p style="margin:0;color:var(--muted);font-size:13px">Leave it unticked and Claude sends the price to the customer on its next run, then moves the deal to Quote sent.</p>
+    <div class="field"><label for="m-checked">Date and kit checked by</label><input id="m-checked" name="checkedBy" dir="auto" value="${esc(l.dateCheckedBy || "")}" placeholder="Name or initials of who checked the date, crew and equipment" required></div>
+    <div class="checks"><label><input type="checkbox" name="sent">I already sent this price to the customer myself</label></div>
+    <p style="margin:0;color:var(--muted);font-size:13px">${isTrial()
+      ? "Leave it unticked and Claude drafts the price message on its next run, for you to review in the Trial tab. Nothing is sent in trial mode."
+      : "Leave it unticked and Claude sends this price to the customer on its next run."} Tick it if the customer already has this price: the quote is marked sent and stays valid for ${QUOTE_VALID_DAYS} days.</p>
     <div class="actions"><button class="btn primary" type="submit">Save price</button><button class="btn" type="button" data-cancel>Cancel</button></div>`,
   async (fd) => {
     const price = Number(fd.get("price"));
+    if (!(price > 0)) { toast("Enter the price in AED, excl. VAT."); return false; }
+    const checkedBy = String(fd.get("checkedBy") || "").trim();
+    if (!checkedBy) { toast("Fill in who checked the date and kit."); $("#m-checked")?.focus(); return false; }
     const details = String(fd.get("details") || "").trim() || `${aed(price)} + 5% VAT`;
-    const patch = { priceAED: price, quoteDetails: details };
-    if (!fd.get("sent") && l.stage === "awaiting_price") { patch.nextAction = "Claude: send this price to the customer"; patch.nextActionDate = todayISO(); }
-    if (fd.get("sent")) {
-      patch.quoteSentAt = Date.now(); patch.nextAction = "Follow up on quote"; patch.nextActionDate = addDays(todayISO(), 1);
-      if (["new", "qualifying", "awaiting_price"].includes(l.stage)) { await setStage(l, "quoted", patch, `Price ${aed(price)} excl. VAT`); return true; }
+    const now = Date.now();
+    const patch = { priceAED: price, quoteDetails: details, priceSetAt: now, dateCheckedBy: checkedBy };
+    if (!fd.get("sent")) {
+      Object.assign(patch, { priceToSend: true, nextAction: "Claude: send this price", nextActionDate: todayISO() });
+      const ok = await updateLead(l.id, patch, { type: "quote", text: `Price entered for Claude to ${isTrial() ? "draft" : "send"} (checked by ${checkedBy}): ${details}` });
+      if (ok) toast(isTrial() ? "Price saved. Claude drafts the message on its next run." : "Price saved. Claude sends it on its next run.");
+      return ok;
     }
-    return updateLead(l.id, patch, { type: "quote", text: `Price set: ${details}` });
+    Object.assign(patch, quoteSentPatch(now));
+    const note = `Price sent by the team (checked by ${checkedBy}), valid until ${fmtDate(patch.quoteValidUntil)}: ${details}`;
+    const ok = (STAGE[l.stage]?.i ?? 0) < STAGE.quoted.i ? await setStage(l, "quoted", patch, note) : await updateLead(l.id, patch, { type: "quote", text: note });
+    if (ok) toast(`Price saved. Quote valid until ${fmtDate(patch.quoteValidUntil)}.`);
+    return ok;
   });
 }
 function openLostModal(l) {

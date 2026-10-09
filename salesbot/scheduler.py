@@ -1,4 +1,4 @@
-"""Background loop that runs follow-ups, review requests, reactivations, retries and the daily digest."""
+"""Background loop that runs follow-ups, review requests, reactivations, price reminders, retries and the digest."""
 
 import asyncio
 import logging
@@ -8,7 +8,8 @@ from datetime import datetime, timedelta
 from salesbot import config
 from salesbot.agent import SalesAgent
 from salesbot.db import Database
-from salesbot.tools import lead_summary, lead_tag, price_reply_help
+from salesbot.outbound import is_trial
+from salesbot.tools import lead_summary, lead_tag, lead_url, needs_price, price_help, quote_valid_until, today_local
 
 log = logging.getLogger(__name__)
 
@@ -70,8 +71,8 @@ class Scheduler:
                                          {**job["payload"], "attempts": attempts})
                 elif job["lead_id"]:
                     await self.agent.channels.notify_owner(
-                        f"Bot could not complete '{job['kind']}' - please reply manually",
-                        f"Error: {exc}\n{config.settings.public_base_url}/admin/leads/{job['lead_id']}",
+                        f"{lead_tag(job['lead_id'])} Bot could not complete '{job['kind']}' - please reply yourself",
+                        f"Error: {exc}\n{lead_url(job['lead_id'])}",
                     )
 
     async def _run(self, job: dict, local_now: datetime) -> None:
@@ -83,50 +84,76 @@ class Scheduler:
         elif kind == "retry_inbound":
             await self.agent.handle_inbound(lead_id, payload["content"])
         elif kind == "price_reminder":
-            await self.remind_price(lead_id)
+            still_waiting = await self.remind_price(lead_id)
+            repeat = config.settings.price_reminder_repeat_hours
+            others = [j for j in self.db.pending_jobs(lead_id, "price_reminder") if j["id"] != job["id"]]
+            if still_waiting and repeat > 0 and not others:
+                # After the first reminders, keep reminding every day (by default) until the lead is priced.
+                self.db.schedule_job("price_reminder", local_now.timestamp() + repeat * 3600, lead_id)
         elif kind == "deliver":
-            await self.agent.deliver(lead_id, payload["text"])
+            await self.agent.resend(lead_id, payload)
         elif kind == "daily_digest":
             await self.send_digest(local_now)
             self.db.schedule_job("daily_digest", next_digest_time(local_now + timedelta(minutes=1)).timestamp())
         else:
             raise ValueError(f"unknown job kind {kind}")
 
-    async def remind_price(self, lead_id: int) -> None:
+    async def remind_price(self, lead_id: int) -> bool:
+        """Remind the owner that a customer is waiting for a price. Returns False once nobody is waiting."""
         lead = self.db.get_lead(lead_id)
-        if lead["stage"] != "awaiting_price":
-            return
+        if not needs_price(lead):
+            return False
         waiting = round((time.time() - (lead["price_requested_at"] or time.time())) / 3600)
         await self.agent.channels.notify_owner(
             f"{lead_tag(lead_id)} Reminder: {lead.get('name') or 'a customer'} has waited {waiting}h for a price",
-            f"{price_reply_help(lead_id)}\n\n{lead_summary(lead)}",
+            f"{price_help(lead_id)}\n\n{lead_summary(lead)}",
         )
+        return True
 
     async def send_digest(self, local_now: datetime) -> None:
         since = local_now.timestamp() - 86400
+        today = today_local(local_now.timestamp())
         leads = self.db.list_leads(limit=1000)
         new = [l for l in leads if l["created_at"] >= since]
         active = [l for l in leads if l["updated_at"] >= since]
         by_stage: dict[str, int] = {}
         for lead in leads:
             by_stage[lead["stage"]] = by_stage.get(lead["stage"], 0) + 1
-        waiting = [l for l in leads if l["stage"] == "awaiting_price"]
+        waiting = [l for l in leads if needs_price(l)]
+        undelivered = [l for l in leads if l["price_to_send"]]
+        expiring = [l for l in leads if quote_valid_until(l) == today]
+        expired = [l for l in leads if (quote_valid_until(l) or today) < today]
         hot = [l for l in active if l["stage"] in ("quoted", "negotiating", "booked")]
-        lines = [
+
+        def line(l: dict, extra: str = "") -> str:
+            return (f"- #{l['id']} {l.get('name') or 'Unknown'} | {l.get('event_type') or '?'} on "
+                    f"{l.get('event_date') or '?'}{extra} | {lead_url(l['id'])}")
+
+        lines = []
+        if is_trial():
+            pending = sum(self.db.pending_draft_counts().values())
+            lines += [f"Trial mode: nothing is sent to customers. {pending} drafts are waiting for your review: "
+                      f"{config.settings.public_base_url}/admin/drafts", ""]
+        lines += [
             f"Last 24 hours: {len(new)} new leads, {len(active)} active conversations.",
             "Pipeline: " + ", ".join(f"{stage} {count}" for stage, count in sorted(by_stage.items())),
             "",
         ]
-        if waiting:
-            lines.append("Waiting for your price:")
-            lines += [f"- #{l['id']} {l.get('name') or 'Unknown'} | {l.get('event_type') or '?'} on "
-                      f"{l.get('event_date') or '?'} | {config.settings.public_base_url}/admin/leads/{l['id']}"
-                      for l in waiting]
-            lines.append("")
+        sections = [
+            ("Waiting for your price:", waiting, lambda l: ""),
+            ("Price entered, waiting for the customer to write back (WhatsApp 24-hour rule):", undelivered,
+             lambda l: ""),
+            ("Quotes expiring today:", expiring, lambda l: ""),
+            ("Quotes expired without a decision (the team re-confirms before booking):", expired,
+             lambda l: f" | expired {l['quote_valid_until']}"),
+        ]
+        for title, items, extra in sections:
+            if items:
+                lines.append(title)
+                lines += [line(l, extra(l)) for l in items]
+                lines.append("")
         lines.append("Hot leads:" if hot else "No hot leads today.")
         for lead in hot:
             quote = f"AED {lead['quote_aed']:,}" if lead["quote_aed"] else ("priced" if lead["quote_details"] else "no quote yet")
-            lines.append(f"- {lead.get('name') or 'Unknown'} | {lead.get('event_type') or '?'} on "
-                         f"{lead.get('event_date') or '?'} | {lead['stage']} | {quote} | "
-                         f"{config.settings.public_base_url}/admin/leads/{lead['id']}")
+            lines.append(line(lead, f" | {lead['stage']} | {quote}"))
         await self.agent.channels.notify_owner("Daily sales digest", "\n".join(lines))

@@ -41,7 +41,7 @@ class Channels:
             {"messaging_product": "whatsapp", "to": to, "type": "text", "text": {"body": text[:4096]}},
         )
 
-    async def whatsapp_template(self, to: str, template: str, params: list[str]) -> None:
+    async def whatsapp_template(self, to: str, template: str, params: list[str], language: str) -> None:
         s = config.settings
         await self._post_graph(
             f"{s.whatsapp_phone_number_id}/messages",
@@ -52,7 +52,7 @@ class Channels:
                 "type": "template",
                 "template": {
                     "name": template,
-                    "language": {"code": s.wa_template_language},
+                    "language": {"code": language},
                     "components": [
                         {"type": "body", "parameters": [{"type": "text", "text": p} for p in params]}
                     ],
@@ -61,7 +61,7 @@ class Channels:
         )
 
     async def whatsapp_media(self, media_id: str) -> tuple[bytes, str]:
-        """Download an image a customer sent. Returns (bytes, mime type)."""
+        """Download a photo, voice note or file a customer sent. Returns (bytes, mime type)."""
         s = config.settings
         headers = {"Authorization": f"Bearer {s.whatsapp_token}"}
         meta = await self.http.get(self._graph(media_id), headers=headers)
@@ -69,7 +69,7 @@ class Channels:
         info = meta.json()
         media = await self.http.get(info["url"], headers=headers)
         media.raise_for_status()
-        return media.content, info.get("mime_type", "image/jpeg")
+        return media.content, info.get("mime_type") or "application/octet-stream"
 
     # Instagram messaging
 
@@ -117,7 +117,7 @@ class Channels:
         s = config.settings
         if s.owner_email and s.smtp_host:
             try:
-                await self.send_email(s.owner_email, f"[EchoLight sales bot] {subject}", text)
+                await self.send_email(s.owner_email, f"[EchoLight sales] {subject}", text)
             except Exception:
                 log.exception("owner email failed")
         if s.owner_whatsapp and s.whatsapp_token:
@@ -128,7 +128,8 @@ class Channels:
                 try:
                     if not s.wa_template_owner_alert:
                         raise
-                    await self.whatsapp_template(s.owner_whatsapp, s.wa_template_owner_alert, [subject[:200]])
+                    await self.whatsapp_template(s.owner_whatsapp, s.wa_template_owner_alert, [subject[:200]],
+                                                 s.wa_template_default_language)
                 except Exception:
                     log.warning("owner WhatsApp alert not delivered (owner outside 24h window, no template?)")
         if not (s.owner_email or s.owner_whatsapp):

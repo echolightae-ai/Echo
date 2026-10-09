@@ -9,6 +9,8 @@ from anthropic.types.beta import BetaMessage
 ROOT = Path(__file__).resolve().parent.parent
 
 TEST_ENV = {
+    # Most tests exercise live behaviour; the `trial` fixture switches trial mode (the real default) back on.
+    "TRIAL_MODE": "false",
     "ADMIN_TOKEN": "admin-secret",
     "META_APP_SECRET": "app-secret",
     "META_VERIFY_TOKEN": "verify-me",
@@ -30,7 +32,6 @@ TEST_ENV = {
 }
 
 
-
 @pytest.fixture(autouse=True)
 def settings(tmp_path, monkeypatch):
     knowledge = tmp_path / "knowledge"
@@ -42,6 +43,21 @@ def settings(tmp_path, monkeypatch):
 
     monkeypatch.setattr(config, "settings", config.Settings())
     return config.settings
+
+
+def configure(monkeypatch, **env: str):
+    """Change settings for one test, e.g. configure(monkeypatch, TRIAL_MODE="true")."""
+    from salesbot import config
+
+    for key, value in env.items():
+        monkeypatch.setenv(key, value)
+    monkeypatch.setattr(config, "settings", config.Settings())
+    return config.settings
+
+
+@pytest.fixture
+def trial(settings, monkeypatch):
+    return configure(monkeypatch, TRIAL_MODE="true")
 
 
 _ids = itertools.count(1)
@@ -98,10 +114,12 @@ class FakeChannels:
     async def whatsapp_text(self, to, body):
         self.sent.append(("whatsapp_text", to, body))
 
-    async def whatsapp_template(self, to, template, params):
-        self.sent.append(("whatsapp_template", to, template, params))
+    async def whatsapp_template(self, to, template, params, language):
+        self.sent.append(("whatsapp_template", to, template, params, language))
 
     async def whatsapp_media(self, media_id):
+        if media_id.startswith("audio"):
+            return b"OggS fake voice", "audio/ogg"
         return b"\x89PNG fake", "image/png"
 
     async def instagram_text(self, user_id, body):
@@ -118,6 +136,10 @@ class FakeChannels:
 
     def of(self, kind):
         return [s for s in self.sent if s[0] == kind]
+
+    def to_customers(self):
+        """Everything that reached a customer (all sends except owner alerts)."""
+        return [s for s in self.sent if s[0] != "owner"]
 
 
 @pytest.fixture

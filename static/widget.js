@@ -7,9 +7,12 @@
     location.pathname.indexOf("/ar") === 0;
   var t = arabic
     ? { open: "تحدث معنا", title: "إيكو لايت", placeholder: "اكتب رسالتك...", send: "إرسال",
-        hello: "أهلاً! حدثنا عن فعاليتك: النوع، التاريخ والمكان، وبنساعدك فوراً.", wait: "..." }
+        hello: "أهلاً! حدثنا عن فعاليتك: النوع، التاريخ والمكان، ونساعدك فوراً.", wait: "...",
+        held: "شكراً لرسالتك! فريق إيكو لايت سيرد عليك في أقرب وقت. اترك رقم واتساب أو بريدك الإلكتروني حتى نتواصل معك، أو راسلنا على واتساب: +971 56 722 0533" }
     : { open: "Chat with us", title: "EchoLight", placeholder: "Type your message...", send: "Send",
-        hello: "Hi! Tell us about your event (type, date and venue) and we'll help right away.", wait: "..." };
+        hello: "Hi! Tell us about your event (type, date and venue) and we'll help right away.", wait: "...",
+        held: "Thanks for your message! The EchoLight team will get back to you as soon as possible. Leave your " +
+          "WhatsApp number or email so we can reach you, or message us on WhatsApp: +971 56 722 0533" };
 
   function sessionId() {
     var id = null;
@@ -84,7 +87,8 @@
     })
       .then(function (r) { return r.json(); })
       .then(function (data) {
-        if (data.reply) { pending.textContent = data.reply; } else { pending.remove(); }
+        // "held": the team answers this chat themselves (trial mode, or a person has taken over).
+        if (data.reply) { pending.textContent = data.reply; } else if (data.held) { pending.textContent = t.held; } else { pending.remove(); }
         if (data.detail) { pending.textContent = data.detail; }
       })
       .catch(function () { pending.textContent = "WhatsApp: +971 56 722 0533"; });

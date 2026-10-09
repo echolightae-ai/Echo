@@ -16,8 +16,16 @@ def _env_list(name: str, default: str = "") -> list[str]:
     return [item.strip() for item in _env(name, default).split(",") if item.strip()]
 
 
+def _env_bool(name: str, default: str) -> bool:
+    return _env(name, default).lower() in ("1", "true", "yes", "on")
+
+
 @dataclass(frozen=True)
 class Settings:
+    # Trial mode (the default): the bot writes every message as a draft for the owner to review in /admin and
+    # sends nothing to customers. Owner alerts still go out. Only the owner switches this off (TRIAL_MODE=false).
+    trial_mode: bool = field(default_factory=lambda: _env_bool("TRIAL_MODE", "true"))
+
     # Claude
     model: str = field(default_factory=lambda: _env("CLAUDE_MODEL", "claude-opus-5-5"))
     effort: str = field(default_factory=lambda: _env("CLAUDE_EFFORT", "medium"))
@@ -37,7 +45,7 @@ class Settings:
     meta_verify_token: str = field(default_factory=lambda: _env("META_VERIFY_TOKEN"))
     whatsapp_token: str = field(default_factory=lambda: _env("WHATSAPP_TOKEN"))
     whatsapp_phone_number_id: str = field(default_factory=lambda: _env("WHATSAPP_PHONE_NUMBER_ID"))
-    # Approved WhatsApp templates used outside the 24-hour customer-service window.
+    # Approved WhatsApp templates used outside the 24-hour customer-service window (wording in templates.py).
     # Each template takes one body parameter: the customer's first name.
     wa_template_followup: str = field(default_factory=lambda: _env("WA_TEMPLATE_FOLLOWUP"))
     wa_template_missed_call: str = field(default_factory=lambda: _env("WA_TEMPLATE_MISSED_CALL"))
@@ -46,11 +54,15 @@ class Settings:
     wa_template_quote_ready: str = field(default_factory=lambda: _env("WA_TEMPLATE_QUOTE_READY"))
     # Sent to the owner when a free-form alert can't be delivered; one parameter: the alert title.
     wa_template_owner_alert: str = field(default_factory=lambda: _env("WA_TEMPLATE_OWNER_ALERT"))
-    wa_template_language: str = field(default_factory=lambda: _env("WA_TEMPLATE_LANGUAGE", "en"))
+    # Arabic-speaking leads always get the Arabic ("ar") version; everyone else gets this language.
+    # Set it to "en" once the English versions are approved.
+    wa_template_default_language: str = field(default_factory=lambda: _env("WA_TEMPLATE_DEFAULT_LANGUAGE", "ar"))
 
     # Instagram messaging (same Meta app)
     instagram_account_id: str = field(default_factory=lambda: _env("INSTAGRAM_ACCOUNT_ID"))
     instagram_token: str = field(default_factory=lambda: _env("INSTAGRAM_TOKEN"))
+    # Call-to-action words: a comment triggers a private reply only when the WHOLE comment is one of these
+    # (or it asks about price, see app.comment_triggers).
     instagram_comment_keywords: list[str] = field(
         default_factory=lambda: _env_list("INSTAGRAM_COMMENT_KEYWORDS", "عرض,سعر,price,quote,info")
     )
@@ -67,10 +79,10 @@ class Settings:
     twilio_auth_token: str = field(default_factory=lambda: _env("TWILIO_AUTH_TOKEN"))
     call_forward_number: str = field(default_factory=lambda: _env("CALL_FORWARD_NUMBER"))
 
-    # Owner notifications (hot leads, escalations, daily digest)
+    # Owner notifications (hot leads, escalations, daily digest). Prices are entered only in /admin.
     owner_email: str = field(default_factory=lambda: _env("OWNER_EMAIL"))
-    # The owner's personal WhatsApp (digits only, not the business number the bot runs on). Messages from it
-    # starting with "#<lead id>" are treated as prices for that lead.
+    # The owner's personal WhatsApp (digits only, not the business number the bot runs on). Used for alerts;
+    # messages from it are never treated as a lead.
     owner_whatsapp: str = field(default_factory=lambda: "".join(c for c in _env("OWNER_WHATSAPP") if c.isdigit()))
 
     # Website chat
@@ -85,6 +97,11 @@ class Settings:
     price_reminder_hours: list[float] = field(
         default_factory=lambda: [float(h) for h in _env_list("PRICE_REMINDER_HOURS", "3,24")]
     )
+    # After the reminders above, keep reminding every N hours until the lead is priced (0 = stop).
+    price_reminder_repeat_hours: float = field(
+        default_factory=lambda: float(_env("PRICE_REMINDER_REPEAT_HOURS", "24"))
+    )
+    quote_validity_days: int = field(default_factory=lambda: int(_env("QUOTE_VALIDITY_DAYS", "3")))
     review_request_delay_hours: float = field(default_factory=lambda: float(_env("REVIEW_DELAY_HOURS", "24")))
     reactivation_delay_days: float = field(default_factory=lambda: float(_env("REACTIVATION_DELAY_DAYS", "60")))
     quiet_hours: tuple[int, int] = field(default_factory=lambda: (22, 9))  # no automated sends 22:00-09:00 local

@@ -1,0 +1,292 @@
+[
+  {
+    "id": "t01-first-reply-en",
+    "order": 1,
+    "name": "First reply",
+    "channel": "whatsapp",
+    "language": "en",
+    "stage": "new",
+    "subject": "",
+    "body": "Hi {name}, thank you for contacting EchoLight! We'd be glad to help with your event.\n\nCould you share the date, the venue (or emirate), roughly how many guests, and what you have in mind: lighting, sound, LED screens, projection mapping, a laser show or full production?"
+  },
+  {
+    "id": "t02-first-reply-ar",
+    "order": 2,
+    "name": "First reply",
+    "channel": "whatsapp",
+    "language": "ar",
+    "stage": "new",
+    "subject": "",
+    "body": "أهلاً {name}، شكراً لتواصلكم مع إيكو لايت! يسعدنا نكون معكم في فعاليتكم.\n\nممكن تشاركونا التاريخ، والمكان (أو الإمارة)، وعدد الضيوف تقريباً، والخدمات اللي تحتاجونها: إضاءة، صوت، شاشات LED، بروجكشن مابينج، عرض ليزر، أو إنتاج كامل؟"
+  },
+  {
+    "id": "t23-voice-note-en",
+    "order": 3,
+    "name": "Voice note received",
+    "channel": "whatsapp",
+    "language": "en",
+    "stage": "",
+    "subject": "",
+    "body": "Hi {name}, thanks for the voice note! The team will listen to it. To keep things moving, could you also type the key details: the date, the venue (or emirate), roughly how many guests, and what you'd like for the event?"
+  },
+  {
+    "id": "t24-voice-note-ar",
+    "order": 4,
+    "name": "Voice note received",
+    "channel": "whatsapp",
+    "language": "ar",
+    "stage": "",
+    "subject": "",
+    "body": "أهلاً {name}، شكراً على الرسالة الصوتية! الفريق بيسمعها. وعشان نمشي بسرعة، ممكن تكتبون لنا التفاصيل الأساسية: التاريخ، والمكان (أو الإمارة)، وعدد الضيوف تقريباً، والخدمات اللي تحتاجونها؟"
+  },
+  {
+    "id": "t03-preparing-quote-en",
+    "order": 5,
+    "name": "Quote is being prepared",
+    "channel": "whatsapp",
+    "language": "en",
+    "stage": "awaiting_price",
+    "subject": "",
+    "body": "Thank you {name}, we have everything we need. Every setup is designed around the venue and the event, so the team is preparing your quote now and will also confirm availability for {date}. We'll send it to you as soon as possible."
+  },
+  {
+    "id": "t04-preparing-quote-ar",
+    "order": 6,
+    "name": "Quote is being prepared",
+    "channel": "whatsapp",
+    "language": "ar",
+    "stage": "awaiting_price",
+    "subject": "",
+    "body": "شكراً {name}، وصلتنا كل التفاصيل. كل تجهيز نصممه حسب المكان والفعالية، والفريق الحين يجهز لكم عرض السعر ويؤكد توفر الموعد في {date}. بنرسل لكم العرض في أقرب وقت ممكن."
+  },
+  {
+    "id": "t05-quote-en",
+    "order": 7,
+    "name": "Send the quote",
+    "channel": "whatsapp",
+    "language": "en",
+    "stage": "quoted",
+    "subject": "",
+    "body": "Hi {name}, here is your quote for the {event} on {date}:\n\n{price}\n\nPrices are excl. VAT (+ 5% VAT). This quote is valid until {validUntil}.\n\nTo confirm the date we take a 50% deposit, and the remaining 50% is due on the event day before the show starts. Payment is only to the EchoLight company account shown on the invoice.\n\nWould you like to go ahead, or shall we go through it together on a quick call?"
+  },
+  {
+    "id": "t06-quote-ar",
+    "order": 8,
+    "name": "Send the quote",
+    "channel": "whatsapp",
+    "language": "ar",
+    "stage": "quoted",
+    "subject": "",
+    "body": "مرحباً {name}، هذا عرض السعر لفعاليتكم في {date}:\n\n{price}\n\nالسعر غير شامل ضريبة القيمة المضافة (+ 5%). العرض ساري حتى {validUntil}.\n\nلتأكيد الحجز نطلب دفعة مقدمة 50%، والـ 50% الباقية تُدفع يوم الفعالية قبل البدء. الدفع يكون فقط على حساب شركة إيكو لايت الموضح في الفاتورة.\n\nتحبون نثبت الحجز، أو نشرح لكم التفاصيل في مكالمة سريعة؟"
+  },
+  {
+    "id": "t25-revised-quote-en",
+    "order": 9,
+    "name": "Revised quote",
+    "channel": "whatsapp",
+    "language": "en",
+    "stage": "negotiating",
+    "subject": "",
+    "body": "Hi {name}, the team has updated your quote for the {event} on {date}:\n\n{price}\n\nPrices are excl. VAT (+ 5% VAT). This updated quote is valid until {validUntil}.\n\nThe terms stay the same: a 50% deposit confirms the date, and the remaining 50% is due on the event day before the show starts. Shall we go ahead?"
+  },
+  {
+    "id": "t26-revised-quote-ar",
+    "order": 10,
+    "name": "Revised quote",
+    "channel": "whatsapp",
+    "language": "ar",
+    "stage": "negotiating",
+    "subject": "",
+    "body": "مرحباً {name}، الفريق حدّث لكم عرض السعر لفعاليتكم في {date}:\n\n{price}\n\nالسعر غير شامل ضريبة القيمة المضافة (+ 5%). العرض المحدّث ساري حتى {validUntil}.\n\nالشروط نفسها: دفعة مقدمة 50% تثبت الموعد، والـ 50% الباقية تُدفع يوم الفعالية قبل البدء. نثبت الحجز؟"
+  },
+  {
+    "id": "t07-followup1-en",
+    "order": 11,
+    "name": "Follow-up 1 (day 1)",
+    "channel": "whatsapp",
+    "language": "en",
+    "stage": "quoted",
+    "subject": "",
+    "body": "Hi {name}, just checking you received the quote for your {event}. We're happy to adjust anything or answer any questions. The quote is valid until {validUntil}."
+  },
+  {
+    "id": "t08-followup1-ar",
+    "order": 12,
+    "name": "Follow-up 1 (day 1)",
+    "channel": "whatsapp",
+    "language": "ar",
+    "stage": "quoted",
+    "subject": "",
+    "body": "مرحباً {name}، حبينا نتأكد إن عرض السعر وصلكم. إذا تحبون نعدل أي شيء أو عندكم أي سؤال، نحن في الخدمة. العرض ساري حتى {validUntil}."
+  },
+  {
+    "id": "t09-followup2-en",
+    "order": 13,
+    "name": "Follow-up 2 (day 3, quote expires today)",
+    "channel": "whatsapp",
+    "language": "en",
+    "stage": "quoted",
+    "subject": "",
+    "body": "Hi {name}, a quick reminder that your quote is valid until today, {validUntil}. Shall we lock in {date} for you? Once you confirm, the team will send the invoice for the 50% deposit.\n\nSome of our recent work: https://www.echolight.ae/our-work"
+  },
+  {
+    "id": "t10-followup2-ar",
+    "order": 14,
+    "name": "Follow-up 2 (day 3, quote expires today)",
+    "channel": "whatsapp",
+    "language": "ar",
+    "stage": "quoted",
+    "subject": "",
+    "body": "مرحباً {name}، حبينا نذكركم إن عرض السعر ساري لنهاية اليوم ({validUntil}). نثبت لكم الحجز في {date}؟ بمجرد تأكيدكم، الفريق بيرسل لكم فاتورة الدفعة المقدمة 50%.\n\nوهذي بعض أعمالنا الأخيرة: https://www.echolight.ae/our-work"
+  },
+  {
+    "id": "t11-followup3-en",
+    "order": 15,
+    "name": "Follow-up 3 (day 7, offer a refreshed quote)",
+    "channel": "whatsapp",
+    "language": "en",
+    "stage": "quoted",
+    "subject": "",
+    "body": "Hi {name}, last check-in from us about your {event}. Your earlier quote has expired, but if you're still planning the event, just reply here and the team will re-confirm the price and the date's availability for you. If your plans have changed, no problem at all."
+  },
+  {
+    "id": "t12-followup3-ar",
+    "order": 16,
+    "name": "Follow-up 3 (day 7, offer a refreshed quote)",
+    "channel": "whatsapp",
+    "language": "ar",
+    "stage": "quoted",
+    "subject": "",
+    "body": "مرحباً {name}، هذي آخر رسالة متابعة منا بخصوص فعاليتكم. عرض السعر السابق انتهت صلاحيته، لكن إذا ما زلتم تخططون للفعالية، ردوا علينا هنا والفريق بيؤكد لكم السعر وتوفر الموعد من جديد. وإذا تغيرت خططكم، ولا يهمكم."
+  },
+  {
+    "id": "t27-quote-expired-en",
+    "order": 17,
+    "name": "Quote expired, re-confirming",
+    "channel": "whatsapp",
+    "language": "en",
+    "stage": "quoted",
+    "subject": "",
+    "body": "Hi {name}, thanks for getting back to us! Your earlier quote has expired, so the team is re-confirming the price and the date's availability. We'll send you the updated quote as soon as possible."
+  },
+  {
+    "id": "t28-quote-expired-ar",
+    "order": 18,
+    "name": "Quote expired, re-confirming",
+    "channel": "whatsapp",
+    "language": "ar",
+    "stage": "quoted",
+    "subject": "",
+    "body": "أهلاً {name}، شكراً لردكم! عرض السعر السابق انتهت صلاحيته، فالفريق الحين يؤكد السعر وتوفر الموعد من جديد، وبنرسل لكم العرض المحدّث في أقرب وقت ممكن."
+  },
+  {
+    "id": "t13-deposit-en",
+    "order": 19,
+    "name": "Booking and deposit",
+    "channel": "whatsapp",
+    "language": "en",
+    "stage": "booked",
+    "subject": "",
+    "body": "Wonderful {name}! We're excited to be part of your {event}. The team will send you the official invoice. The 50% deposit confirms {date} and is paid only to the EchoLight company account shown on the invoice. The remaining 50% is due on the event day before the show starts."
+  },
+  {
+    "id": "t14-deposit-ar",
+    "order": 20,
+    "name": "Booking and deposit",
+    "channel": "whatsapp",
+    "language": "ar",
+    "stage": "booked",
+    "subject": "",
+    "body": "ممتاز {name}! متحمسين نكون معكم في فعاليتكم. الفريق بيرسل لكم الفاتورة الرسمية. الدفعة المقدمة 50% تثبت موعدكم في {date}، وتُدفع فقط على حساب شركة إيكو لايت الموضح في الفاتورة. والـ 50% الباقية تُدفع يوم الفعالية قبل البدء."
+  },
+  {
+    "id": "t15-confirmed-en",
+    "order": 21,
+    "name": "Deposit received, date confirmed",
+    "channel": "whatsapp",
+    "language": "en",
+    "stage": "confirmed",
+    "subject": "",
+    "body": "Thank you {name}, we've received the deposit and {date} is confirmed. The team will be in touch about access times, power and setup at {venue}. A reminder: the remaining 50% is due on the event day before the show starts."
+  },
+  {
+    "id": "t16-confirmed-ar",
+    "order": 22,
+    "name": "Deposit received, date confirmed",
+    "channel": "whatsapp",
+    "language": "ar",
+    "stage": "confirmed",
+    "subject": "",
+    "body": "شكراً {name}، استلمنا الدفعة المقدمة وموعدكم في {date} صار مؤكد. الفريق بيتواصل معكم بخصوص أوقات الدخول والكهرباء والتجهيز في {venue}. للتذكير: الـ 50% الباقية تُدفع يوم الفعالية قبل البدء."
+  },
+  {
+    "id": "t17-review-en",
+    "order": 23,
+    "name": "Thank you, review and referral",
+    "channel": "whatsapp",
+    "language": "en",
+    "stage": "completed",
+    "subject": "",
+    "body": "Thank you {name} for choosing EchoLight! We hope the {event} was everything you wanted. If you have a minute, a Google review would mean a lot to us. And if you know anyone planning an event, we'd be grateful for an introduction."
+  },
+  {
+    "id": "t18-review-ar",
+    "order": 24,
+    "name": "Thank you, review and referral",
+    "channel": "whatsapp",
+    "language": "ar",
+    "stage": "completed",
+    "subject": "",
+    "body": "شكراً {name} على اختياركم إيكو لايت! نتمنى إن الفعالية عجبتكم وكانت مثل ما تبون. إذا عندكم دقيقة، تقييمكم على جوجل يفرق معنا وايد. وإذا تعرفون أحد يخطط لفعالية، نكون ممتنين لو تعرفونا عليه."
+  },
+  {
+    "id": "t19-outreach-corporate-en",
+    "order": 25,
+    "name": "Outreach: corporate events",
+    "channel": "email",
+    "language": "en",
+    "stage": "",
+    "subject": "AV production for {company}'s next event",
+    "body": "Hi {name},\n\nWe're reaching out from EchoLight, an Abu Dhabi event production company specialised in AV: lighting, sound, LED screens, projection mapping and light and laser shows, plus stages and full production anywhere in the UAE.\n\nWe've produced 400+ events, including launches for Bin Hamoodah Auto and DIBO One. If {company} has a conference, gala dinner or launch coming up, we'd be glad to share ideas and a tailored quote.\n\nWould a short call next week be useful?\n\nBest regards,\nEchoLight team\n+971 56 722 0533 · www.echolight.ae\n\nIf you'd rather not hear from us, just reply \"unsubscribe\" and we won't contact you again."
+  },
+  {
+    "id": "t20-outreach-hotel-en",
+    "order": 26,
+    "name": "Outreach: hotels and venues",
+    "channel": "email",
+    "language": "en",
+    "stage": "",
+    "subject": "An AV partner for events at {company}",
+    "body": "Hi {name},\n\nWe're writing from EchoLight in Abu Dhabi. We handle lighting, sound, LED screens, projection mapping and laser shows for weddings, gala dinners and celebrations, including events at Jumeirah Saadiyat and Novotel.\n\nMany venues work with us as their go-to AV partner when clients need more than the in-house setup. Would you be open to a quick chat about how we could support your events team?\n\nBest regards,\nEchoLight team\n+971 56 722 0533 · www.echolight.ae\n\nIf you'd rather not hear from us, just reply \"unsubscribe\" and we won't contact you again."
+  },
+  {
+    "id": "t21-outreach-agency-en",
+    "order": 27,
+    "name": "Outreach: event agencies and planners",
+    "channel": "email",
+    "language": "en",
+    "stage": "",
+    "subject": "AV and production support for your UAE events",
+    "body": "Hi {name},\n\nWe're reaching out from EchoLight, an Abu Dhabi production company specialised in AV: lighting, sound, LED screens, projection mapping, light and laser shows, stages and trussing.\n\nWe work anywhere in the UAE and are used to tight timelines and last-minute changes. If you need a reliable AV partner for upcoming projects, we'd be glad to send our portfolio and price your next brief.\n\nBest regards,\nEchoLight team\n+971 56 722 0533 · www.echolight.ae\n\nIf you'd rather not hear from us, just reply \"unsubscribe\" and we won't contact you again."
+  },
+  {
+    "id": "t22-outreach-corporate-ar",
+    "order": 28,
+    "name": "Outreach: corporate events",
+    "channel": "email",
+    "language": "ar",
+    "stage": "",
+    "subject": "حلول الإنتاج الصوتي والمرئي لفعاليات {company}",
+    "body": "مرحباً {name}،\n\nنتواصل معكم من إيكو لايت، شركة إنتاج فعاليات في أبوظبي متخصصة في الإضاءة والصوت وشاشات LED والبروجكشن مابينج وعروض الإضاءة والليزر، مع توفير المسارح والإنتاج الكامل في جميع أنحاء الإمارات.\n\nنفذنا أكثر من 400 فعالية، منها إطلاقات لبن حمودة للسيارات وDIBO One. إذا عندكم مؤتمر أو حفل عشاء أو إطلاق قادم، يسعدنا نشارككم أفكارنا ونجهز لكم عرض سعر مخصص.\n\nيناسبكم اتصال قصير الأسبوع القادم؟\n\nمع التحية،\nفريق إيكو لايت\n+971 56 722 0533 · www.echolight.ae\n\nإذا ما تحبون نتواصل معكم مرة ثانية، ردوا بكلمة \"إلغاء\" وما بنراسلكم بعدها."
+  },
+  {
+    "id": "t29-outreach-hotel-ar",
+    "order": 29,
+    "name": "Outreach: hotels and venues",
+    "channel": "email",
+    "language": "ar",
+    "stage": "",
+    "subject": "شريك الصوت والإضاءة لفعاليات {company}",
+    "body": "مرحباً {name}،\n\nنتواصل معكم من إيكو لايت في أبوظبي. نوفر الإضاءة والصوت وشاشات LED والبروجكشن مابينج وعروض الليزر لحفلات الأعراس وحفلات العشاء والاحتفالات، ومنها فعاليات في جميرا السعديات ونوفوتيل.\n\nفنادق وقاعات كثيرة تعتمد علينا كشريك للصوت والإضاءة إذا احتاج عملاؤها أكثر من تجهيزات القاعة. يناسبكم نتكلم باختصار عن طريقة دعمنا لفريق الفعاليات عندكم؟\n\nمع التحية،\nفريق إيكو لايت\n+971 56 722 0533 · www.echolight.ae\n\nإذا ما تحبون نتواصل معكم مرة ثانية، ردوا بكلمة \"إلغاء\" وما بنراسلكم بعدها."
+  }
+]
