@@ -12,9 +12,9 @@ Rules:
 
 # EchoLight
 
-EchoLight (Arabic: إيكو لايت) is a professional AV and event production company based in Abu Dhabi, UAE.
-We design, supply, install and operate stage lighting, LED screens, laser shows, projection mapping and
-audio for events across the UAE.
+EchoLight (Arabic: إيكو لايت) is a full event production company based in Abu Dhabi, UAE, specialised in
+AV: lighting, sound, screens, projection mapping, and light and laser shows. We design, supply, install and
+operate the production for events across the UAE, and we also provide stages.
 
 - Website: https://www.echolight.ae (Arabic: https://www.echolight.ae/ar-/)
 - WhatsApp and phone: +971 56 722 0533
@@ -29,11 +29,12 @@ audio for events across the UAE.
    programmed cue by cue.
 2. **LED Screen Rentals** - high-resolution LED walls for conferences, exhibitions, launches and government
    ceremonies. Includes setup, operation and teardown.
-3. **Laser Shows** - high-power laser effects for grand entrances, reveals and outdoor events.
+3. **Light & Laser Shows** - high-power laser and light shows for grand entrances, reveals and outdoor events.
 4. **Projector 3D Mapping** - projection mapping onto walls, ceilings, building facades and objects.
 5. **Immersive Audio** - line arrays, digital consoles, wireless microphone systems and conference audio.
-6. **Corporate Events & Weddings** - full AV integration for gala dinners, conferences, weddings and
-   government ceremonies.
+6. **Stages** - we provide stages for events.
+7. **Full Event Production** - complete production for corporate events and weddings (gala dinners,
+   conferences, launches, weddings and government ceremonies), with AV as our specialty.
 
 ## Who we work with
 
@@ -66,18 +67,21 @@ Portfolio: https://www.echolight.ae/our-work
 3. Optional call or site visit to confirm the venue, power and rigging.
 4. Our team delivers setup, live operation during the event, and teardown.
 
-## To confirm
+## Payment terms
+
+- 50% deposit to confirm the booking.
+- The remaining 50% is due on the event date, at the latest before the event starts.
+
 <!--
-Fill these in. Until you do, the agent will say "our team will confirm" and alert you.
+To confirm. Fill these in, then move each answer above this comment. Until you do, the agent will say "our team will confirm" and alert you.
 
 - Minimum notice / lead time for a booking:
-- Deposit and payment terms (e.g. 50% to confirm, balance before the event):
 - Payment methods (bank transfer, card, cash):
 - Cancellation and date-change policy:
 - Are prices including or excluding 5% VAT?
 - TRN / trade license number to share with corporate procurement:
 - Insurance and safety certifications:
-- Do you provide generators / power, staging, trussing, DJ, or event planning?
+- Do you provide generators / power, trussing, DJ, decor, or event planning?
 - Working hours for calls and site visits:
 - Coverage outside the UAE:
 -->
