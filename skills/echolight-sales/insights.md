@@ -26,11 +26,13 @@ Wedding planners and small event companies who resell our lighting to couples an
 
 **Known partners, staff and suppliers (from the owner, Oct 2026). Never sell to them, never follow them up:**
 - Partners (wedding/event companies): La Ceremonia Events, Battoul (Golden Touch Events), Mahmoud (Charming
-  Touch), Khaled (Emirati Events), JSK Parties, Samer 1 and Samer 3.
+  Touch; WhatsApp chat named "اللهم صل على سيدنا محمد"), Khaled (Emirati Events), JSK Parties, Samer 1 and Samer 3.
 - Staff: Reda (EchoLight), Shabbous (EchoLight).
 - Suppliers: Obada (3D mapping), Joseph (sound), Emad (bands, DJs, sound), Ahmed Nasef (transport), G.A.E Events (entertainers),
   LED screen and truss suppliers.
 - Personal: Farhan and other friends and family.
+Chat display names are often not real names (a prayer, an emoji, a nickname): the CRM document
+`config/insights` → `chatNames` maps them to who they really are. Check it before deciding who someone is.
 If a chat's name matches one of these, it's not a lead. Partners can still be customers for a specific job
 the owner is handling: log what happens, never chase.
 
