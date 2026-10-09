@@ -35,7 +35,7 @@ DIST = HERE / "dist"
 IMAGE_EXT = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
 VIDEO_EXT = {".mp4", ".mov", ".m4v"}
 MAX_PHOTOS = 12      # per project; the best-looking first ones are kept
-MAX_VIDEOS = 3
+MAX_VIDEOS = 8
 PHOTO_PX = 1600
 
 
@@ -175,8 +175,10 @@ def import_folder(folder: Path, catalog: dict, use_ai: bool) -> dict | None:
         out = dest / f"photo-{i:02d}.jpg"
         if save_photo(src, out):
             media.append({"type": "image", "src": f"media/{slug}/{out.name}"})
-    # Cards show the first item; a photo makes a better cover than a video poster.
-    media.sort(key=lambda m: m["type"] != "image")
+    # A sharp photo makes the card cover; the videos come right after it when the project opens.
+    images = [m for m in media if m["type"] == "image"]
+    clips = [m for m in media if m["type"] == "video"]
+    media = images[:1] + clips + images[1:]
     if not media:
         return None
 

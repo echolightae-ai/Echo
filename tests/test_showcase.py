@@ -211,3 +211,14 @@ def test_cost_estimate_for_a_big_camera_roll(organize):
     # 12,000 photos is typically a few hundred groups; Claude is asked once per group.
     assert 15 < organize.estimate(500, "claude-opus-5-5") < 20
     assert organize.estimate(500, "claude-haiku-5-5") < 1
+
+
+def test_videos_get_most_of_the_contact_sheet(organize):
+    from datetime import datetime, timedelta
+
+    t0 = datetime(2026, 3, 1, 20)
+    shots = [organize.Shot(Path(f"{i}"), t0 + timedelta(minutes=i), None, video=i % 3 == 0) for i in range(90)]
+    picked = organize.sample(organize.Group(shots))
+    assert len(picked) == organize.SHEET_TILES
+    assert sum(s.video for s in picked) == 18
+    assert picked == sorted(picked, key=lambda s: s.when)

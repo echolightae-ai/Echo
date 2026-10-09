@@ -381,7 +381,7 @@ footer { border-top: 1px solid var(--line); padding-block: 22px 34px; color: var
     var shot = h("div", { class: "shot" }, [
       h("img", { src: m.poster || m.src, alt: p.title + " by EchoLight", loading: "lazy" }),
       best ? h("span", { class: "match", text: "Best match" }) : null,
-      (m.video || m.type === "video") ? h("span", { class: "play", "aria-hidden": "true" }) : null
+      p.media.some(function (x) { return x.video || x.type === "video"; }) ? h("span", { class: "play", "aria-hidden": "true" }) : null
     ]);
     var whySet = {}; x.why.forEach(function (w) { whySet[w] = 1; });
     var tags = p.eventTypes.map(function (id) { return EVT[id] && EVT[id].name; })

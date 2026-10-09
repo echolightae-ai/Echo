@@ -37,8 +37,8 @@ GAP = timedelta(hours=4)          # a pause longer than this starts a new event
 MOVE_KM = 3.0                     # ...and so does moving further than this
 MIN_ITEMS = 6                     # fewer shots than this is not an event worth showing
 SHEET_TILES = 30
-KEEP_PHOTOS = 12
-KEEP_VIDEOS = 3
+KEEP_PHOTOS = 8
+KEEP_VIDEOS = 8                   # we sell visuals: videos come first
 
 # Claude is asked once per event group (one contact sheet), never once per photo.
 # USD per million input / output tokens, and a typical call: ~3,500 tokens in, ~1,000 out.
@@ -224,12 +224,18 @@ def thumb(shot: Shot, px: int = 300):
     return img
 
 
-def sample(g: Group) -> list[Shot]:
+def spread(items: list, n: int) -> list:
     """An even spread across the whole event, so the sheet shows setup, show and crowd alike."""
-    if len(g.shots) <= SHEET_TILES:
-        return list(g.shots)
-    step = len(g.shots) / SHEET_TILES
-    return [g.shots[int(i * step)] for i in range(SHEET_TILES)]
+    if len(items) <= n:
+        return list(items)
+    return [items[int(i * len(items) / n)] for i in range(n)]
+
+
+def sample(g: Group) -> list[Shot]:
+    """Up to 18 videos get a tile; photos fill the rest of the sheet."""
+    videos = spread([s for s in g.shots if s.video], 18)
+    photos = spread([s for s in g.shots if not s.video], SHEET_TILES - len(videos))
+    return sorted(videos + photos, key=lambda s: s.when)
 
 
 def contact_sheet(shots: list[Shot]):
@@ -294,7 +300,8 @@ def ask_claude(client, catalog: dict, g: Group, sheet) -> dict | None:
         "- tags: 3-6 short lowercase words a client might search for (e.g. 'outdoor', 'ballroom', 'bridal walk').\n"
         f"- best: up to {KEEP_PHOTOS + KEEP_VIDEOS} tile numbers for the portfolio, best first. Pick shots that "
         "show the lighting at its best during the event; skip blurry, dark, duplicate, empty-venue and "
-        "people-close-up shots. Include VIDEO tiles that look strong.\n"
+        "people-close-up shots. EchoLight sells visuals, so videos matter most: list every strong VIDEO tile "
+        f"first (up to {KEEP_VIDEOS}), then the best photos (up to {KEEP_PHOTOS}).\n"
         "If is_event is false, leave the other text fields empty and best as []."
     )
     try:
@@ -365,6 +372,8 @@ def organize(root: Path, use_ai: bool = True, limit: int = 0, budget: float = 0,
         cost = estimate(len(groups), MODEL)
         print(f"Claude ({MODEL}) will look at {len(groups)} groups: about ${cost:.2f}"
               + (f", and it stops at ${budget:.2f}." if budget else "."))
+        if MODEL != "claude-haiku-5-5":
+            print(f"(With --model claude-haiku-5-5 it would be about ${estimate(len(groups), 'claude-haiku-5-5'):.2f}.)")
         if confirm and input("Go ahead? [y/N] ").strip().lower() not in {"y", "yes"}:
             return []
 
@@ -399,7 +408,7 @@ def organize(root: Path, use_ai: bool = True, limit: int = 0, budget: float = 0,
             chosen = [picks_from[i - 1] for i in verdict["best"] if 1 <= i <= len(picks_from)]
             photos = [s for s in chosen if not s.video][:KEEP_PHOTOS]
             videos = [s for s in chosen if s.video][:KEEP_VIDEOS]
-            picks = photos + videos or picks_from[:KEEP_PHOTOS]
+            picks = videos + photos or picks_from[:KEEP_PHOTOS]
             dest = INBOX / name
             copy_picks(g, picks, dest)
             (dest / "info.json").write_text(json.dumps({
