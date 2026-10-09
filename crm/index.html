@@ -1,0 +1,910 @@
+<title>EchoLight CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a production desk. Top bar with the day's tabs, one working view, a side drawer for the open deal. */
+:root {
+  --bg: #f3f4f6;            /* cool gel-frame grey */
+  --panel: #ffffff;
+  --sunk: #e8eaee;
+  --line: #d5d9e0;
+  --ink: #15181e;
+  --muted: #5d6573;
+  --accent: #c2410c;        /* tungsten amber, lamp-warm */
+  --accent-ink: #ffffff;
+  --accent-soft: #fde8d9;
+  --cool: #1d4ed8;          /* steel-blue wash */
+  --cool-soft: #dce6fb;
+  --good: #15803d; --good-soft: #dcf2e3;
+  --warn: #b45309; --warn-soft: #fbedd5;
+  --bad: #b91c1c;  --bad-soft: #f9dede;
+  --display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --body: "IBM Plex Sans", "IBM Plex Sans Arabic", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1216; --panel: #171b21; --sunk: #1f242c; --line: #2c333d; --ink: #e8ebf0; --muted: #98a1ae;
+  --accent: #f08c4a; --accent-ink: #1a0d04; --accent-soft: #3a2415; --cool: #7ea2f5; --cool-soft: #1c2742;
+  --good: #5cc98a; --good-soft: #15291e; --warn: #f0b45a; --warn-soft: #33260f; --bad: #f08080; --bad-soft: #3a1919;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1216; --panel: #171b21; --sunk: #1f242c; --line: #2c333d; --ink: #e8ebf0; --muted: #98a1ae;
+  --accent: #f08c4a; --accent-ink: #1a0d04; --accent-soft: #3a2415; --cool: #7ea2f5; --cool-soft: #1c2742;
+  --good: #5cc98a; --good-soft: #15291e; --warn: #f0b45a; --warn-soft: #33260f; --bad: #f08080; --bad-soft: #3a1919;
+  color-scheme: dark }
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--ink); font: 14px/1.5 var(--body); }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: var(--cool); }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--panel); border-bottom: 1px solid var(--line); }
+.top-in { display: flex; align-items: center; gap: 16px; padding: 10px 16px; flex-wrap: wrap; }
+.brand { font: 800 22px/1 var(--display); letter-spacing: .04em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+.brand i { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); display: inline-block; }
+.tabs { display: flex; gap: 2px; overflow-x: auto; flex: 1 1 auto; min-width: 0; scrollbar-width: none; }
+.tabs button { background: none; border: 0; padding: 8px 12px; border-radius: 8px; color: var(--muted); font-weight: 500; white-space: nowrap; cursor: pointer; }
+.tabs button[aria-current="page"] { background: var(--sunk); color: var(--ink); }
+.tabs button .count { margin-inline-start: 6px; font: 500 11px var(--mono); background: var(--accent); color: var(--accent-ink); padding: 1px 6px; border-radius: 99px; }
+.who { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+.who img { width: 26px; height: 26px; border-radius: 50%; }
+
+.btn { border: 1px solid var(--line); background: var(--panel); padding: 7px 12px; border-radius: 8px; cursor: pointer; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { border-color: var(--muted); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.ghost { border-color: transparent; background: none; }
+.btn.small { padding: 4px 9px; font-size: 13px; }
+.btn.danger { color: var(--bad); }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+
+main { padding-block: 20px 60px; padding-inline: 16px; max-width: 1400px; margin: 0 auto; }
+.banner { background: var(--warn-soft); color: var(--warn); border-radius: var(--radius); padding: 10px 14px; margin-bottom: 16px; }
+h1.view-title { font: 800 34px/1.05 var(--display); text-transform: uppercase; letter-spacing: .02em; margin: 0 0 4px; text-wrap: balance; }
+.sub { color: var(--muted); margin: 0 0 20px; }
+h2 { font: 600 13px var(--body); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 10px; }
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.kpi { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; }
+.kpi .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .07em; }
+.kpi .value { font: 800 34px/1.1 var(--display); margin-top: 4px; }
+.kpi .hint { color: var(--muted); font-size: 12px; }
+.kpi.alert .value { color: var(--accent); }
+
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 16px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; min-width: 0; }
+.list { display: flex; flex-direction: column; }
+.row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); cursor: pointer; min-width: 0; }
+.row:last-child { border-bottom: 0; }
+.row:hover .row-main b { color: var(--accent); }
+.row-main { flex: 1 1 auto; min-width: 0; }
+.row-main b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-main span { color: var(--muted); font-size: 13px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-side { text-align: end; flex: 0 0 auto; font-size: 13px; }
+.empty { color: var(--muted); padding: 18px 0; }
+
+.pill { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 99px; background: var(--sunk); color: var(--muted); white-space: nowrap; }
+.pill.hot { background: var(--bad-soft); color: var(--bad); }
+.pill.warm { background: var(--warn-soft); color: var(--warn); }
+.pill.cold { background: var(--cool-soft); color: var(--cool); }
+.pill.good { background: var(--good-soft); color: var(--good); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.accent { background: var(--accent-soft); color: var(--accent); }
+.pill.claude { background: var(--cool-soft); color: var(--cool); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+
+/* Pipeline board */
+.board { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 1fr); gap: 12px; overflow-x: auto; padding-bottom: 12px; }
+.col { background: var(--sunk); border-radius: var(--radius); padding: 10px; min-height: 200px; display: flex; flex-direction: column; gap: 8px; }
+.col.drop { outline: 2px dashed var(--accent); }
+.col-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 2px 4px 6px; }
+.col-head b { font: 800 16px var(--display); text-transform: uppercase; letter-spacing: .04em; }
+.col-head span { color: var(--muted); font-size: 12px; }
+.deal { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 10px; cursor: grab; display: flex; flex-direction: column; gap: 4px; }
+.deal:hover { border-color: var(--accent); }
+.deal b { font-weight: 600; }
+.deal .meta { color: var(--muted); font-size: 12px; }
+.deal .foot { display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+/* Tables */
+.toolbar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+.toolbar input[type=search] { flex: 1 1 220px; min-width: 0; }
+input, select, textarea { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; width: 100%; }
+textarea { resize: vertical; min-height: 70px; }
+.toolbar select { width: auto; }
+.table-wrap { overflow-x: auto; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); }
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: start; padding: 9px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; background: var(--sunk); }
+tbody tr { cursor: pointer; }
+tbody tr:hover td { background: var(--sunk); }
+td.wrap { white-space: normal; min-width: 220px; }
+
+/* Drawer */
+.scrim { position: fixed; inset: 0; background: rgb(0 0 0 / .35); z-index: 40; }
+.drawer { position: fixed; top: 0; bottom: 0; inset-inline-end: 0; width: min(640px, 100%); background: var(--panel); z-index: 41; display: flex; flex-direction: column; border-inline-start: 1px solid var(--line); padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.drawer-head { padding: 14px 16px; border-bottom: 1px solid var(--line); display: flex; gap: 10px; align-items: flex-start; }
+.drawer-head h3 { margin: 0; font: 800 26px/1.1 var(--display); text-transform: uppercase; letter-spacing: .02em; overflow-wrap: anywhere; }
+.drawer-body { overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 18px; }
+.section { display: flex; flex-direction: column; gap: 10px; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field label, .lbl { font-size: 12px; color: var(--muted); font-weight: 500; }
+.field.full { grid-column: 1 / -1; }
+.checks { display: flex; flex-wrap: wrap; gap: 6px; }
+.checks label { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: 99px; padding: 4px 10px; font-size: 13px; cursor: pointer; }
+.checks input { width: auto; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.stage-track { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 4px; }
+.stage-track button { flex: 1 0 auto; border: 1px solid var(--line); background: var(--panel); border-radius: 6px; padding: 6px 8px; font-size: 12px; cursor: pointer; color: var(--muted); }
+.stage-track button.done { background: var(--accent-soft); color: var(--accent); border-color: transparent; }
+.stage-track button.current { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.money { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.money div { background: var(--sunk); border-radius: 8px; padding: 10px; }
+.money b { display: block; font: 600 18px var(--mono); }
+.timeline { display: flex; flex-direction: column; gap: 10px; }
+.act { border-inline-start: 2px solid var(--line); padding-inline-start: 10px; }
+.act .when { color: var(--muted); font-size: 12px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.act p { margin: 2px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.copybox { background: var(--sunk); border-radius: 8px; padding: 10px; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 13px; }
+
+/* Modal */
+.modal { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 16px; background: rgb(0 0 0 / .4); }
+.modal-card { background: var(--panel); border-radius: 14px; width: min(560px, 100%); max-height: 90vh; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.modal-card h3 { margin: 0; font: 800 24px var(--display); text-transform: uppercase; }
+
+.toast { position: fixed; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 8px; z-index: 80; max-width: calc(100% - 32px); }
+
+/* Reports */
+.bars { display: flex; flex-direction: column; gap: 8px; }
+.bar { display: grid; grid-template-columns: minmax(90px, 160px) 1fr auto; gap: 10px; align-items: center; font-size: 13px; }
+.bar .track { background: var(--sunk); border-radius: 4px; height: 14px; overflow: hidden; }
+.bar .fill { background: var(--accent); height: 100%; border-radius: 4px; }
+.bar .fill.cool { background: var(--cool); }
+.month-group { margin-bottom: 22px; }
+.month-group h2 { color: var(--ink); font: 800 20px var(--display); letter-spacing: .04em; }
+.show-date { font: 800 26px/1 var(--display); text-align: center; min-width: 52px; }
+.show-date small { display: block; font: 500 11px var(--body); color: var(--muted); text-transform: uppercase; }
+.switch { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.switch input { width: auto; }
+@media (max-width: 640px) {
+  h1.view-title { font-size: 28px; }
+  .who span { display: none; }
+}
+</style>
+
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><i></i>EchoLight <span style="color:var(--muted)">CRM</span></div>
+    <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+    <button class="btn primary" id="newLeadBtn" type="button">+ New lead</button>
+    <div class="who" id="who"></div>
+  </div>
+</header>
+<main id="view"></main>
+<div id="drawerRoot"></div>
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+(() => {
+"use strict";
+
+// ---------- Reference data ----------
+const STAGES = [
+  { id: "new", label: "New enquiry", open: true },
+  { id: "qualifying", label: "Qualifying", open: true },
+  { id: "awaiting_price", label: "Needs price", open: true },
+  { id: "quoted", label: "Quote sent", open: true },
+  { id: "negotiating", label: "Negotiating", open: true },
+  { id: "booked", label: "Booked · deposit due", open: true },
+  { id: "confirmed", label: "Confirmed · deposit paid", open: false, won: true },
+  { id: "completed", label: "Event done", open: false, won: true },
+  { id: "lost", label: "Lost", open: false },
+];
+const STAGE = Object.fromEntries(STAGES.map((s, i) => [s.id, { ...s, i }]));
+const SERVICES = ["Lighting", "Sound", "LED screens", "Projection mapping", "Light & laser show", "Stage", "Trussing", "DJ", "Decor", "Event planning", "Full production"];
+const SOURCES = ["WhatsApp", "Instagram", "Email", "Phone call", "Website", "Referral", "Repeat client", "Outbound (Claude)", "Outbound (team)", "Google", "Walk-in / event", "Other"];
+const SEGMENTS = ["Corporate", "Wedding", "Hospitality / hotel", "Automotive", "Government", "Event agency", "Retail / mall", "Exhibition", "Private party", "Other"];
+const EMIRATES = ["Abu Dhabi", "Dubai", "Al Ain", "Sharjah", "Ajman", "Umm Al Quwain", "Ras Al Khaimah", "Fujairah"];
+const LOST_REASONS = ["Price", "Date not available", "Chose another supplier", "Event cancelled", "No response", "Budget too low", "Outside our services", "Other"];
+const PROSPECT_STATUSES = [
+  { id: "found", label: "Found" }, { id: "approved", label: "Approved to contact" }, { id: "contacted", label: "Contacted" },
+  { id: "replied", label: "Replied" }, { id: "converted", label: "Became a lead" }, { id: "not_interested", label: "Not interested" },
+  { id: "do_not_contact", label: "Do not contact" },
+];
+const VAT = 0.05;
+const TABS = [
+  { id: "today", label: "Call sheet" }, { id: "pipeline", label: "Pipeline" }, { id: "leads", label: "Leads" },
+  { id: "prospects", label: "Prospects" }, { id: "shows", label: "Shows" }, { id: "reports", label: "Reports" },
+  { id: "messages", label: "Messages" }, { id: "settings", label: "Settings" },
+];
+const DEFAULT_SETTINGS = {
+  autopilot: { inboundReplies: true, followUps: true, outreach: false, outreachNeedsApproval: true, outreachDailyCap: 20 },
+  followUpDays: [1, 3, 7],
+  targetSegments: ["Corporate", "Hospitality / hotel", "Automotive", "Event agency", "Wedding"],
+  notes: "",
+};
+
+// ---------- State ----------
+const S = {
+  db: null, user: null, me: null, writable: true, canEdit: false, ready: false, failed: false,
+  leads: [], prospects: [], templates: [], settings: DEFAULT_SETTINGS,
+  view: "today", openLead: null, activities: [], actUnsub: null,
+  q: "", fStage: "open", fSource: "", fSegment: "", pq: "", pStatus: "",
+  profiles: {},
+};
+try { const v = localStorage.getItem("el-crm-view"); if (v && TABS.some(t => t.id === v)) S.view = v; } catch (e) {}
+if (TABS.some(t => t.id === location.hash.slice(1))) S.view = location.hash.slice(1);
+
+// ---------- Helpers ----------
+const $ = (sel, root = document) => root.querySelector(sel);
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const todayISO = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Dubai" });
+const addDays = (iso, n) => { const d = new Date(iso + "T12:00:00"); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); };
+const aed = (n) => (n || n === 0) && !isNaN(n) ? "AED " + Math.round(Number(n)).toLocaleString("en-US") : "—";
+const fmtDate = (iso) => { if (!iso) return "—"; const d = new Date(iso.length <= 10 ? iso + "T12:00:00" : iso); return isNaN(d) ? esc(iso) : d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" }); };
+const ago = (ts) => { if (!ts) return ""; const m = Math.round((Date.now() - ts) / 60000); if (m < 1) return "just now"; if (m < 60) return m + "m ago"; const h = Math.round(m / 60); if (h < 48) return h + "h ago"; return Math.round(h / 24) + "d ago"; };
+const digits = (p) => String(p || "").replace(/\D/g, "").replace(/^00/, "");
+const daysUntil = (iso) => iso ? Math.round((new Date(iso + "T12:00:00") - new Date(todayISO() + "T12:00:00")) / 86400000) : null;
+const leadTitle = (l) => l.company ? `${l.name || "Unnamed"} · ${l.company}` : (l.name || "Unnamed lead");
+const isOpen = (l) => STAGE[l.stage]?.open ?? true;
+const isWon = (l) => !!STAGE[l.stage]?.won;
+const temp = (l) => l.priority ? `<span class="pill ${esc(l.priority)}">${esc(l.priority)}</span>` : "";
+const stagePill = (l) => `<span class="pill ${l.stage === "lost" ? "bad" : isWon(l) ? "good" : l.stage === "awaiting_price" ? "accent" : ""}">${esc(STAGE[l.stage]?.label || l.stage)}</span>`;
+const byLabel = (by) => by === "claude" ? `<span class="pill claude">Claude</span>` : (by ? esc(S.profiles[by]?.name || "Team") : "");
+
+function toast(msg) {
+  const el = document.createElement("div"); el.className = "toast"; el.textContent = msg; el.setAttribute("role", "status");
+  $("#toastRoot").replaceChildren(el); setTimeout(() => el.remove(), 3200);
+}
+function fail(e) {
+  console.error(e);
+  if (e && e.code === "invalid_argument") { S.writable = false; toast("You can view this CRM but not change it. Ask the owner for Contributor access."); render(); return; }
+  if (e && e.code === "quota_exceeded") { toast("The CRM storage is full. Archive old leads to make room."); return; }
+  toast("Couldn't save. Check your connection and try again.");
+}
+async function write(fn) {
+  if (!S.db) { toast("Shared data isn't available in this view."); return false; }
+  try { await fn(); return true; } catch (e) { fail(e); return false; }
+}
+async function resolveProfiles(ids) {
+  if (!S.user) return;
+  const want = [...new Set(ids.filter(Boolean).filter((id) => id !== "claude"))];
+  if (!want.length) return;
+  try { const ps = await S.user.profiles(want); Object.assign(S.profiles, ps); } catch (e) {}
+}
+
+// ---------- Data writes ----------
+function newLeadDoc(fields) {
+  const now = Date.now();
+  return {
+    name: "", company: "", phone: "", email: "", source: "", segment: "", language: "",
+    eventType: "", eventDate: "", venue: "", emirate: "", guests: null, setting: "", services: [],
+    requirements: "", budgetAED: null, decisionMaker: "", priority: "warm",
+    stage: "new", stageHistory: { new: now },
+    priceAED: null, quoteDetails: "", quoteSentAt: null, priceRequestedAt: null,
+    depositStatus: "not_due", depositReceivedAt: null, balanceStatus: "not_due", balanceReceivedAt: null,
+    lostReason: "", nextAction: "Reply and qualify", nextActionDate: todayISO(),
+    assignedTo: S.me?.id || null, marketingOptIn: false, doNotContact: false, prospectId: null,
+    lastContactAt: null, createdAt: now, updatedAt: now, createdBy: S.me?.id || null,
+    ...fields,
+  };
+}
+async function addActivity(leadId, type, text, extra = {}) {
+  if (!S.db) return;
+  await S.db.collection("activities").add({ leadId, type, text, at: Date.now(), by: S.me?.id || null, ...extra });
+}
+async function updateLead(id, patch, activity) {
+  return write(async () => {
+    await S.db.doc("leads/" + id).update({ ...patch, updatedAt: Date.now() });
+    if (activity) await addActivity(id, activity.type, activity.text);
+  });
+}
+async function setStage(lead, stage, extra = {}, note = "") {
+  if (lead.stage === stage) return;
+  const hist = { ...(lead.stageHistory || {}), [stage]: Date.now() };
+  const patch = { stage, stageHistory: hist, ...extra };
+  if (stage === "awaiting_price") { patch.priceRequestedAt = Date.now(); patch.nextAction = "Team to price this project"; patch.nextActionDate = todayISO(); }
+  if (stage === "booked" && lead.depositStatus !== "received") { patch.depositStatus = "requested"; patch.nextAction = "Collect 50% deposit"; }
+  if (stage === "confirmed") { patch.depositStatus = "received"; patch.depositReceivedAt = lead.depositReceivedAt || Date.now(); patch.balanceStatus = "due_on_event"; patch.nextAction = "Prepare production; collect balance on event day"; patch.nextActionDate = lead.eventDate || todayISO(); }
+  if (stage === "completed") { patch.nextAction = "Ask for a review and referral"; patch.nextActionDate = addDays(todayISO(), 1); }
+  if (stage === "lost") { patch.nextAction = ""; patch.nextActionDate = ""; }
+  const text = `Stage: ${STAGE[lead.stage]?.label || lead.stage} → ${STAGE[stage].label}${note ? ". " + note : ""}`;
+  await updateLead(lead.id, patch, { type: "stage", text });
+}
+
+// ---------- Boot ----------
+async function boot() {
+  render();
+  if (!window.claude?.use) { S.failed = true; render(); return; }
+  const [db, user] = await Promise.all([window.claude.use("db"), window.claude.use("user")]);
+  S.db = db; S.user = user;
+  if (user) {
+    try { S.me = await user.me(); S.canEdit = !!S.me?.canEdit; } catch (e) {}
+    try { const w = await user.can("data.write"); if (w === false) S.writable = false; } catch (e) {}
+  }
+  if (!db) { S.failed = true; renderTop(); render(); return; }
+  const err = (e) => { console.error(e); if (e?.code === "revoked") { S.failed = true; render(); } };
+  db.collection("leads").orderBy("updatedAt", "desc").limit(1000).onSnapshot((snap) => {
+    S.leads = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    S.ready = true;
+    resolveProfiles(S.leads.map((l) => l.assignedTo)).then(() => { render(); refreshDrawer(); });
+    render(); refreshDrawer();
+  }, err);
+  db.collection("prospects").orderBy("updatedAt", "desc").limit(1000).onSnapshot((snap) => {
+    S.prospects = snap.docs.map((d) => ({ id: d.id, ...d.data() })); renderTop(); if (S.view === "prospects" || S.view === "today") render();
+  }, err);
+  db.collection("templates").limit(200).onSnapshot((snap) => {
+    S.templates = snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
+    if (S.view === "messages") render(); refreshDrawer();
+  }, err);
+  db.doc("config/settings").onSnapshot((snap) => {
+    S.settings = snap.exists ? { ...DEFAULT_SETTINGS, ...snap.data(), autopilot: { ...DEFAULT_SETTINGS.autopilot, ...(snap.data().autopilot || {}) } } : DEFAULT_SETTINGS;
+    if (S.view === "settings") render();
+  }, err);
+  renderTop();
+}
+
+// ---------- Top bar ----------
+function renderTop() {
+  const needPrice = S.leads.filter((l) => l.stage === "awaiting_price").length;
+  const toApprove = S.prospects.filter((p) => p.status === "found").length;
+  const counts = { today: needPrice, prospects: toApprove };
+  $("#tabs").innerHTML = TABS.map((t) => `<button type="button" data-tab="${t.id}" ${S.view === t.id ? 'aria-current="page"' : ""}>${t.label}${counts[t.id] ? `<span class="count">${counts[t.id]}</span>` : ""}</button>`).join("");
+  const me = S.me;
+  $("#who").innerHTML = me && me.id ? `<img alt="" src="${esc(me.avatarUrl)}"><span>${esc(me.name || "You")}</span>` : "";
+  $("#newLeadBtn").disabled = !S.writable || !S.db;
+}
+$("#tabs").addEventListener("click", (e) => {
+  const b = e.target.closest("button[data-tab]"); if (!b) return;
+  S.view = b.dataset.tab; try { localStorage.setItem("el-crm-view", S.view); } catch (err) {}
+  render(); window.scrollTo(0, 0);
+});
+$("#newLeadBtn").addEventListener("click", () => openLeadModal());
+
+// ---------- Views ----------
+function render() {
+  renderTop();
+  const v = $("#view");
+  let banner = "";
+  if (S.failed) banner = `<div class="banner">Shared data isn't available in this view. Open the CRM from claude.ai while signed in to see and edit leads.</div>`;
+  else if (!S.writable) banner = `<div class="banner">You have view-only access. Ask the owner to make you a Contributor to edit leads.</div>`;
+  const views = { today: viewToday, pipeline: viewPipeline, leads: viewLeads, prospects: viewProspects, shows: viewShows, reports: viewReports, messages: viewMessages, settings: viewSettings };
+  v.innerHTML = banner + views[S.view]();
+}
+
+function leadRow(l, side) {
+  return `<div class="row" data-lead="${esc(l.id)}"><div class="row-main"><b>${esc(leadTitle(l))}</b><span>${esc([l.eventType, l.eventDate && fmtDate(l.eventDate), l.emirate].filter(Boolean).join(" · ") || "No event details yet")}</span></div><div class="row-side">${side}</div></div>`;
+}
+function emptyLeads(msg) { return `<div class="empty">${msg}</div>`; }
+
+function viewToday() {
+  const t = todayISO();
+  const open = S.leads.filter(isOpen);
+  const needPrice = S.leads.filter((l) => l.stage === "awaiting_price").sort((a, b) => (a.priceRequestedAt || 0) - (b.priceRequestedAt || 0));
+  const due = open.filter((l) => l.stage !== "awaiting_price" && l.nextActionDate && l.nextActionDate <= t).sort((a, b) => a.nextActionDate.localeCompare(b.nextActionDate));
+  const fresh = S.leads.filter((l) => l.stage === "new");
+  const shows = S.leads.filter((l) => ["booked", "confirmed"].includes(l.stage) && l.eventDate && daysUntil(l.eventDate) >= 0 && daysUntil(l.eventDate) <= 21).sort((a, b) => a.eventDate.localeCompare(b.eventDate));
+  const pipeline = S.leads.filter((l) => ["quoted", "negotiating", "booked"].includes(l.stage)).reduce((s, l) => s + (Number(l.priceAED) || 0), 0);
+  const month = t.slice(0, 7);
+  const wonMonth = S.leads.filter((l) => isWon(l) && l.depositReceivedAt && new Date(l.depositReceivedAt).toISOString().slice(0, 7) === month).reduce((s, l) => s + (Number(l.priceAED) || 0), 0);
+  const toApprove = S.prospects.filter((p) => p.status === "found").length;
+
+  const kpis = `<div class="kpis">
+    <div class="kpi ${needPrice.length ? "alert" : ""}"><div class="label">Waiting for your price</div><div class="value num">${needPrice.length}</div><div class="hint">${needPrice[0] ? "Oldest waiting " + ago(needPrice[0].priceRequestedAt) : "Nobody is waiting"}</div></div>
+    <div class="kpi ${due.length ? "alert" : ""}"><div class="label">Follow-ups due</div><div class="value num">${due.length}</div><div class="hint">Today and overdue</div></div>
+    <div class="kpi"><div class="label">Open quotes</div><div class="value num">${aed(pipeline).replace("AED ", "")}</div><div class="hint">AED excl. VAT, quoted to booked</div></div>
+    <div class="kpi"><div class="label">Won this month</div><div class="value num">${aed(wonMonth).replace("AED ", "")}</div><div class="hint">AED excl. VAT, deposit received</div></div>
+  </div>`;
+
+  if (S.ready && !S.leads.length) {
+    return `<h1 class="view-title">Call sheet</h1><p class="sub">${fmtDate(t)} · Abu Dhabi</p>${kpis}
+      <div class="card"><h2>No leads yet</h2><p>Add your first enquiry with <b>+ New lead</b>, or ask Claude to import past enquiries from your WhatsApp and email. Every new lead lands in <b>New enquiry</b> and moves through the pipeline from there.</p></div>`;
+  }
+  return `<h1 class="view-title">Call sheet</h1><p class="sub">${fmtDate(t)} · Abu Dhabi${toApprove ? ` · <a href="#prospects" data-go="prospects">${toApprove} prospect${toApprove > 1 ? "s" : ""} waiting for approval</a>` : ""}</p>${kpis}
+  <div class="grid2">
+    <section class="card"><h2>Price these projects</h2><div class="list">${needPrice.map((l) => leadRow(l, l.priceAED ? `<span class="pill good">Priced · Claude to send</span>` : `<span class="pill accent">${ago(l.priceRequestedAt) || "waiting"}</span>`)).join("") || emptyLeads(S.ready ? "No projects waiting for a price." : "Loading…")}</div></section>
+    <section class="card"><h2>Follow up today</h2><div class="list">${due.map((l) => leadRow(l, `${l.nextActionDate < t ? `<span class="pill bad">Overdue ${-daysUntil(l.nextActionDate)}d</span>` : `<span class="pill">Today</span>`}<div style="color:var(--muted)">${esc(l.nextAction || "")}</div>`)).join("") || emptyLeads(S.ready ? "Nothing due. Nice." : "Loading…")}</div></section>
+    <section class="card"><h2>New enquiries</h2><div class="list">${fresh.map((l) => leadRow(l, `${esc(l.source || "")}<div style="color:var(--muted)">${ago(l.createdAt)}</div>`)).join("") || emptyLeads(S.ready ? "No new enquiries." : "Loading…")}</div></section>
+    <section class="card"><h2>Shows in the next 3 weeks</h2><div class="list">${shows.map((l) => leadRow(l, `<b class="num">${daysUntil(l.eventDate) === 0 ? "Today" : "in " + daysUntil(l.eventDate) + "d"}</b><div>${paymentPills(l)}</div>`)).join("") || emptyLeads(S.ready ? "No booked shows in the next 3 weeks." : "Loading…")}</div></section>
+  </div>`;
+}
+
+function paymentPills(l) {
+  const dep = l.depositStatus === "received" ? `<span class="pill good">Deposit paid</span>` : `<span class="pill warn">Deposit due</span>`;
+  const bal = l.balanceStatus === "received" ? `<span class="pill good">Balance paid</span>` : (l.depositStatus === "received" ? `<span class="pill">Balance on event day</span>` : "");
+  return dep + " " + bal;
+}
+
+function viewPipeline() {
+  const cols = STAGES.filter((s) => s.id !== "lost" && s.id !== "completed");
+  return `<h1 class="view-title">Pipeline</h1><p class="sub">Drag a deal to move it, or open it to change the stage. Values are AED excl. VAT.</p>
+  <div class="board">${cols.map((s) => {
+    const deals = S.leads.filter((l) => l.stage === s.id);
+    const total = deals.reduce((a, l) => a + (Number(l.priceAED) || 0), 0);
+    return `<div class="col" data-stage="${s.id}"><div class="col-head"><b>${s.label}</b><span class="num">${deals.length}${total ? " · " + aed(total).replace("AED ", "") : ""}</span></div>
+      ${deals.map((l) => `<div class="deal" draggable="${S.writable}" data-lead="${esc(l.id)}"><b>${esc(leadTitle(l))}</b><div class="meta">${esc([l.eventType, l.eventDate && fmtDate(l.eventDate)].filter(Boolean).join(" · ") || "No event details")}</div><div class="foot"><span class="num">${l.priceAED ? aed(l.priceAED) : ""}</span>${temp(l)}</div></div>`).join("") || `<div class="empty" style="padding:8px 4px">Empty</div>`}
+    </div>`;
+  }).join("")}</div>`;
+}
+
+function filteredLeads() {
+  const q = S.q.trim().toLowerCase();
+  return S.leads.filter((l) => {
+    if (S.fStage === "open" && !isOpen(l)) return false;
+    if (S.fStage && S.fStage !== "open" && S.fStage !== "all" && l.stage !== S.fStage) return false;
+    if (S.fSource && l.source !== S.fSource) return false;
+    if (S.fSegment && l.segment !== S.fSegment) return false;
+    if (q && ![l.name, l.company, l.phone, l.email, l.eventType, l.venue, l.requirements].join(" ").toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+function viewLeads() {
+  const rows = filteredLeads();
+  const opt = (arr, cur, all) => `<option value="">${all}</option>` + arr.map((x) => `<option ${x === cur ? "selected" : ""}>${esc(x)}</option>`).join("");
+  return `<h1 class="view-title">Leads</h1><p class="sub">${rows.length} of ${S.leads.length} leads</p>
+  <div class="toolbar">
+    <input type="search" id="q" placeholder="Search name, company, phone, venue…" value="${esc(S.q)}" aria-label="Search leads">
+    <select id="fStage" aria-label="Stage"><option value="open" ${S.fStage === "open" ? "selected" : ""}>Open deals</option><option value="all" ${S.fStage === "all" ? "selected" : ""}>All stages</option>${STAGES.map((s) => `<option value="${s.id}" ${S.fStage === s.id ? "selected" : ""}>${s.label}</option>`).join("")}</select>
+    <select id="fSource" aria-label="Source">${opt(SOURCES, S.fSource, "All sources")}</select>
+    <select id="fSegment" aria-label="Segment">${opt(SEGMENTS, S.fSegment, "All segments")}</select>
+  </div>
+  <div class="table-wrap"><table><thead><tr><th>Lead</th><th>Stage</th><th>Event</th><th>Date</th><th>Emirate</th><th>Price</th><th>Next step</th><th>Source</th><th>Updated</th></tr></thead><tbody>
+  ${rows.map((l) => `<tr data-lead="${esc(l.id)}"><td><b>${esc(leadTitle(l))}</b> ${temp(l)}</td><td>${stagePill(l)}</td><td>${esc(l.eventType || "")}</td><td class="num">${l.eventDate ? fmtDate(l.eventDate) : ""}</td><td>${esc(l.emirate || "")}</td><td class="num">${l.priceAED ? aed(l.priceAED) : ""}</td><td>${esc(l.nextAction || "")}${l.nextActionDate ? ` <span class="pill ${l.nextActionDate < todayISO() ? "bad" : ""}">${fmtDate(l.nextActionDate)}</span>` : ""}</td><td>${esc(l.source || "")}</td><td>${ago(l.updatedAt)}</td></tr>`).join("") || `<tr><td colspan="9" class="empty">${S.ready ? "No leads match." : "Loading…"}</td></tr>`}
+  </tbody></table></div>`;
+}
+
+function viewProspects() {
+  const q = S.pq.trim().toLowerCase();
+  const rows = S.prospects.filter((p) => (!S.pStatus || p.status === S.pStatus) && (!q || [p.company, p.contactName, p.segment, p.emirate, p.email].join(" ").toLowerCase().includes(q)));
+  const counts = Object.fromEntries(PROSPECT_STATUSES.map((s) => [s.id, S.prospects.filter((p) => p.status === s.id).length]));
+  const auto = S.settings.autopilot;
+  return `<h1 class="view-title">Prospects</h1>
+  <p class="sub">Companies Claude or the team found that could need EchoLight. Outreach autopilot is <b>${auto.outreach ? "on" : "off"}</b>${auto.outreach ? (auto.outreachNeedsApproval ? ": Claude only contacts prospects you approve" : ": Claude contacts new prospects without approval") : ""}, max ${esc(auto.outreachDailyCap)} a day. Change it in Settings.</p>
+  <div class="toolbar">
+    <input type="search" id="pq" placeholder="Search company, contact, segment…" value="${esc(S.pq)}" aria-label="Search prospects">
+    <select id="pStatus" aria-label="Status"><option value="">All statuses</option>${PROSPECT_STATUSES.map((s) => `<option value="${s.id}" ${S.pStatus === s.id ? "selected" : ""}>${s.label} (${counts[s.id]})</option>`).join("")}</select>
+    <button class="btn" id="addProspect" type="button" ${S.writable && S.db ? "" : "disabled"}>+ Add prospect</button>
+  </div>
+  <div class="table-wrap"><table><thead><tr><th>Company</th><th>Segment</th><th>Contact</th><th>Why they fit</th><th>Status</th><th>Last touch</th><th></th></tr></thead><tbody>
+  ${rows.map((p) => `<tr data-prospect="${esc(p.id)}"><td><b>${esc(p.company || "")}</b><div style="color:var(--muted);font-size:12px">${esc(p.emirate || "")}${p.website ? " · " + esc(p.website) : ""}</div></td><td>${esc(p.segment || "")}</td><td>${esc(p.contactName || "")}${p.role ? `<div style="color:var(--muted);font-size:12px">${esc(p.role)}</div>` : ""}</td><td class="wrap">${esc(p.whyFit || "")}</td><td><span class="pill ${p.status === "replied" || p.status === "converted" ? "good" : p.status === "do_not_contact" || p.status === "not_interested" ? "bad" : p.status === "found" ? "accent" : ""}">${esc(PROSPECT_STATUSES.find((s) => s.id === p.status)?.label || p.status)}</span>${p.addedBy === "claude" ? ` <span class="pill claude">Claude</span>` : ""}</td><td>${p.lastOutreachAt ? ago(p.lastOutreachAt) : "—"}${p.touches ? ` · ${p.touches}×` : ""}</td>
+  <td><div class="actions">${p.status === "found" ? `<button class="btn small" data-papprove="${esc(p.id)}" type="button">Approve</button>` : ""}${!["converted", "do_not_contact"].includes(p.status) ? `<button class="btn small" data-pconvert="${esc(p.id)}" type="button">Make lead</button><button class="btn small ghost danger" data-pdnc="${esc(p.id)}" type="button">Do not contact</button>` : ""}</div></td></tr>`).join("") || `<tr><td colspan="7" class="empty">${S.ready ? "No prospects yet. Ask Claude to find prospects (see the playbook), or add one yourself." : "Loading…"}</td></tr>`}
+  </tbody></table></div>`;
+}
+
+function viewShows() {
+  const shows = S.leads.filter((l) => ["booked", "confirmed", "completed"].includes(l.stage) && l.eventDate && daysUntil(l.eventDate) >= -30).sort((a, b) => a.eventDate.localeCompare(b.eventDate));
+  const groups = {};
+  shows.forEach((l) => { const k = l.eventDate.slice(0, 7); (groups[k] ||= []).push(l); });
+  const monthName = (k) => new Date(k + "-15T12:00:00").toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+  return `<h1 class="view-title">Shows</h1><p class="sub">Booked, confirmed and recent events, with payment status. Balance is due on the event date, before the show starts.</p>
+  ${Object.keys(groups).map((k) => `<div class="month-group"><h2>${monthName(k)}</h2><div class="card"><div class="list">${groups[k].map((l) => {
+    const d = new Date(l.eventDate + "T12:00:00");
+    return `<div class="row" data-lead="${esc(l.id)}"><div class="show-date">${d.getDate()}<small>${d.toLocaleDateString("en-GB", { weekday: "short" })}</small></div><div class="row-main"><b>${esc(leadTitle(l))}</b><span>${esc([l.eventType, l.venue, l.emirate, l.guests && l.guests + " guests"].filter(Boolean).join(" · "))}</span><span>${esc((l.services || []).join(", "))}</span></div><div class="row-side"><div class="num">${l.priceAED ? aed(l.priceAED) : ""}</div><div>${paymentPills(l)}</div></div></div>`;
+  }).join("")}</div></div></div>`).join("") || `<div class="card empty">${S.ready ? "No booked shows yet. Deals appear here once they reach Booked." : "Loading…"}</div>`}`;
+}
+
+function viewReports() {
+  const leads = S.leads;
+  const funnel = ["new", "qualifying", "awaiting_price", "quoted", "negotiating", "booked", "confirmed", "completed"];
+  const reached = (l, st) => { const i = STAGE[st].i; if (l.stage !== "lost") return STAGE[l.stage].i >= i; return Object.keys(l.stageHistory || {}).some((s) => s !== "lost" && STAGE[s]?.i >= i); };
+  const fCounts = funnel.map((st) => ({ st, n: leads.filter((l) => reached(l, st)).length }));
+  const maxF = Math.max(1, ...fCounts.map((x) => x.n));
+  const won = leads.filter(isWon), lost = leads.filter((l) => l.stage === "lost");
+  const winRate = won.length + lost.length ? Math.round(100 * won.length / (won.length + lost.length)) : null;
+  const group = (key, list) => { const m = {}; list.forEach((l) => { const k = l[key] || "Unknown"; m[k] ||= { n: 0, won: 0, value: 0 }; m[k].n++; if (isWon(l)) { m[k].won++; m[k].value += Number(l.priceAED) || 0; } }); return Object.entries(m).sort((a, b) => b[1].n - a[1].n); };
+  const src = group("source", leads), seg = group("segment", leads);
+  const lostR = {}; lost.forEach((l) => { const k = l.lostReason || "Not recorded"; lostR[k] = (lostR[k] || 0) + 1; });
+  const months = {}; won.forEach((l) => { if (!l.eventDate) return; const k = l.eventDate.slice(0, 7); months[k] = (months[k] || 0) + (Number(l.priceAED) || 0); });
+  const mKeys = Object.keys(months).sort().slice(-12); const maxM = Math.max(1, ...mKeys.map((k) => months[k]));
+  const bars = (rows, max, cls = "") => rows.map(([label, val, right]) => `<div class="bar"><span>${esc(label)}</span><div class="track"><div class="fill ${cls}" style="width:${Math.max(2, 100 * val / max)}%"></div></div><span class="num">${right}</span></div>`).join("");
+  const avgDeal = won.length ? won.reduce((s, l) => s + (Number(l.priceAED) || 0), 0) / won.length : 0;
+  const quoted = leads.filter((l) => l.quoteSentAt && l.priceRequestedAt);
+  const avgPriceHrs = quoted.length ? Math.round(quoted.reduce((s, l) => s + (l.quoteSentAt - l.priceRequestedAt), 0) / quoted.length / 3600000) : null;
+  return `<h1 class="view-title">Reports</h1><p class="sub">All time, AED excl. VAT.</p>
+  <div class="kpis">
+    <div class="kpi"><div class="label">Leads</div><div class="value num">${leads.length}</div></div>
+    <div class="kpi"><div class="label">Win rate</div><div class="value num">${winRate === null ? "—" : winRate + "%"}</div><div class="hint">Won ÷ (won + lost)</div></div>
+    <div class="kpi"><div class="label">Average deal</div><div class="value num">${avgDeal ? aed(avgDeal).replace("AED ", "") : "—"}</div></div>
+    <div class="kpi"><div class="label">Time to price</div><div class="value num">${avgPriceHrs === null ? "—" : avgPriceHrs + "h"}</div><div class="hint">Request to quote sent</div></div>
+  </div>
+  <div class="grid2">
+    <section class="card"><h2>Sales funnel</h2><div class="bars">${bars(fCounts.map((x) => [STAGE[x.st].label, x.n, x.n]), maxF)}</div></section>
+    <section class="card"><h2>Won revenue by event month</h2><div class="bars">${mKeys.length ? bars(mKeys.map((k) => [new Date(k + "-15T12:00:00").toLocaleDateString("en-GB", { month: "short", year: "2-digit" }), months[k], aed(months[k]).replace("AED ", "")]), maxM) : `<div class="empty">No won deals with event dates yet.</div>`}</div></section>
+    <section class="card"><h2>Leads by source</h2><div class="bars">${src.length ? bars(src.map(([k, v]) => [k, v.n, `${v.n} · ${v.won} won`]), Math.max(...src.map(([, v]) => v.n)), "cool") : `<div class="empty">No leads yet.</div>`}</div></section>
+    <section class="card"><h2>Leads by segment</h2><div class="bars">${seg.length ? bars(seg.map(([k, v]) => [k, v.n, `${v.n} · ${v.won} won`]), Math.max(...seg.map(([, v]) => v.n)), "cool") : `<div class="empty">No leads yet.</div>`}</div></section>
+    <section class="card"><h2>Why deals were lost</h2><div class="bars">${Object.keys(lostR).length ? bars(Object.entries(lostR).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, v, v]), Math.max(...Object.values(lostR))) : `<div class="empty">No lost deals recorded.</div>`}</div></section>
+  </div>`;
+}
+
+function viewMessages() {
+  return `<h1 class="view-title">Messages</h1><p class="sub">Ready-to-send messages for every stage. Claude uses these too. Placeholders: {name}, {company}, {event}, {date}, {price}, {venue}.</p>
+  <div class="toolbar"><button class="btn" id="addTemplate" type="button" ${S.writable && S.db ? "" : "disabled"}>+ New message</button></div>
+  <div class="grid2">${S.templates.map((t) => `<section class="card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><h2 style="margin:0">${esc(t.name)}</h2><div style="display:flex;gap:6px;margin:6px 0 10px"><span class="pill">${esc(t.channel || "")}</span><span class="pill">${t.language === "ar" ? "العربية" : "English"}</span>${t.stage ? `<span class="pill">${esc(STAGE[t.stage]?.label || t.stage)}</span>` : ""}</div></div><button class="btn small" data-tedit="${esc(t.id)}" type="button" ${S.writable ? "" : "disabled"}>Edit</button></div>${t.subject ? `<div class="lbl">Subject: ${esc(t.subject)}</div>` : ""}<div class="copybox" dir="auto">${esc(t.body)}</div></section>`).join("") || `<div class="card empty">${S.ready ? "No messages yet." : "Loading…"}</div>`}</div>`;
+}
+
+function viewSettings() {
+  const a = S.settings.autopilot;
+  const ed = S.canEdit ? "" : "disabled";
+  const sw = (k, label, hint) => `<label class="switch"><span><b>${label}</b><div style="color:var(--muted);font-size:13px">${hint}</div></span><input type="checkbox" data-auto="${k}" ${a[k] ? "checked" : ""} ${ed}></label>`;
+  return `<h1 class="view-title">Settings</h1><p class="sub">These switches tell Claude what it may do on its own. Claude reads them before every run.${S.canEdit ? "" : " Only the owner and editors can change them."}</p>
+  <div class="grid2">
+  <section class="card"><h2>Claude autopilot</h2>
+    ${sw("inboundReplies", "Reply to incoming enquiries", "Claude answers people who message EchoLight, qualifies them and logs everything here.")}
+    ${sw("followUps", "Send follow-ups", "Claude follows up leads whose next step is due, using the Messages library.")}
+    ${sw("outreach", "Outbound prospecting", "Claude finds companies that could need EchoLight and emails them.")}
+    ${sw("outreachNeedsApproval", "Approve prospects before outreach", "Claude only contacts prospects marked Approved.")}
+    <div class="switch"><span><b>Daily outreach limit</b><div style="color:var(--muted);font-size:13px">Most new prospects Claude may contact per day.</div></span><input type="number" min="0" max="100" id="cap" value="${esc(a.outreachDailyCap)}" style="width:90px" ${ed}></div>
+  </section>
+  <section class="card"><h2>Target segments for prospecting</h2><div class="checks">${SEGMENTS.map((s) => `<label><input type="checkbox" data-seg="${esc(s)}" ${(S.settings.targetSegments || []).includes(s) ? "checked" : ""} ${ed}>${esc(s)}</label>`).join("")}</div>
+    <h2 style="margin-top:18px">Instructions for Claude</h2><textarea id="setNotes" rows="5" placeholder="e.g. Focus on hotels in Abu Dhabi this month. Don't contact X." ${ed}>${esc(S.settings.notes || "")}</textarea>
+    <div style="margin-top:8px"><button class="btn primary" id="saveNotes" type="button" ${ed}>Save instructions</button></div>
+  </section>
+  <section class="card"><h2>House rules (fixed)</h2><ul style="margin:0;padding-inline-start:18px;display:flex;flex-direction:column;gap:6px">
+    <li>Only the team sets prices. Claude asks, waits, then passes the price on word for word.</li>
+    <li>Prices are excl. VAT; 5% VAT is added on top.</li>
+    <li>50% deposit to confirm; 50% on the event date before the show starts.</li>
+    <li>Payment only to the company account on the quotation or invoice.</li>
+    <li>Anywhere in the UAE; no events abroad. No generators.</li>
+    <li>Leads marked "do not contact" are never messaged again.</li>
+  </ul></section>
+  </div>`;
+}
+
+// ---------- View events ----------
+document.addEventListener("click", async (e) => {
+  const go = e.target.closest("[data-go]"); if (go) { e.preventDefault(); S.view = go.dataset.go; render(); return; }
+  const leadEl = e.target.closest("[data-lead]");
+  if (leadEl && !e.target.closest("button") && $("#view").contains(leadEl)) { openDrawer(leadEl.dataset.lead); return; }
+  const pa = e.target.closest("[data-papprove]"); if (pa) { const p = S.prospects.find((x) => x.id === pa.dataset.papprove); await write(() => S.db.doc("prospects/" + p.id).update({ status: "approved", updatedAt: Date.now() })); toast("Approved for outreach"); return; }
+  const pd = e.target.closest("[data-pdnc]"); if (pd) { await write(() => S.db.doc("prospects/" + pd.dataset.pdnc).update({ status: "do_not_contact", updatedAt: Date.now() })); toast("Marked do not contact"); return; }
+  const pc = e.target.closest("[data-pconvert]"); if (pc) { convertProspect(pc.dataset.pconvert); return; }
+  const pr = e.target.closest("tr[data-prospect]"); if (pr) { openProspectModal(S.prospects.find((p) => p.id === pr.dataset.prospect)); return; }
+  if (e.target.closest("#addProspect")) { openProspectModal(null); return; }
+  if (e.target.closest("#addTemplate")) { openTemplateModal(null); return; }
+  const te = e.target.closest("[data-tedit]"); if (te) { openTemplateModal(S.templates.find((t) => t.id === te.dataset.tedit)); return; }
+  if (e.target.closest("#saveNotes")) { if (await saveSettings({ notes: $("#setNotes").value })) toast("Instructions saved"); return; }
+});
+document.addEventListener("input", (e) => {
+  if (e.target.id === "q") { S.q = e.target.value; const pos = e.target.selectionStart; render(); const q = $("#q"); q.focus(); q.setSelectionRange(pos, pos); }
+  if (e.target.id === "pq") { S.pq = e.target.value; const pos = e.target.selectionStart; render(); const q = $("#pq"); q.focus(); q.setSelectionRange(pos, pos); }
+});
+document.addEventListener("change", async (e) => {
+  const id = e.target.id;
+  if (id === "fStage") { S.fStage = e.target.value; render(); }
+  if (id === "fSource") { S.fSource = e.target.value; render(); }
+  if (id === "fSegment") { S.fSegment = e.target.value; render(); }
+  if (id === "pStatus") { S.pStatus = e.target.value; render(); }
+  if (e.target.dataset.auto) { if (await saveSettings({ autopilot: { ...S.settings.autopilot, [e.target.dataset.auto]: e.target.checked } })) toast("Saved"); }
+  if (id === "cap") { if (await saveSettings({ autopilot: { ...S.settings.autopilot, outreachDailyCap: Math.max(0, Math.min(100, Number(e.target.value) || 0)) } })) toast("Saved"); }
+  if (e.target.dataset.seg) { const set = new Set(S.settings.targetSegments || []); e.target.checked ? set.add(e.target.dataset.seg) : set.delete(e.target.dataset.seg); await saveSettings({ targetSegments: [...set] }); }
+});
+async function saveSettings(patch) {
+  if (!S.db) return false;
+  const next = { ...S.settings, ...patch, updatedAt: Date.now() };
+  try { await S.db.doc("config/settings").set(next); return true; }
+  catch (e) { console.error(e); toast(e?.code === "invalid_argument" ? "Only the owner and editors can change settings." : "Couldn't save settings. Try again."); render(); return false; }
+}
+
+// Drag and drop on the board
+let dragId = null;
+document.addEventListener("dragstart", (e) => { const d = e.target.closest?.(".deal"); if (d) { dragId = d.dataset.lead; e.dataTransfer.effectAllowed = "move"; } });
+document.addEventListener("dragover", (e) => { const c = e.target.closest?.(".col"); if (c && dragId) { e.preventDefault(); c.classList.add("drop"); } });
+document.addEventListener("dragleave", (e) => { const c = e.target.closest?.(".col"); if (c) c.classList.remove("drop"); });
+document.addEventListener("drop", async (e) => {
+  const c = e.target.closest?.(".col"); if (!c || !dragId) return; e.preventDefault(); c.classList.remove("drop");
+  const lead = S.leads.find((l) => l.id === dragId); const stage = c.dataset.stage; dragId = null;
+  if (lead) requestStage(lead, stage);
+});
+
+// Stage changes that need extra input
+function requestStage(lead, stage) {
+  if (lead.stage === stage) return;
+  if (stage === "quoted") return openPriceModal(lead);
+  if (stage === "lost") return openLostModal(lead);
+  setStage(lead, stage);
+}
+
+// ---------- Drawer ----------
+function openDrawer(id) {
+  S.openLead = id; S.activities = [];
+  if (S.actUnsub) S.actUnsub();
+  S.actUnsub = S.db ? S.db.collection("activities").where("leadId", "==", id).orderBy("at", "desc").limit(200).onSnapshot((snap) => {
+    S.activities = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    resolveProfiles(S.activities.map((a) => a.by)).then(renderTimeline);
+    renderTimeline();
+  }, (e) => console.error(e)) : null;
+  drawDrawer();
+}
+function closeDrawer() { S.openLead = null; if (S.actUnsub) S.actUnsub(); S.actUnsub = null; $("#drawerRoot").innerHTML = ""; }
+const lead = () => S.leads.find((l) => l.id === S.openLead);
+
+const FIELD_GROUPS = [
+  { title: "Contact", fields: [
+    { k: "name", label: "Contact name" }, { k: "company", label: "Company" }, { k: "phone", label: "Phone / WhatsApp", type: "tel" },
+    { k: "email", label: "Email", type: "email" }, { k: "decisionMaker", label: "Decision maker" },
+    { k: "language", label: "Language", type: "select", options: [["", "—"], ["en", "English"], ["ar", "Arabic"]] },
+    { k: "source", label: "Source", type: "select", options: SOURCES }, { k: "segment", label: "Segment", type: "select", options: SEGMENTS },
+  ]},
+  { title: "Event", fields: [
+    { k: "eventType", label: "Event type" }, { k: "eventDate", label: "Event date", type: "date" }, { k: "venue", label: "Venue" },
+    { k: "emirate", label: "Emirate", type: "select", options: EMIRATES }, { k: "guests", label: "Guests", type: "number" },
+    { k: "setting", label: "Indoor / outdoor", type: "select", options: [["", "—"], ["indoor", "Indoor"], ["outdoor", "Outdoor"], ["both", "Both"]] },
+    { k: "budgetAED", label: "Customer budget (AED)", type: "number" },
+    { k: "priority", label: "Temperature", type: "select", options: [["hot", "Hot"], ["warm", "Warm"], ["cold", "Cold"]] },
+    { k: "services", label: "Services wanted", type: "checks", options: SERVICES, full: true },
+    { k: "requirements", label: "Requirements and notes", type: "textarea", full: true },
+  ]},
+];
+function fieldHTML(f, l) {
+  const v = l[f.k];
+  const dis = S.writable ? "" : "disabled";
+  const id = "f-" + f.k;
+  if (f.type === "select") {
+    const opts = f.options.map((o) => Array.isArray(o) ? o : [o, o]);
+    if (!opts.some(([val]) => val === "")) opts.unshift(["", "—"]);
+    return `<div class="field"><label for="${id}">${f.label}</label><select id="${id}" data-k="${f.k}" ${dis}>${opts.map(([val, lab]) => `<option value="${esc(val)}" ${String(v ?? "") === val ? "selected" : ""}>${esc(lab)}</option>`).join("")}</select></div>`;
+  }
+  if (f.type === "checks") return `<div class="field full"><span class="lbl">${f.label}</span><div class="checks" data-k="${f.k}">${f.options.map((o) => `<label><input type="checkbox" value="${esc(o)}" ${(v || []).includes(o) ? "checked" : ""} ${dis}>${esc(o)}</label>`).join("")}</div></div>`;
+  if (f.type === "textarea") return `<div class="field full"><label for="${id}">${f.label}</label><textarea id="${id}" data-k="${f.k}" dir="auto" rows="4" ${dis}>${esc(v || "")}</textarea></div>`;
+  return `<div class="field ${f.full ? "full" : ""}"><label for="${id}">${f.label}</label><input id="${id}" data-k="${f.k}" type="${f.type || "text"}" dir="auto" value="${esc(v ?? "")}" ${dis}></div>`;
+}
+
+function drawDrawer() {
+  const l = lead(); if (!l) { closeDrawer(); return; }
+  const dis = S.writable ? "" : "disabled";
+  const cur = STAGE[l.stage]?.i ?? 0;
+  const vatTotal = l.priceAED ? Number(l.priceAED) * (1 + VAT) : null;
+  $("#drawerRoot").innerHTML = `<div class="scrim" data-close></div>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-label="Lead details">
+    <div class="drawer-head"><div style="flex:1;min-width:0"><div id="dHeadMeta"></div><h3 id="dTitle">${esc(leadTitle(l))}</h3></div><button class="btn ghost" data-close type="button" aria-label="Close">✕</button></div>
+    <div class="drawer-body">
+      <section class="section"><span class="lbl">Stage</span><div class="stage-track" id="dStages">${STAGES.map((s) => `<button type="button" data-stage="${s.id}" class="${s.id === l.stage ? "current" : (l.stage !== "lost" && s.i < cur && s.id !== "lost") ? "done" : ""}" ${dis}>${s.label}</button>`).join("")}</div></section>
+      <section class="section"><span class="lbl">Next step</span><div class="fields"><div class="field"><input id="f-nextAction" data-k="nextAction" value="${esc(l.nextAction || "")}" placeholder="e.g. Send quote, call back" ${dis}></div><div class="field"><input id="f-nextActionDate" data-k="nextActionDate" type="date" value="${esc(l.nextActionDate || "")}" aria-label="Next step date" ${dis}></div></div>
+        <div class="actions"><button class="btn small" data-snooze="1" type="button" ${dis}>Tomorrow</button><button class="btn small" data-snooze="3" type="button" ${dis}>In 3 days</button><button class="btn small" data-snooze="7" type="button" ${dis}>Next week</button><button class="btn small" id="assignMe" type="button" ${dis}>Assign to me</button></div></section>
+      <section class="section"><span class="lbl">Price and payment (AED, excl. VAT)</span><div class="money" id="dMoney"></div>
+        <div class="actions" id="dMoneyActions"></div></section>
+      <section class="section"><span class="lbl">Message this lead</span>
+        <div class="fields"><div class="field"><select id="tplPick" aria-label="Message">${S.templates.map((t) => `<option value="${esc(t.id)}">${esc(t.name)} · ${t.language === "ar" ? "AR" : "EN"} · ${esc(t.channel)}</option>`).join("")}</select></div></div>
+        <div class="copybox" id="tplPreview" dir="auto"></div>
+        <div class="actions"><button class="btn small" id="tplCopy" type="button">Copy</button><a class="btn small" id="tplWa" target="_blank" rel="noopener">Open WhatsApp</a><button class="btn small" id="tplLog" type="button" ${dis}>Log as sent</button></div>
+        <div style="color:var(--muted);font-size:12px">Phone: <span class="num">${esc(l.phone || "—")}</span> · Email: ${esc(l.email || "—")}</div></section>
+      ${FIELD_GROUPS.map((g) => `<section class="section"><span class="lbl">${g.title}</span><div class="fields">${g.fields.map((f) => fieldHTML(f, l)).join("")}</div></section>`).join("")}
+      <section class="section"><span class="lbl">Consent</span><div class="checks"><label><input type="checkbox" data-k="marketingOptIn" ${l.marketingOptIn ? "checked" : ""} ${dis}>Agreed to offers and updates</label><label><input type="checkbox" data-k="doNotContact" ${l.doNotContact ? "checked" : ""} ${dis}>Do not contact</label></div></section>
+      <section class="section"><span class="lbl">Activity</span>
+        <div class="fields"><div class="field full"><textarea id="noteText" rows="2" dir="auto" placeholder="Add a note, call summary or what the customer said…" ${dis}></textarea></div></div>
+        <div class="actions"><select id="noteType" style="width:auto" ${dis}><option value="note">Note</option><option value="call">Call</option><option value="whatsapp">WhatsApp</option><option value="email">Email</option><option value="meeting">Meeting</option><option value="site_visit">Site visit</option></select><button class="btn primary small" id="addNote" type="button" ${dis}>Add to timeline</button></div>
+        <div class="timeline" id="dTimeline"></div></section>
+      <section class="section"><div class="actions"><button class="btn small ghost danger" id="delLead" type="button" ${dis}>Delete lead</button></div></section>
+    </div>
+  </aside>`;
+  refreshDrawer(true);
+}
+function refreshDrawer(initial) {
+  const l = lead(); if (!S.openLead) return; if (!l) { if (S.ready) closeDrawer(); return; }
+  if (!$("#dTitle")) return;
+  $("#dTitle").textContent = leadTitle(l);
+  $("#dHeadMeta").innerHTML = `${stagePill(l)} ${temp(l)} <span style="color:var(--muted);font-size:12px">Added ${ago(l.createdAt)}${l.assignedTo ? " · " + esc(S.profiles[l.assignedTo]?.name || "Assigned") : ""}</span>`;
+  const cur = STAGE[l.stage]?.i ?? 0;
+  document.querySelectorAll("#dStages button").forEach((b) => { const s = STAGE[b.dataset.stage]; b.className = s.id === l.stage ? "current" : (l.stage !== "lost" && s.i < cur && s.id !== "lost") ? "done" : ""; });
+  // Sync inputs that aren't being edited
+  document.querySelectorAll(".drawer [data-k]").forEach((el) => {
+    if (el.contains(document.activeElement) && !initial) return;
+    const k = el.dataset.k, v = l[k];
+    if (el.classList.contains("checks")) el.querySelectorAll("input").forEach((c) => { c.checked = (v || []).includes(c.value); });
+    else if (el.type === "checkbox") el.checked = !!v;
+    else el.value = v ?? "";
+  });
+  const price = l.priceAED ? Number(l.priceAED) : null;
+  $("#dMoney").innerHTML = `<div><span class="lbl">Price</span><b>${price ? aed(price) : "Not priced"}</b></div><div><span class="lbl">Incl. 5% VAT</span><b>${price ? aed(price * (1 + VAT)) : "—"}</b></div><div><span class="lbl">Deposit 50%</span><b>${price ? aed(price * (1 + VAT) / 2) : "—"}</b><span class="pill ${l.depositStatus === "received" ? "good" : ""}">${l.depositStatus === "received" ? "Received" : l.depositStatus === "requested" ? "Requested" : "Not due"}</span></div><div><span class="lbl">Balance 50%</span><b>${price ? aed(price * (1 + VAT) / 2) : "—"}</b><span class="pill ${l.balanceStatus === "received" ? "good" : ""}">${l.balanceStatus === "received" ? "Received" : l.balanceStatus === "due_on_event" ? "Due on event day" : "Not due"}</span></div>${l.quoteDetails ? `<div style="grid-column:1/-1"><span class="lbl">Quote as sent</span><p style="margin:4px 0 0;white-space:pre-wrap" dir="auto">${esc(l.quoteDetails)}</p></div>` : ""}`;
+  const dis = S.writable ? "" : "disabled";
+  $("#dMoneyActions").innerHTML = `<button class="btn small primary" id="setPrice" type="button" ${dis}>${price ? "Change price" : "Enter price"}</button>${l.stage !== "awaiting_price" && !price ? `<button class="btn small" id="needPrice" type="button" ${dis}>Ask team for price</button>` : ""}${l.depositStatus !== "received" && price ? `<button class="btn small" id="depPaid" type="button" ${dis}>Deposit received</button>` : ""}${l.depositStatus === "received" && l.balanceStatus !== "received" ? `<button class="btn small" id="balPaid" type="button" ${dis}>Balance received</button>` : ""}${l.stage !== "lost" ? `<button class="btn small ghost danger" id="markLost" type="button" ${dis}>Mark lost</button>` : ""}`;
+  updateTemplatePreview();
+  renderTimeline();
+}
+function fillTemplate(text, l) {
+  return String(text || "").replace(/\{name\}/g, (l.name || "").split(" ")[0] || "").replace(/\{company\}/g, l.company || "your company").replace(/\{event\}/g, l.eventType || "event").replace(/\{date\}/g, l.eventDate ? fmtDate(l.eventDate) : "").replace(/\{venue\}/g, l.venue || "").replace(/\{price\}/g, l.quoteDetails || (l.priceAED ? aed(l.priceAED) + " + 5% VAT" : ""));
+}
+function updateTemplatePreview() {
+  const l = lead(); const pick = $("#tplPick"); if (!l || !pick) return;
+  const t = S.templates.find((x) => x.id === pick.value) || S.templates[0];
+  const body = t ? fillTemplate(t.body, l) : "Add messages in the Messages tab.";
+  $("#tplPreview").textContent = body;
+  const wa = $("#tplWa"); const ph = digits(l.phone);
+  if (ph && t) { wa.href = `https://wa.me/${ph}?text=${encodeURIComponent(body)}`; wa.removeAttribute("aria-disabled"); wa.style.opacity = ""; }
+  else { wa.removeAttribute("href"); wa.setAttribute("aria-disabled", "true"); wa.style.opacity = ".5"; }
+}
+function renderTimeline() {
+  const el = $("#dTimeline"); if (!el) return;
+  const l = lead();
+  el.innerHTML = S.activities.map((a) => `<div class="act"><div class="when"><span class="pill">${esc(a.type)}</span>${byLabel(a.by)}<span>${new Date(a.at).toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}</span></div><p dir="auto">${esc(a.text)}</p></div>`).join("") || `<div class="empty">No activity yet.${l ? " Notes, calls, messages and stage changes appear here." : ""}</div>`;
+}
+
+$("#drawerRoot").addEventListener("click", async (e) => {
+  const l = lead(); if (!l) return;
+  if (e.target.closest("[data-close]")) { closeDrawer(); return; }
+  const st = e.target.closest("[data-stage]"); if (st) { requestStage(l, st.dataset.stage); return; }
+  const sn = e.target.closest("[data-snooze]"); if (sn) { await updateLead(l.id, { nextActionDate: addDays(todayISO(), Number(sn.dataset.snooze)) }); return; }
+  if (e.target.closest("#assignMe")) { if (S.me?.id) await updateLead(l.id, { assignedTo: S.me.id }); return; }
+  if (e.target.closest("#setPrice")) { openPriceModal(l); return; }
+  if (e.target.closest("#needPrice")) { setStage(l, "awaiting_price"); return; }
+  if (e.target.closest("#depPaid")) { setStage(l, "confirmed", {}, "50% deposit received"); return; }
+  if (e.target.closest("#balPaid")) {
+    const patch = { balanceStatus: "received", balanceReceivedAt: Date.now() };
+    if (l.eventDate && l.eventDate <= todayISO()) await setStage(l, "completed", patch, "Balance received");
+    else await updateLead(l.id, patch, { type: "payment", text: "50% balance received" });
+    return;
+  }
+  if (e.target.closest("#markLost")) { openLostModal(l); return; }
+  if (e.target.closest("#addNote")) {
+    const text = $("#noteText").value.trim(); if (!text) return;
+    const type = $("#noteType").value;
+    const ok = await write(async () => {
+      await addActivity(l.id, type, text);
+      const patch = { updatedAt: Date.now() };
+      if (type !== "note") patch.lastContactAt = Date.now();
+      await S.db.doc("leads/" + l.id).update(patch);
+    });
+    if (ok) $("#noteText").value = "";
+    return;
+  }
+  if (e.target.closest("#tplCopy")) {
+    const text = $("#tplPreview").textContent;
+    try { await navigator.clipboard.writeText(text); toast("Copied"); } catch (err) { const r = document.createRange(); r.selectNodeContents($("#tplPreview")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast("Selected. Press Ctrl+C to copy."); }
+    return;
+  }
+  if (e.target.closest("#tplLog")) {
+    const t = S.templates.find((x) => x.id === $("#tplPick").value);
+    await write(async () => {
+      await addActivity(l.id, t?.channel === "email" ? "email" : "whatsapp", `Sent "${t?.name || "message"}":\n${$("#tplPreview").textContent}`);
+      await S.db.doc("leads/" + l.id).update({ lastContactAt: Date.now(), updatedAt: Date.now() });
+    });
+    toast("Logged");
+    return;
+  }
+  if (e.target.closest("#delLead")) { openConfirm("Delete this lead?", "The lead is removed for everyone. Its timeline stays in storage but won't be shown.", "Delete", async () => { await write(() => S.db.doc("leads/" + l.id).delete()); closeDrawer(); toast("Lead deleted"); }); return; }
+});
+$("#drawerRoot").addEventListener("change", async (e) => {
+  const l = lead(); if (!l) return;
+  if (e.target.id === "tplPick") { updateTemplatePreview(); return; }
+  if (e.target.id === "noteType") return;
+  const host = e.target.closest("[data-k]"); if (!host) return;
+  const k = host.dataset.k;
+  let v;
+  if (host.classList.contains("checks")) v = [...host.querySelectorAll("input:checked")].map((c) => c.value);
+  else if (host.type === "checkbox") v = host.checked;
+  else if (host.type === "number") v = host.value === "" ? null : Number(host.value);
+  else v = host.value.trim();
+  if (JSON.stringify(v) === JSON.stringify(l[k] ?? (Array.isArray(v) ? [] : v === null ? null : ""))) return;
+  const patch = { [k]: v };
+  if (k === "doNotContact" && v) { patch.nextAction = "Do not contact"; patch.nextActionDate = ""; }
+  await updateLead(l.id, patch);
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") { if ($("#modalRoot").innerHTML) closeModal(); else if (S.openLead) closeDrawer(); } });
+
+// ---------- Modals ----------
+function openModal(html, onSubmit) {
+  $("#modalRoot").innerHTML = `<div class="modal" data-mclose><form class="modal-card" id="mForm">${html}</form></div>`;
+  const form = $("#mForm");
+  form.addEventListener("submit", async (e) => { e.preventDefault(); const btn = form.querySelector("button[type=submit]"); if (btn) btn.disabled = true; const ok = await onSubmit(new FormData(form)); if (ok !== false) closeModal(); else if (btn) btn.disabled = false; });
+  form.querySelector("input, select, textarea")?.focus();
+}
+function closeModal() { $("#modalRoot").innerHTML = ""; }
+$("#modalRoot").addEventListener("click", (e) => { if (e.target.matches("[data-mclose]") || e.target.closest("[data-cancel]")) closeModal(); });
+function openConfirm(title, body, label, fn) {
+  openModal(`<h3>${esc(title)}</h3><p>${esc(body)}</p><div class="actions"><button class="btn primary" type="submit">${esc(label)}</button><button class="btn" type="button" data-cancel>Cancel</button></div>`, async () => { await fn(); });
+}
+
+function openLeadModal() {
+  if (!S.db || !S.writable) return;
+  const opt = (arr) => `<option value="">—</option>` + arr.map((x) => `<option>${esc(x)}</option>`).join("");
+  openModal(`<h3>New lead</h3>
+    <div class="fields">
+      <div class="field"><label for="m-name">Contact name</label><input id="m-name" name="name" dir="auto" required></div>
+      <div class="field"><label for="m-company">Company</label><input id="m-company" name="company" dir="auto"></div>
+      <div class="field"><label for="m-phone">Phone / WhatsApp</label><input id="m-phone" name="phone" type="tel" placeholder="+971 5…"></div>
+      <div class="field"><label for="m-email">Email</label><input id="m-email" name="email" type="email"></div>
+      <div class="field"><label for="m-source">Source</label><select id="m-source" name="source">${opt(SOURCES)}</select></div>
+      <div class="field"><label for="m-segment">Segment</label><select id="m-segment" name="segment">${opt(SEGMENTS)}</select></div>
+      <div class="field"><label for="m-eventType">Event type</label><input id="m-eventType" name="eventType" dir="auto" placeholder="Wedding, gala dinner, car launch…"></div>
+      <div class="field"><label for="m-eventDate">Event date</label><input id="m-eventDate" name="eventDate" type="date"></div>
+      <div class="field full"><label for="m-req">What do they need?</label><textarea id="m-req" name="requirements" dir="auto" rows="3"></textarea></div>
+    </div>
+    <div class="actions"><button class="btn primary" type="submit">Add lead</button><button class="btn" type="button" data-cancel>Cancel</button></div>`,
+  async (fd) => {
+    const f = Object.fromEntries(fd.entries());
+    const ref = S.db.collection("leads").doc();
+    const ok = await write(async () => { await ref.set(newLeadDoc(f)); await addActivity(ref.id, "note", "Lead created"); });
+    if (ok) { toast("Lead added"); openDrawer(ref.id); }
+    return ok;
+  });
+}
+
+function openPriceModal(l) {
+  openModal(`<h3>Price for ${esc(l.name || "this lead")}</h3>
+    <p style="margin:0;color:var(--muted)">Enter the price excl. VAT and the exact wording to send. Claude passes the wording to the customer as written.</p>
+    <div class="field"><label for="m-price">Price (AED, excl. VAT)</label><input id="m-price" name="price" type="number" min="0" step="1" value="${esc(l.priceAED ?? "")}" required></div>
+    <div class="field"><label for="m-details">What the customer will read</label><textarea id="m-details" name="details" rows="4" dir="auto" placeholder="AED 28,000 + 5% VAT: lighting, 6x3m LED wall, sound, stage, setup and 2 technicians">${esc(l.quoteDetails || "")}</textarea></div>
+    <div class="checks"><label><input type="checkbox" name="sent" ${l.stage === "awaiting_price" ? "" : "checked"}>I've already sent this price to the customer myself</label></div>
+    <p style="margin:0;color:var(--muted);font-size:13px">Leave it unticked and Claude sends the price to the customer on its next run, then moves the deal to Quote sent.</p>
+    <div class="actions"><button class="btn primary" type="submit">Save price</button><button class="btn" type="button" data-cancel>Cancel</button></div>`,
+  async (fd) => {
+    const price = Number(fd.get("price"));
+    const details = String(fd.get("details") || "").trim() || `${aed(price)} + 5% VAT`;
+    const patch = { priceAED: price, quoteDetails: details };
+    if (!fd.get("sent") && l.stage === "awaiting_price") { patch.nextAction = "Claude: send this price to the customer"; patch.nextActionDate = todayISO(); }
+    if (fd.get("sent")) {
+      patch.quoteSentAt = Date.now(); patch.nextAction = "Follow up on quote"; patch.nextActionDate = addDays(todayISO(), 1);
+      if (["new", "qualifying", "awaiting_price"].includes(l.stage)) { await setStage(l, "quoted", patch, `Price ${aed(price)} excl. VAT`); return true; }
+    }
+    return updateLead(l.id, patch, { type: "quote", text: `Price set: ${details}` });
+  });
+}
+function openLostModal(l) {
+  openModal(`<h3>Mark as lost</h3><div class="field"><label for="m-reason">Why?</label><select id="m-reason" name="reason">${LOST_REASONS.map((r) => `<option>${r}</option>`).join("")}</select></div>
+    <div class="field"><label for="m-lnote">Details (optional)</label><textarea id="m-lnote" name="note" rows="2" dir="auto"></textarea></div>
+    <div class="actions"><button class="btn primary" type="submit">Mark lost</button><button class="btn" type="button" data-cancel>Cancel</button></div>`,
+  async (fd) => { await setStage(l, "lost", { lostReason: fd.get("reason") }, [fd.get("reason"), fd.get("note")].filter(Boolean).join(": ")); });
+}
+
+const PROSPECT_FIELDS = [["company", "Company"], ["segment", "Segment"], ["emirate", "Emirate"], ["website", "Website"], ["contactName", "Contact name"], ["role", "Role"], ["email", "Business email"], ["phone", "Business phone"], ["sourceUrl", "Where you found them (link)"], ["whyFit", "Why they could need EchoLight"], ["notes", "Notes"]];
+function openProspectModal(p) {
+  const v = p || {};
+  const dis = S.writable ? "" : "disabled";
+  openModal(`<h3>${p ? esc(v.company || "Prospect") : "New prospect"}</h3>
+    <div class="fields">${PROSPECT_FIELDS.map(([k, label]) => {
+      if (k === "segment") return `<div class="field"><label for="p-${k}">${label}</label><select id="p-${k}" name="${k}" ${dis}><option value="">—</option>${SEGMENTS.map((s) => `<option ${v[k] === s ? "selected" : ""}>${esc(s)}</option>`).join("")}</select></div>`;
+      if (k === "emirate") return `<div class="field"><label for="p-${k}">${label}</label><select id="p-${k}" name="${k}" ${dis}><option value="">—</option>${EMIRATES.map((s) => `<option ${v[k] === s ? "selected" : ""}>${esc(s)}</option>`).join("")}</select></div>`;
+      if (k === "whyFit" || k === "notes") return `<div class="field full"><label for="p-${k}">${label}</label><textarea id="p-${k}" name="${k}" rows="2" dir="auto" ${dis}>${esc(v[k] || "")}</textarea></div>`;
+      return `<div class="field"><label for="p-${k}">${label}</label><input id="p-${k}" name="${k}" value="${esc(v[k] || "")}" dir="auto" ${dis} ${k === "company" ? "required" : ""}></div>`;
+    }).join("")}
+    ${p ? `<div class="field"><label for="p-status">Status</label><select id="p-status" name="status" ${dis}>${PROSPECT_STATUSES.map((s) => `<option value="${s.id}" ${v.status === s.id ? "selected" : ""}>${s.label}</option>`).join("")}</select></div>` : ""}
+    </div>
+    ${v.outreachLog?.length ? `<div><span class="lbl">Outreach so far</span>${v.outreachLog.slice(-5).map((o) => `<div class="act" style="margin-top:6px"><div class="when">${esc(o.channel || "")} · ${o.at ? new Date(o.at).toLocaleDateString("en-GB") : ""}</div><p dir="auto">${esc(o.summary || "")}</p></div>`).join("")}</div>` : ""}
+    <div class="actions"><button class="btn primary" type="submit" ${dis}>${p ? "Save" : "Add prospect"}</button><button class="btn" type="button" data-cancel>Close</button></div>`,
+  async (fd) => {
+    const data = Object.fromEntries(fd.entries());
+    if (p) return write(() => S.db.doc("prospects/" + p.id).update({ ...data, updatedAt: Date.now() }));
+    return write(() => S.db.collection("prospects").add({ ...data, status: "found", addedBy: S.me?.id || null, touches: 0, outreachLog: [], createdAt: Date.now(), updatedAt: Date.now() }));
+  });
+}
+async function convertProspect(id) {
+  const p = S.prospects.find((x) => x.id === id); if (!p) return;
+  const ref = S.db.collection("leads").doc();
+  const ok = await write(async () => {
+    await ref.set(newLeadDoc({ name: p.contactName || "", company: p.company || "", phone: p.phone || "", email: p.email || "", segment: p.segment || "", emirate: p.emirate || "", source: p.addedBy === "claude" ? "Outbound (Claude)" : "Outbound (team)", requirements: p.whyFit || "", prospectId: p.id, stage: "qualifying", stageHistory: { new: Date.now(), qualifying: Date.now() } }));
+    await addActivity(ref.id, "note", `Converted from prospect ${p.company}`);
+    await S.db.doc("prospects/" + p.id).update({ status: "converted", leadId: ref.id, updatedAt: Date.now() });
+  });
+  if (ok) { toast("Lead created"); openDrawer(ref.id); }
+}
+
+function openTemplateModal(t) {
+  const v = t || { channel: "whatsapp", language: "en" };
+  openModal(`<h3>${t ? "Edit message" : "New message"}</h3>
+    <div class="fields">
+      <div class="field full"><label for="t-name">Name</label><input id="t-name" name="name" value="${esc(v.name || "")}" required></div>
+      <div class="field"><label for="t-channel">Channel</label><select id="t-channel" name="channel">${["whatsapp", "email", "instagram", "linkedin"].map((c) => `<option ${v.channel === c ? "selected" : ""}>${c}</option>`).join("")}</select></div>
+      <div class="field"><label for="t-lang">Language</label><select id="t-lang" name="language"><option value="en" ${v.language === "en" ? "selected" : ""}>English</option><option value="ar" ${v.language === "ar" ? "selected" : ""}>Arabic</option></select></div>
+      <div class="field"><label for="t-stage">Stage</label><select id="t-stage" name="stage"><option value="">Any</option>${STAGES.map((s) => `<option value="${s.id}" ${v.stage === s.id ? "selected" : ""}>${s.label}</option>`).join("")}</select></div>
+      <div class="field full"><label for="t-subject">Email subject (optional)</label><input id="t-subject" name="subject" value="${esc(v.subject || "")}" dir="auto"></div>
+      <div class="field full"><label for="t-body">Message</label><textarea id="t-body" name="body" rows="7" dir="auto" required>${esc(v.body || "")}</textarea></div>
+    </div>
+    <div class="actions"><button class="btn primary" type="submit">Save</button><button class="btn" type="button" data-cancel>Cancel</button>${t ? `<button class="btn ghost danger" type="button" id="tDel">Delete</button>` : ""}</div>`,
+  async (fd) => {
+    const data = Object.fromEntries(fd.entries());
+    if (t) return write(() => S.db.doc("templates/" + t.id).update({ ...data, updatedAt: Date.now() }));
+    return write(() => S.db.collection("templates").add({ ...data, order: 99, updatedAt: Date.now() }));
+  });
+  const del = $("#tDel"); if (del) del.addEventListener("click", async () => { await write(() => S.db.doc("templates/" + t.id).delete()); closeModal(); toast("Message deleted"); });
+}
+
+boot();
+})();
+</script>
