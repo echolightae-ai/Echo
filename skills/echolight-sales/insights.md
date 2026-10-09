@@ -27,8 +27,8 @@ Wedding planners and small event companies who resell our lighting to couples an
 **Known partners, staff and suppliers (from the owner, Oct 2026). Never sell to them, never follow them up:**
 - Partners (wedding/event companies): La Ceremonia Events, Battoul (Golden Touch Events), Mahmoud (Charming
   Touch), Khaled (Emirati Events), JSK Parties, Samer 1 and Samer 3.
-- Staff: Reda (EchoLight), Shabbous (EchoLight), Emad (EchoLight).
-- Suppliers: Obada (3D mapping), Joseph (sound), Ahmed Nasef (transport), G.A.E Events (entertainers),
+- Staff: Reda (EchoLight), Shabbous (EchoLight).
+- Suppliers: Obada (3D mapping), Joseph (sound), Emad (bands, DJs, sound), Ahmed Nasef (transport), G.A.E Events (entertainers),
   LED screen and truss suppliers.
 - Personal: Farhan and other friends and family.
 If a chat's name matches one of these, it's not a lead. Partners can still be customers for a specific job
