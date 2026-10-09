@@ -24,6 +24,19 @@ Wedding planners and small event companies who resell our lighting to couples an
 - **Treat them as partners:** no sales follow-ups, no formal tone. Reply fast, in their dialect, keep it
   short. Pricing and money between partners is handled by the owner only: log it, never discuss it.
 
+**Known partners, staff and suppliers (from the owner, Oct 2026). Never sell to them, never follow them up:**
+- Partners (wedding/event companies): La Ceremonia Events, Battoul (Golden Touch Events), Mahmoud (Charming
+  Touch), Khaled (Emirati Events), JSK Parties, Samer 1 and Samer 3.
+- Staff: Reda (EchoLight), Shabbous (EchoLight), Emad (EchoLight).
+- Suppliers: Obada (3D mapping), Joseph (sound), Ahmed Nasef (transport), G.A.E Events (entertainers),
+  LED screen and truss suppliers.
+- Personal: Farhan and other friends and family.
+If a chat's name matches one of these, it's not a lead. Partners can still be customers for a specific job
+the owner is handling: log what happens, never chase.
+
+**Money matters are the owner's only:** receivables, cheques, payment chasing and side agreements (e.g. The
+Muse) are never your business. Don't log, summarise or mention them.
+
 ### B. VIP private clients (homes, palaces, family celebrations)
 Example: a ladies-only National Day garden party for a family in Al Bateen, managed by an assistant.
 - **What they want:** "something special, something new" that their family hasn't seen: timecode light
@@ -113,7 +126,8 @@ Never offer generators or fireworks (SKILL.md section 4).
 
 ## 4. The calendar (when demand happens)
 
-- **National Day (late Nov - 2 Dec):** enquiries start in **September**; VIP and government want concepts
+- **National Day (late Nov - 2 Dec):** a **growth market**: no National Day orders in 2025, so there are no
+  repeat clients; every one is new. Enquiries start in **September**; VIP and government want concepts
   early to get approvals and gate passes. 2026 theme hooks: "55 years of the Union" and "Year of Family".
 - **New Year's Eve (31 Dec):** enquiries from **late September**; hotels and outdoor venues (Bab Al Qasr,
   Conrad) book stage + screen + sound + lighting; agencies collect quotes early. Last year's NYE clients come
@@ -127,7 +141,8 @@ Never offer generators or fireworks (SKILL.md section 4).
 
 Order of priority (rule 14 still applies: WhatsApp only for people who wrote first or existing clients;
 cold contact by email only):
-1. **Last year's seasonal clients**, 6-8 weeks before their season (National Day in early October, NYE in
+1. **Last year's seasonal clients** (e.g. Nawal, Winter Corner RAK: NYE 2025; the owner already reached out
+   once with no reply, so the next touch must bring something new: an idea or a video), 6-8 weeks before their season (National Day in early October, NYE in
    mid-October): one short personal line, e.g. "Hi, hope you're well. Will you be planning something for New
    Year's like last time? We'd love to make it even better this year."
 2. **Partners with no booking for the coming weekends:** a friendly check-in in their dialect, never pushy.
