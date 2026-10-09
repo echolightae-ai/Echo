@@ -25,17 +25,10 @@ TEST_ENV = {
     "TWILIO_AUTH_TOKEN": "twilio-token",
     "PUBLIC_BASE_URL": "https://bot.example.com",
     "OWNER_EMAIL": "owner@example.com",
+    "OWNER_WHATSAPP": "+971 50 999 8888",
+    "WA_TEMPLATE_QUOTE_READY": "quote_ready_v1",
 }
 
-PRICING = """
-vat_rate: 0.05
-quote_validity_days: 14
-max_discount_percent: 0
-services:
-  stage_lighting: {label: Stage lighting, unit: package per event day, min: 5000, max: 9000}
-  led_screen: {label: LED screen, unit: square metre per event day, min: 300, max: 450}
-  laser_show: {label: Laser show, unit: show, min: null, max: null}
-"""
 
 
 @pytest.fixture(autouse=True)
@@ -43,7 +36,6 @@ def settings(tmp_path, monkeypatch):
     knowledge = tmp_path / "knowledge"
     knowledge.mkdir()
     shutil.copy(ROOT / "knowledge" / "business.md", knowledge / "business.md")
-    (knowledge / "pricing.yaml").write_text(PRICING)
     for key, value in {**TEST_ENV, "KNOWLEDGE_DIR": str(knowledge)}.items():
         monkeypatch.setenv(key, value)
     from salesbot import config

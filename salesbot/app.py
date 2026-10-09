@@ -4,6 +4,7 @@ import asyncio
 import base64
 import html
 import logging
+import re
 import secrets
 import time
 from collections import defaultdict, deque
@@ -12,7 +13,7 @@ from email.utils import parseaddr
 from pathlib import Path
 
 import anthropic
-from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, Form, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, PlainTextResponse
 from fastapi.security import HTTPBasic, HTTPBasicCredentials
@@ -138,6 +139,9 @@ def create_app(
 
     async def handle_whatsapp(message: dict, profile_name: str | None) -> None:
         wa_id = message["from"]
+        if s.owner_whatsapp and wa_id == s.owner_whatsapp:
+            await handle_owner_whatsapp(message)
+            return
         lead = db.get_or_create_lead("whatsapp", wa_id, phone=f"+{wa_id}", name=profile_name, source="whatsapp")
         content = await whatsapp_content(message)
         await reply_to(lead["id"], content)
@@ -174,6 +178,50 @@ def create_app(
             return [{"type": "text", "text": f"[The customer sent a document: {name}. You cannot open it; the team "
                                              "will review it.]"}]
         return [{"type": "text", "text": f"[The customer sent a {kind} message.]"}]
+
+    # Prices from the owner
+
+    async def submit_price(lead_id: int, details: str) -> str:
+        """Hand the owner's price to the agent. Returns a short confirmation for the owner."""
+        try:
+            lead = db.get_lead(lead_id)
+        except KeyError:
+            return f"There is no lead #{lead_id}."
+        details = details.strip()
+        if not details:
+            return "The price message was empty."
+        status = await agent.present_price(lead_id, details, parse_amount(details))
+        who = lead.get("name") or f"lead #{lead_id}"
+        if status == "sent":
+            return f"Price sent to {who}."
+        return (f"{who} last wrote more than 24 hours ago, so WhatsApp only allows a template. They were told their "
+                "quote is ready, and the price will be given as soon as they reply.")
+
+    async def handle_owner_whatsapp(message: dict) -> None:
+        body = (message.get("text") or {}).get("body", "")
+        match = re.match(r"\s*#\s*(\d+)\s+(.+)", body, re.DOTALL)
+        if match:
+            try:
+                reply = await submit_price(int(match.group(1)), match.group(2))
+            except Exception:
+                log.exception("owner price failed")
+                reply = "Something went wrong sending that price. Please try again or use the dashboard."
+        else:
+            reply = ("To send a price, start with the lead number, for example:\n"
+                     "#12 AED 28,000 incl. VAT - lighting, LED wall, setup and 2 technicians")
+        await channels.whatsapp_text(s.owner_whatsapp, reply)
+
+    async def handle_owner_email(subject: str, body: str) -> None:
+        match = re.search(r"\[Lead #(\d+)\]", subject)
+        price = strip_quoted_reply(body)
+        if not match or not price:
+            return
+        try:
+            reply = await submit_price(int(match.group(1)), price)
+        except Exception:
+            log.exception("owner price failed")
+            reply = "Something went wrong sending that price. Please try again or use the dashboard."
+        await channels.notify_owner(f"[Lead #{match.group(1)}] {reply}", f"Your message:\n{price}")
 
     def handle_instagram_dm(event: dict) -> None:
         message = event.get("message") or {}
@@ -227,6 +275,9 @@ def create_app(
             return {"ok": True, "ignored": True}
         if not db.mark_seen(f"email:{data.get('MessageID') or hash((address, subject, body))}"):
             return {"ok": True, "duplicate": True}
+        if s.owner_email and address == s.owner_email.lower():
+            spawn(handle_owner_email(subject, body))
+            return {"ok": True, "owner": True}
         lead = db.get_or_create_lead("email", address, email=address, name=name or None, source="email")
         spawn(reply_to(lead["id"], [{"type": "text", "text": f"Subject: {subject}\n\n{body.strip()[:8000]}"}]))
         return {"ok": True}
@@ -349,15 +400,51 @@ def create_app(
             for m in db.outbound_messages(lead_id)
         )
         bookings = "".join(f"<li>{b['kind']}: {html.escape(b['preferred_time'])}</li>" for b in db.bookings(lead_id))
-        return _page(f"Lead {lead_id}", f"<p><a href='/admin'>All leads</a></p><table>{details}</table>"
+        price_form = (
+            f"<h2>Send the price</h2><form method='post' action='/admin/leads/{lead_id}/price'>"
+            "<textarea name='details' rows='4' style='width:100%' required placeholder='AED 28,000 incl. VAT - "
+            "lighting, 6x3m LED wall, setup and 2 technicians'></textarea><button>Send to customer</button></form>"
+        )
+        return _page(f"Lead {lead_id}", f"<p><a href='/admin'>All leads</a></p><table>{details}</table>{price_form}"
                                         f"<h2>Bookings</h2><ul>{bookings or '<li>none</li>'}</ul>"
                                         f"<h2>Customer messages</h2>{conversation}<h2>Messages sent</h2>{sent}")
 
+    @app.post("/admin/leads/{lead_id}/price", dependencies=[Depends(admin)])
+    async def admin_price(lead_id: int, request: Request, details: str = Form(...)) -> Response:
+        origin = request.headers.get("origin")
+        if origin and origin.rstrip("/") != s.public_base_url.rstrip("/"):
+            raise HTTPException(403, "cross-site form post")
+        message = await submit_price(lead_id, details)
+        return _page_response(f"Lead {lead_id}", f"<p>{html.escape(message)}</p>"
+                                                 f"<p><a href='/admin/leads/{lead_id}'>Back to the lead</a></p>")
+
+    app.state.submit_price = submit_price
     return app
 
 
+def parse_amount(text: str) -> int | None:
+    """First figure that looks like a price (100 or more), e.g. 'AED 28,000' -> 28000."""
+    for match in re.finditer(r"\d{1,3}(?:,\d{3})+|\d{3,}", text):
+        return int(match.group().replace(",", ""))
+    return None
+
+
+def strip_quoted_reply(body: str) -> str:
+    """Keep only what the owner typed above the quoted alert in an email reply."""
+    kept = []
+    for line in body.splitlines():
+        if line.startswith(">") or re.match(r"^\s*On .+wrote:\s*$", line) or line.strip() == "--":
+            break
+        kept.append(line)
+    return "\n".join(kept).strip()
+
+
 def _aed(lead: dict) -> str:
-    return f"AED {lead['quote_min_aed']:,}-{lead['quote_max_aed']:,}" if lead["quote_min_aed"] else ""
+    return f"AED {lead['quote_aed']:,}" if lead["quote_aed"] else ("priced" if lead["quote_details"] else "")
+
+
+def _page_response(title: str, body: str) -> HTMLResponse:
+    return HTMLResponse(_page(title, body))
 
 
 def _ago(ts: float | None) -> str:

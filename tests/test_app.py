@@ -199,12 +199,14 @@ async def test_daily_digest(db, channels, settings):
 
     scheduler = Scheduler(db, SalesAgent(db, channels, FakeClient()))
     lead = db.get_or_create_lead("whatsapp", "971501239999", name="Hamad", event_type="gala dinner")
-    db.update_lead(lead["id"], stage="quoted", quote_min_aed=10000, quote_max_aed=15000)
+    db.update_lead(lead["id"], stage="quoted", quote_aed=12000, quote_details="AED 12,000 incl. VAT")
+    db.get_or_create_lead("whatsapp", "971501238888", name="Mira", stage="awaiting_price")
     scheduler.ensure_digest_scheduled()
     [job] = db.pending_jobs(kind="daily_digest")
     await scheduler.tick(now=job["run_at"] + 1)
     [(_, subject, body)] = channels.of("owner")
-    assert subject == "Daily sales digest" and "Hamad" in body and "AED 10,000-15,000" in body
+    assert subject == "Daily sales digest" and "Hamad" in body and "AED 12,000" in body
+    assert body.index("Waiting for your price") < body.index("Mira") < body.index("Hot leads")
     assert len(db.pending_jobs(kind="daily_digest")) == 1, "the digest reschedules itself"
 
 
@@ -221,3 +223,82 @@ def test_send_failure_resends_text_without_rerunning_claude(app_env, db, channel
     [job] = db.pending_jobs(kind="deliver")
     assert job["payload"] == {"text": "Hello!"}
     assert len(claude.messages.calls) == 1
+
+
+def test_owner_sends_price_by_whatsapp(app_env, db, channels):
+    client, claude, _ = app_env
+    lead = db.get_or_create_lead("whatsapp", "971501110000", name="Sara", stage="awaiting_price",
+                                 last_inbound_at=time.time())
+    claude.queue(message(text("Great news Sara! Your quote is AED 28,000 incl. VAT.")))
+    meta_post(client, whatsapp_payload("wamid.o1", "971509998888", f"#{lead['id']} AED 28,000 incl. VAT - all in",
+                                       name="Kareem"))
+    wait_for(lambda: len(channels.of("whatsapp_text")) == 2)
+    to_customer, to_owner = channels.of("whatsapp_text")
+    assert to_customer[1] == "971501110000" and "28,000" in to_customer[2]
+    assert to_owner[1:] == ("971509998888", "Price sent to Sara.")
+    assert db.get_lead(lead["id"])["quote_aed"] == 28000
+    assert len(db.list_leads()) == 1, "the owner is never treated as a lead"
+
+
+def test_owner_whatsapp_without_lead_number_gets_help(app_env, channels):
+    client, claude, _ = app_env
+    meta_post(client, whatsapp_payload("wamid.o2", "971509998888", "28000"))
+    wait_for(lambda: channels.of("whatsapp_text"))
+    assert "#12 AED" in channels.of("whatsapp_text")[0][2]
+    assert claude.messages.calls == []
+
+
+def test_owner_sends_price_by_email_reply(app_env, db, channels):
+    client, claude, _ = app_env
+    lead = db.get_or_create_lead("email", "buyer@corp.ae", email="buyer@corp.ae", name="Ahmed",
+                                 stage="awaiting_price")
+    claude.queue(message(text("Dear Ahmed, your quote is AED 15,500 + VAT.")))
+    client.post("/webhooks/email?token=mail-token", json={
+        "From": "Owner <owner@example.com>",
+        "Subject": f"Re: [EchoLight sales bot] [Lead #{lead['id']}] Price needed: Ahmed",
+        "TextBody": "AED 15,500 + VAT, conference audio and LED\n\nOn Mon, 12 Oct 2026, bot wrote:\n> Price needed",
+        "MessageID": "owner-1"})
+    wait_for(lambda: channels.of("email"))
+    assert channels.of("email")[0][1] == "buyer@corp.ae"
+    assert db.get_lead(lead["id"])["quote_details"] == "AED 15,500 + VAT, conference audio and LED"
+    wait_for(lambda: any("Price sent to Ahmed" in o[1] for o in channels.of("owner")))
+
+
+def test_owner_sends_price_from_dashboard(app_env, db, channels):
+    client, claude, _ = app_env
+    lead = db.get_or_create_lead("whatsapp", "971501117777", name="Laila", stage="awaiting_price",
+                                 last_inbound_at=time.time())
+    page = client.get(f"/admin/leads/{lead['id']}", auth=("owner", "admin-secret"))
+    assert "Send the price" in page.text
+    claude.queue(message(text("Laila, your quote is AED 9,000.")))
+    url = f"/admin/leads/{lead['id']}/price"
+    assert client.post(url, data={"details": "AED 9,000"}).status_code == 401
+    assert client.post(url, data={"details": "AED 9,000"}, auth=("owner", "admin-secret"),
+                       headers={"Origin": "https://evil.example"}).status_code == 403
+    response = client.post(url, data={"details": "AED 9,000"}, auth=("owner", "admin-secret"))
+    assert "Price sent to Laila" in response.text
+    assert channels.of("whatsapp_text")[-1][2] == "Laila, your quote is AED 9,000."
+
+
+async def test_price_reminder_only_while_waiting(db, channels, settings):
+    from salesbot.agent import SalesAgent
+    from salesbot.scheduler import Scheduler
+
+    scheduler = Scheduler(db, SalesAgent(db, channels, FakeClient()))
+    lead = db.get_or_create_lead("whatsapp", "971501236666", name="Omar", stage="awaiting_price",
+                                 price_requested_at=time.time() - 3 * 3600)
+    await scheduler.remind_price(lead["id"])
+    [(_, subject, _)] = channels.of("owner")
+    assert subject == f"[Lead #{lead['id']}] Reminder: Omar has waited 3h for a price"
+    db.update_lead(lead["id"], stage="quoted")
+    await scheduler.remind_price(lead["id"])
+    assert len(channels.of("owner")) == 1
+
+
+def test_parse_amount_and_strip_reply():
+    from salesbot.app import parse_amount, strip_quoted_reply
+
+    assert parse_amount("AED 28,000 incl. VAT") == 28000
+    assert parse_amount("45000 + VAT for 2 days") == 45000
+    assert parse_amount("price on request") is None
+    assert strip_quoted_reply("AED 5,000\n\nOn Mon, X wrote:\n> old") == "AED 5,000"

@@ -15,7 +15,9 @@ CREATE TABLE IF NOT EXISTS leads (
     event_type TEXT, event_date TEXT, venue TEXT, emirate TEXT,
     guest_count INTEGER, indoor_outdoor TEXT, services TEXT, budget_aed INTEGER, notes TEXT,
     stage TEXT NOT NULL DEFAULT 'new',
-    quote_min_aed INTEGER, quote_max_aed INTEGER,
+    quote_aed INTEGER,                 -- the price you gave, if it had a single figure
+    quote_details TEXT,                -- your price message, exactly as you sent it
+    price_requested_at REAL,
     marketing_opt_in INTEGER NOT NULL DEFAULT 0,
     do_not_contact INTEGER NOT NULL DEFAULT 0,
     source TEXT,
@@ -64,7 +66,7 @@ CREATE TABLE IF NOT EXISTS seen_messages (
 LEAD_FIELDS = (
     "name", "phone", "email", "language", "event_type", "event_date", "venue", "emirate",
     "guest_count", "indoor_outdoor", "services", "budget_aed", "notes", "stage",
-    "quote_min_aed", "quote_max_aed", "marketing_opt_in", "do_not_contact", "source",
+    "quote_aed", "quote_details", "price_requested_at", "marketing_opt_in", "do_not_contact", "source",
     "agent_notes", "last_inbound_at", "last_outbound_at",
 )
 

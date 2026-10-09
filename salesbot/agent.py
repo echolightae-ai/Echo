@@ -12,12 +12,13 @@ import anthropic
 from salesbot import config
 from salesbot.channels import Channels
 from salesbot.db import Database
-from salesbot.knowledge import PriceList, load_business_facts
+from salesbot.knowledge import load_business_facts
 from salesbot.prompts import (
     COMMENT_INSTRUCTION,
     FINAL_FOLLOWUP_NOTE,
     FOLLOWUP_INSTRUCTION,
     NO_REPLY,
+    PRICE_READY_INSTRUCTION,
     build_system_prompt,
 )
 from salesbot.tools import ToolExecutor, tool_definitions
@@ -29,8 +30,8 @@ MAX_TOOL_ROUNDS = 8
 FALLBACK_BETA = "server-side-fallback-2026-07-01"
 
 LEAD_CONTEXT_KEYS = ("name", "phone", "email", "language", "event_type", "event_date", "venue", "emirate",
-                     "guest_count", "indoor_outdoor", "services", "budget_aed", "stage", "quote_min_aed",
-                     "quote_max_aed", "marketing_opt_in", "source")
+                     "guest_count", "indoor_outdoor", "services", "budget_aed", "stage", "quote_details",
+                     "marketing_opt_in", "source")
 
 
 class AgentError(Exception):
@@ -59,12 +60,9 @@ class SalesAgent:
         self.channels = channels
         self.client = client or anthropic.AsyncAnthropic()
         s = config.settings
-        self.prices = PriceList.load(s.knowledge_dir)
-        self.system_prompt = build_system_prompt(
-            load_business_facts(s.knowledge_dir), self.prices.catalogue(), self.prices.max_discount_percent
-        )
-        self.tools = tool_definitions(list(self.prices.services))
-        self.executor = ToolExecutor(db, channels, self.prices)
+        self.system_prompt = build_system_prompt(load_business_facts(s.knowledge_dir))
+        self.tools = tool_definitions()
+        self.executor = ToolExecutor(db, channels)
         self._locks: dict[int, asyncio.Lock] = defaultdict(asyncio.Lock)
 
     # Public entry points
@@ -98,10 +96,32 @@ class SalesAgent:
                 self._schedule_followups(lead_id)
             return reply
 
+    async def present_price(self, lead_id: int, details: str, amount_aed: int | None = None) -> str:
+        """The owner priced the project. Pass it to the customer now, or as soon as WhatsApp allows.
+
+        Returns "sent" or "queued" (the customer must reply first; they were sent a template nudge).
+        """
+        async with self._locks[lead_id]:
+            lead = self.db.update_lead(lead_id, quote_details=details, quote_aed=amount_aed, stage="quoted")
+            self.db.cancel_jobs(lead_id, ("price_reminder",))
+            instruction = PRICE_READY_INSTRUCTION.format(details=details)
+            if self._can_send_free_text(lead):
+                note = {"role": "user", "content": [{"type": "text", "text": "[The team has sent the price.]"}]}
+                reply = await self._run(lead_id, [note, self._context_message(lead, extra=instruction)])
+                if reply:
+                    await self.deliver(lead_id, reply)
+                self._schedule_followups(lead_id)
+                return "sent"
+            # Outside WhatsApp's 24h window: nudge with a template; the price is presented when they reply.
+            self.db.update_lead(lead_id, agent_notes="\n".join(filter(None, [lead.get("agent_notes"), instruction])))
+            await self.send_template(self.db.get_lead(lead_id), "quote_ready")
+            self._schedule_followups(lead_id)
+            return "queued"
+
     async def run_followup(self, lead_id: int, step: int) -> None:
         async with self._locks[lead_id]:
             lead = self.db.get_lead(lead_id)
-            if lead["do_not_contact"] or lead["stage"] in ("booked", "lost"):
+            if lead["do_not_contact"] or lead["stage"] in ("booked", "lost", "awaiting_price"):
                 return
             total = len(config.settings.followup_delays_hours)
             if self._can_send_free_text(lead):
@@ -158,6 +178,7 @@ class SalesAgent:
             "review_request": s.wa_template_review,
             "reactivation": s.wa_template_reactivation,
             "missed_call": s.wa_template_missed_call,
+            "quote_ready": s.wa_template_quote_ready,
         }[kind]
         first_name = (lead.get("name") or "").split(" ")[0] or "there"
         phone = lead["channel_user_id"] if lead["channel"] == "whatsapp" else lead.get("phone")
@@ -187,6 +208,8 @@ class SalesAgent:
             "lasers or sound. Reply to this email and we'll take it from there. (Reply STOP to unsubscribe.)\n\n"
             "EchoLight team",
             "missed_call": f"Hi {name},\n\nSorry we missed your call. How can we help with your event?\n\nEchoLight team",
+            "quote_ready": f"Hi {name},\n\nYour EchoLight quote is ready. Reply to this email and we'll share it "
+            "with all the details.\n\nEchoLight team",
         }
         subject = "EchoLight" if kind != "review_request" else "Thank you from EchoLight"
         await self.channels.send_email(to, subject, bodies[kind])
@@ -202,7 +225,7 @@ class SalesAgent:
 
     def _schedule_followups(self, lead_id: int) -> None:
         lead = self.db.get_lead(lead_id)
-        if lead["do_not_contact"] or lead["stage"] in ("booked", "lost"):
+        if lead["do_not_contact"] or lead["stage"] in ("booked", "lost", "awaiting_price"):
             return
         self.db.cancel_jobs(lead_id, ("followup",))
         now = time.time()

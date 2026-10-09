@@ -43,6 +43,9 @@ class Settings:
     wa_template_missed_call: str = field(default_factory=lambda: _env("WA_TEMPLATE_MISSED_CALL"))
     wa_template_review: str = field(default_factory=lambda: _env("WA_TEMPLATE_REVIEW"))
     wa_template_reactivation: str = field(default_factory=lambda: _env("WA_TEMPLATE_REACTIVATION"))
+    wa_template_quote_ready: str = field(default_factory=lambda: _env("WA_TEMPLATE_QUOTE_READY"))
+    # Sent to the owner when a free-form alert can't be delivered; one parameter: the alert title.
+    wa_template_owner_alert: str = field(default_factory=lambda: _env("WA_TEMPLATE_OWNER_ALERT"))
     wa_template_language: str = field(default_factory=lambda: _env("WA_TEMPLATE_LANGUAGE", "en"))
 
     # Instagram messaging (same Meta app)
@@ -66,7 +69,9 @@ class Settings:
 
     # Owner notifications (hot leads, escalations, daily digest)
     owner_email: str = field(default_factory=lambda: _env("OWNER_EMAIL"))
-    owner_whatsapp: str = field(default_factory=lambda: _env("OWNER_WHATSAPP"))
+    # The owner's personal WhatsApp (digits only, not the business number the bot runs on). Messages from it
+    # starting with "#<lead id>" are treated as prices for that lead.
+    owner_whatsapp: str = field(default_factory=lambda: "".join(c for c in _env("OWNER_WHATSAPP") if c.isdigit()))
 
     # Website chat
     webchat_allowed_origins: list[str] = field(
@@ -76,6 +81,9 @@ class Settings:
     # Automation timing
     followup_delays_hours: list[float] = field(
         default_factory=lambda: [float(h) for h in _env_list("FOLLOWUP_DELAYS_HOURS", "20,72,168")]
+    )
+    price_reminder_hours: list[float] = field(
+        default_factory=lambda: [float(h) for h in _env_list("PRICE_REMINDER_HOURS", "3,24")]
     )
     review_request_delay_hours: float = field(default_factory=lambda: float(_env("REVIEW_DELAY_HOURS", "24")))
     reactivation_delay_days: float = field(default_factory=lambda: float(_env("REACTIVATION_DELAY_DAYS", "60")))

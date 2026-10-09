@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from salesbot import config
 from salesbot.agent import SalesAgent
 from salesbot.db import Database
+from salesbot.tools import lead_summary, lead_tag, price_reply_help
 
 log = logging.getLogger(__name__)
 
@@ -52,8 +53,8 @@ class Scheduler:
         now = now if now is not None else time.time()
         local_now = datetime.fromtimestamp(now, config.settings.timezone)
         for job in self.db.due_jobs(now):
-            customer_facing = job["kind"] in ("followup", "review_request", "reactivation")
-            later = next_allowed_time(local_now) if customer_facing else None
+            respects_quiet_hours = job["kind"] in ("followup", "review_request", "reactivation", "price_reminder")
+            later = next_allowed_time(local_now) if respects_quiet_hours else None
             if later:
                 self.db.reschedule_job(job["id"], later.timestamp())
                 continue
@@ -81,6 +82,8 @@ class Scheduler:
             await self.agent.run_template_touch(lead_id, kind)
         elif kind == "retry_inbound":
             await self.agent.handle_inbound(lead_id, payload["content"])
+        elif kind == "price_reminder":
+            await self.remind_price(lead_id)
         elif kind == "deliver":
             await self.agent.deliver(lead_id, payload["text"])
         elif kind == "daily_digest":
@@ -88,6 +91,16 @@ class Scheduler:
             self.db.schedule_job("daily_digest", next_digest_time(local_now + timedelta(minutes=1)).timestamp())
         else:
             raise ValueError(f"unknown job kind {kind}")
+
+    async def remind_price(self, lead_id: int) -> None:
+        lead = self.db.get_lead(lead_id)
+        if lead["stage"] != "awaiting_price":
+            return
+        waiting = round((time.time() - (lead["price_requested_at"] or time.time())) / 3600)
+        await self.agent.channels.notify_owner(
+            f"{lead_tag(lead_id)} Reminder: {lead.get('name') or 'a customer'} has waited {waiting}h for a price",
+            f"{price_reply_help(lead_id)}\n\n{lead_summary(lead)}",
+        )
 
     async def send_digest(self, local_now: datetime) -> None:
         since = local_now.timestamp() - 86400
@@ -97,15 +110,22 @@ class Scheduler:
         by_stage: dict[str, int] = {}
         for lead in leads:
             by_stage[lead["stage"]] = by_stage.get(lead["stage"], 0) + 1
+        waiting = [l for l in leads if l["stage"] == "awaiting_price"]
         hot = [l for l in active if l["stage"] in ("quoted", "negotiating", "booked")]
         lines = [
             f"Last 24 hours: {len(new)} new leads, {len(active)} active conversations.",
             "Pipeline: " + ", ".join(f"{stage} {count}" for stage, count in sorted(by_stage.items())),
             "",
-            "Hot leads:" if hot else "No hot leads today.",
         ]
+        if waiting:
+            lines.append("Waiting for your price:")
+            lines += [f"- #{l['id']} {l.get('name') or 'Unknown'} | {l.get('event_type') or '?'} on "
+                      f"{l.get('event_date') or '?'} | {config.settings.public_base_url}/admin/leads/{l['id']}"
+                      for l in waiting]
+            lines.append("")
+        lines.append("Hot leads:" if hot else "No hot leads today.")
         for lead in hot:
-            quote = f"AED {lead['quote_min_aed']:,}-{lead['quote_max_aed']:,}" if lead["quote_min_aed"] else "no quote yet"
+            quote = f"AED {lead['quote_aed']:,}" if lead["quote_aed"] else ("priced" if lead["quote_details"] else "no quote yet")
             lines.append(f"- {lead.get('name') or 'Unknown'} | {lead.get('event_type') or '?'} on "
                          f"{lead.get('event_date') or '?'} | {lead['stage']} | {quote} | "
                          f"{config.settings.public_base_url}/admin/leads/{lead['id']}")

@@ -62,7 +62,7 @@ Portfolio: https://www.echolight.ae/our-work
 ## How we work
 
 1. The customer shares the event details (date, venue, guests, services, indoor or outdoor).
-2. We send an indicative price range, then a detailed proposal.
+2. Our team prices each project individually based on its requirements and sends the quote.
 3. Optional call or site visit to confirm the venue, power and rigging.
 4. Our team delivers setup, live operation during the event, and teardown.
 

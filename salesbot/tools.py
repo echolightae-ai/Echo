@@ -2,19 +2,19 @@
 
 import json
 import logging
+import time
 from datetime import datetime, time as dtime, timedelta
 
 from salesbot import config
 from salesbot.channels import Channels
 from salesbot.db import Database
-from salesbot.knowledge import PriceList
 
 log = logging.getLogger(__name__)
 
-STAGES = ["qualifying", "quoted", "negotiating", "booked", "lost"]
+STAGES = ["qualifying", "negotiating", "booked", "lost"]  # awaiting_price and quoted are set automatically
 
 
-def tool_definitions(service_ids: list[str]) -> list[dict]:
+def tool_definitions() -> list[dict]:
     return [
         {
             "name": "save_lead_details",
@@ -43,29 +43,25 @@ def tool_definitions(service_ids: list[str]) -> list[dict]:
             },
         },
         {
-            "name": "estimate_quote",
-            "description": "Compute the indicative price range from EchoLight's price list. "
-            "Always use this before mentioning any price.",
+            "name": "request_price",
+            "description": "Ask the EchoLight team to price this project (or to answer a price negotiation). "
+            "The team replies with the price and you will be told it in a system note.",
             "strict": True,
             "input_schema": {
                 "type": "object",
                 "additionalProperties": False,
                 "properties": {
-                    "items": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "additionalProperties": False,
-                            "properties": {
-                                "service_id": {"type": "string", "enum": service_ids},
-                                "quantity": {"type": "number", "description": "Units as defined in the price list"},
-                                "days": {"type": "number", "description": "Event days, usually 1"},
-                            },
-                            "required": ["service_id", "quantity", "days"],
-                        },
-                    }
+                    "requirements": {
+                        "type": "string",
+                        "description": "Everything the team needs to price it: event, date, venue, guests, indoor/"
+                        "outdoor, services and quantities wanted, special requests, budget if mentioned",
+                    },
+                    "customer_request": {
+                        "type": "string",
+                        "description": "Only for negotiation: what the customer is asking for (e.g. a lower price)",
+                    },
                 },
-                "required": ["items"],
+                "required": ["requirements"],
             },
         },
         {
@@ -129,7 +125,7 @@ def tool_definitions(service_ids: list[str]) -> list[dict]:
         },
         {
             "name": "send_email_summary",
-            "description": "Email the customer a written summary or proposal (services, indicative price, next "
+            "description": "Email the customer a written summary or proposal (services, the team's price if given, next "
             "steps). Only when they have given an email address and asked for details by email.",
             "strict": True,
             "input_schema": {
@@ -147,10 +143,24 @@ def tool_definitions(service_ids: list[str]) -> list[dict]:
 
 def lead_summary(lead: dict) -> str:
     keys = ("name", "channel", "phone", "email", "event_type", "event_date", "venue", "emirate", "guest_count",
-            "indoor_outdoor", "services", "budget_aed", "stage", "quote_min_aed", "quote_max_aed", "notes")
+            "indoor_outdoor", "services", "budget_aed", "stage", "quote_details", "notes")
     lines = [f"{k}: {lead[k]}" for k in keys if lead.get(k) not in (None, "")]
     lines.append(f"dashboard: {config.settings.public_base_url}/admin/leads/{lead['id']}")
     return "\n".join(lines)
+
+
+def lead_tag(lead_id: int) -> str:
+    """Put in alert subjects; replying to the email with this tag in the subject routes the reply to the lead."""
+    return f"[Lead #{lead_id}]"
+
+
+def price_reply_help(lead_id: int) -> str:
+    return (
+        "To send the price, reply to this email with the price and what it includes, for example:\n"
+        "  AED 28,000 incl. VAT - lighting, 6x3m LED wall, setup and 2 technicians\n"
+        f"Or WhatsApp the bot number from your own phone: #{lead_id} AED 28,000 incl. VAT ...\n"
+        f"Or use the dashboard: {config.settings.public_base_url}/admin/leads/{lead_id}"
+    )
 
 
 def parse_event_date(value: str | None) -> datetime | None:
@@ -163,10 +173,9 @@ def parse_event_date(value: str | None) -> datetime | None:
 
 
 class ToolExecutor:
-    def __init__(self, db: Database, channels: Channels, prices: PriceList):
+    def __init__(self, db: Database, channels: Channels):
         self.db = db
         self.channels = channels
-        self.prices = prices
 
     async def run(self, lead_id: int, name: str, args: dict) -> tuple[str, bool]:
         """Execute one tool call. Returns (result text, is_error)."""
@@ -191,20 +200,22 @@ class ToolExecutor:
         self.db.update_lead(lead_id, **fields)
         return {"saved": sorted(args)}
 
-    async def _estimate_quote(self, lead_id: int, args: dict) -> dict:
-        estimate = self.prices.estimate(args["items"])
-        if estimate["lines"]:
-            lead = self.db.update_lead(
-                lead_id,
-                quote_min_aed=estimate["total_min_incl_vat_aed"],
-                quote_max_aed=estimate["total_max_incl_vat_aed"],
-                stage="quoted",
-            )
-            await self.channels.notify_owner(
-                f"Quote sent: AED {estimate['total_min_incl_vat_aed']:,}-{estimate['total_max_incl_vat_aed']:,}",
-                lead_summary(lead),
-            )
-        return estimate
+    async def _request_price(self, lead_id: int, args: dict) -> dict:
+        lead = self.db.update_lead(lead_id, stage="awaiting_price", price_requested_at=time.time())
+        # The customer is waiting on us, so no follow-ups; remind the owner instead.
+        self.db.cancel_jobs(lead_id, ("followup", "price_reminder"))
+        for hours in config.settings.price_reminder_hours:
+            self.db.schedule_job("price_reminder", time.time() + hours * 3600, lead_id)
+        ask = args.get("customer_request")
+        title = "Price negotiation" if ask else "Price needed"
+        body = f"{args['requirements']}\n"
+        if ask:
+            body += f"\nCustomer is asking: {ask}\n"
+        await self.channels.notify_owner(
+            f"{lead_tag(lead_id)} {title}: {lead.get('name') or 'new lead'}",
+            f"{body}\n{price_reply_help(lead_id)}\n\n{lead_summary(lead)}",
+        )
+        return {"status": "The team has been asked for the price. Tell the customer they are preparing it."}
 
     async def _book_consultation(self, lead_id: int, args: dict) -> dict:
         booking_id = self.db.add_booking(lead_id, args["kind"], args["preferred_time"], args.get("notes", ""))
@@ -237,7 +248,7 @@ class ToolExecutor:
     async def _escalate_to_team(self, lead_id: int, args: dict) -> dict:
         lead = self.db.get_lead(lead_id)
         prefix = "URGENT: " if args["urgency"] == "urgent" else ""
-        await self.channels.notify_owner(f"{prefix}Needs the team: {args['reason'][:80]}", f"{args['reason']}\n\n{lead_summary(lead)}")
+        await self.channels.notify_owner(f"{lead_tag(lead_id)} {prefix}Needs the team: {args['reason'][:80]}", f"{args['reason']}\n\n{lead_summary(lead)}")
         return {"status": "team alerted"}
 
     async def _set_contact_preferences(self, lead_id: int, args: dict) -> dict:

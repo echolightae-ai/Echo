@@ -125,6 +125,11 @@ class Channels:
                 # Free-form text only reaches the owner if they messaged the business number in the last 24h.
                 await self.whatsapp_text(s.owner_whatsapp, f"{subject}\n\n{text}")
             except Exception:
-                log.warning("owner WhatsApp alert not delivered (owner outside 24h window?)")
+                try:
+                    if not s.wa_template_owner_alert:
+                        raise
+                    await self.whatsapp_template(s.owner_whatsapp, s.wa_template_owner_alert, [subject[:200]])
+                except Exception:
+                    log.warning("owner WhatsApp alert not delivered (owner outside 24h window, no template?)")
         if not (s.owner_email or s.owner_whatsapp):
             log.warning("owner alert (no owner contact configured): %s - %s", subject, text)
