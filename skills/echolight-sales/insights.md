@@ -33,8 +33,9 @@ Wedding planners and small event companies who resell our lighting to couples an
 - Personal: Farhan and other friends and family.
 Chat display names are often not real names (a prayer, an emoji, a nickname): the CRM document
 `config/insights` → `chatNames` maps them to who they really are. Check it before deciding who someone is.
-If a chat's name matches one of these, it's not a lead. Partners can still be customers for a specific job
-the owner is handling: log what happens, never chase.
+If a chat's name matches one of these, it's not a lead. **Partner clients (Ceremonia, Mahmoud Charming Touch,
+Amera, JSK/Saher, Golden Touch, etc.) never go into the CRM at all**, not even for a job they book: the owner
+handles them directly. Don't create leads, drafts or notes for them.
 
 **Money matters are the owner's only:** receivables, cheques, payment chasing and side agreements (e.g. The
 Muse) are never your business. Don't log, summarise or mention them.
