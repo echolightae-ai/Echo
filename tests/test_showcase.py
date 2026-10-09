@@ -182,3 +182,32 @@ def test_sorted_event_lands_on_the_page(tmp_path, organize, monkeypatch):
     p = projects[0]
     assert (p["title"], p["venue"], p["city"], p["year"]) == ("Garden Wedding Spotlights", "Emirates Palace", "Abu Dhabi", 2026)
     assert p["services"] == ["stage-lighting", "laser-light"] and len(p["media"]) == 2
+
+
+def test_rerun_never_pays_twice_and_budget_stops(tmp_path, organize, monkeypatch):
+    _camera_roll(tmp_path / "DCIM")
+    calls = []
+
+    def fake_claude(client, catalog, g, sheet):
+        calls.append(g.city)
+        organize.spent += 0.04
+        return {"is_event": False, "reason": "Not an event."}
+
+    monkeypatch.setattr(organize, "ask_claude", fake_claude)
+    monkeypatch.setattr(organize, "spent", 0.0)
+    monkeypatch.setattr("anthropic.Anthropic", lambda: object())
+
+    organize.organize(tmp_path / "DCIM", budget=0.03)  # stops after the first paid look
+    assert calls == ["Abu Dhabi"]
+    organize.organize(tmp_path / "DCIM")  # picks up where it stopped
+    assert calls == ["Abu Dhabi", "Dubai"]
+    organize.organize(tmp_path / "DCIM")  # nothing left to pay for
+    assert calls == ["Abu Dhabi", "Dubai"]
+    report = (tmp_path / "inbox" / "REVIEW.md").read_text(encoding="utf-8")
+    assert report.count("Not an event.") == 2
+
+
+def test_cost_estimate_for_a_big_camera_roll(organize):
+    # 12,000 photos is typically a few hundred groups; Claude is asked once per group.
+    assert 15 < organize.estimate(500, "claude-opus-5-5") < 20
+    assert organize.estimate(500, "claude-haiku-5-5") < 1

@@ -40,6 +40,13 @@ SHEET_TILES = 30
 KEEP_PHOTOS = 12
 KEEP_VIDEOS = 3
 
+# Claude is asked once per event group (one contact sheet), never once per photo.
+# USD per million input / output tokens, and a typical call: ~3,500 tokens in, ~1,000 out.
+PRICES = {"claude-opus-5-5": (4.00, 20.00), "claude-sonnet-5-5": (2.00, 10.00), "claude-haiku-5-5": (0.10, 0.50)}
+TYPICAL_CALL = (3500, 1000)
+MODEL = "claude-opus-5-5"
+spent = 0.0
+
 # Emirate centres, for naming the city from GPS without any online lookup.
 CITIES = {
     "Abu Dhabi": (24.4539, 54.3773), "Dubai": (25.2048, 55.2708), "Al Ain": (24.2075, 55.7447),
@@ -292,7 +299,7 @@ def ask_claude(client, catalog: dict, g: Group, sheet) -> dict | None:
     )
     try:
         response = client.messages.parse(
-            model="claude-opus-5-5",
+            model=MODEL,
             max_tokens=4000,
             output_config={"effort": "low"},
             messages=[{"role": "user", "content": [
@@ -305,6 +312,9 @@ def ask_claude(client, catalog: dict, g: Group, sheet) -> dict | None:
     except anthropic.APIError as exc:
         print(f"  ! Claude could not look at the {g.start:%d %b %Y} group: {exc}")
         return None
+    global spent
+    usd_in, usd_out = PRICES.get(MODEL, PRICES["claude-opus-5-5"])
+    spent += (response.usage.input_tokens * usd_in + response.usage.output_tokens * usd_out) / 1e6
     if response.parsed_output is None:
         return None
     v = response.parsed_output.model_dump()
@@ -325,7 +335,12 @@ def copy_picks(g: Group, picks: list[Shot], dest: Path) -> None:
         shutil.copy2(s.path, dest / f"{n:02d}{s.path.suffix.lower()}")
 
 
-def organize(root: Path, use_ai: bool = True, limit: int = 0) -> list[dict]:
+def estimate(groups: int, model: str) -> float:
+    usd_in, usd_out = PRICES.get(model, PRICES["claude-opus-5-5"])
+    return groups * (TYPICAL_CALL[0] * usd_in + TYPICAL_CALL[1] * usd_out) / 1e6
+
+
+def organize(root: Path, use_ai: bool = True, limit: int = 0, budget: float = 0, confirm: bool = False) -> list[dict]:
     catalog = json.loads(build.CATALOG.read_text(encoding="utf-8"))
     print(f"Reading {root} ...")
     shots, skipped = scan(root)
@@ -342,6 +357,16 @@ def organize(root: Path, use_ai: bool = True, limit: int = 0) -> list[dict]:
             client = anthropic.Anthropic()
         except Exception as exc:
             print(f"Claude isn't available ({exc}); sorting by date only. Run with an ANTHROPIC_API_KEY to pick events.")
+    # Groups Claude already judged on an earlier run are skipped, so a rerun never pays twice.
+    memory_file = INBOX / ".sorted.json"
+    memory = json.loads(memory_file.read_text(encoding="utf-8")) if memory_file.exists() else {}
+    if client:
+        groups = [g for g in groups if g.start.isoformat() not in memory]
+        cost = estimate(len(groups), MODEL)
+        print(f"Claude ({MODEL}) will look at {len(groups)} groups: about ${cost:.2f}"
+              + (f", and it stops at ${budget:.2f}." if budget else "."))
+        if confirm and input("Go ahead? [y/N] ").strip().lower() not in {"y", "yes"}:
+            return []
 
     done = {p.get("source") for p in catalog["projects"]}
     INBOX.mkdir(parents=True, exist_ok=True)
@@ -352,12 +377,16 @@ def organize(root: Path, use_ai: bool = True, limit: int = 0) -> list[dict]:
         sheet, _ = contact_sheet(picks_from)
         if sheet is None:
             continue
+        if client and budget and spent >= budget:
+            print(f"Reached the ${budget:.2f} budget after ${spent:.2f}. Run again later to continue where it stopped.")
+            break
         if client:
             verdict = ask_claude(client, catalog, g, sheet)
         row = {"date": when, "city": g.city, "shots": len(g.shots)}
         if verdict and not verdict["is_event"]:
             row.update(kept=False, reason=verdict["reason"])
             report.append(row)
+            remember(memory_file, memory, g, row)
             print(f"  - {when}: skipped ({verdict['reason']})")
             continue
 
@@ -379,6 +408,7 @@ def organize(root: Path, use_ai: bool = True, limit: int = 0) -> list[dict]:
             }, ensure_ascii=False, indent=1), encoding="utf-8")
             sheet.save(dest / "_contact-sheet.jpg", quality=80)
             row.update(kept=True, folder=name, picked=len(picks), reason=verdict["reason"])
+            remember(memory_file, memory, g, row)
             print(f"  + {name}: {len(picks)} best of {len(g.shots)}")
         else:
             # No Claude: park the group with its contact sheet for a human (or Claude Code) to look at.
@@ -389,8 +419,17 @@ def organize(root: Path, use_ai: bool = True, limit: int = 0) -> list[dict]:
             print(f"  ? {name}: needs a look")
         report.append(row)
 
-    write_report(report)
+    if client:
+        print(f"Spent about ${spent:.2f} on Claude.")
+    # The report covers every run so far: everything Claude judged, plus this run's groups waiting for a look.
+    judged = list(memory.values())
+    write_report(judged + [r for r in report if not any(r is j for j in judged)])
     return report
+
+
+def remember(path: Path, memory: dict, g: Group, row: dict) -> None:
+    memory[g.start.isoformat()] = row
+    path.write_text(json.dumps(memory, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
 def write_report(rows: list[dict]) -> None:
@@ -420,11 +459,15 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("folder", type=Path, help="the camera folder copied from your phone (for example DCIM)")
     ap.add_argument("--no-ai", action="store_true", help="only group by date and place; don't ask Claude")
     ap.add_argument("--latest", type=int, default=0, metavar="N", help="only the N most recent events (a quick test)")
+    ap.add_argument("--model", default=MODEL, choices=sorted(PRICES), help="which Claude model looks at the photos")
+    ap.add_argument("--budget", type=float, default=0, metavar="USD", help="stop asking Claude once this much is spent")
+    ap.add_argument("--yes", action="store_true", help="don't ask before spending")
     args = ap.parse_args(argv)
     if not args.folder.is_dir():
         print(f"{args.folder} is not a folder. Copy the DCIM folder from your phone to your laptop and point at that.")
         return 1
-    organize(args.folder, use_ai=not args.no_ai, limit=args.latest)
+    globals()["MODEL"] = args.model
+    organize(args.folder, use_ai=not args.no_ai, limit=args.latest, budget=args.budget, confirm=not args.yes)
     return 0
 
 

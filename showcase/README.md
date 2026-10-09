@@ -62,6 +62,11 @@ two commands.
 
 Tips:
 
+- **Cost:** Claude looks at one contact sheet per event group, never at photos one by one. Before spending anything
+  it prints how many groups it found and the estimated cost, and asks you to confirm. Roughly $0.03 per group
+  with the default model, so ~12,000 photos (typically a few hundred groups) costs about $10-25. Add
+  `--model claude-haiku-5-5` to do the same for under $1 (a cheaper model; check the picks a bit more closely),
+  and `--budget 20` to make it stop at $20. A rerun continues where it stopped and never pays for the same group twice.
 - `--latest 5` sorts only the 5 most recent events, for a quick first try.
 - No API key? Use `--no-ai`. The events are grouped and parked in `showcase/inbox/_to-review/` with a contact sheet
   each. Open this repo in Claude Code on your laptop and say *"go through showcase/inbox/_to-review and keep the
