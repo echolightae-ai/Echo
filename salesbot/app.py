@@ -159,7 +159,7 @@ def create_app(
         lead = db.get_or_create_lead("whatsapp", wa_id, phone=f"+{wa_id}", name=profile_name, source="whatsapp")
         content, logged = await whatsapp_content(message)
         db.log_inbound(lead["id"], "whatsapp", **logged)
-        if logged["kind"] in ("audio", "document"):
+        if logged.get("kind") in ("audio", "document"):
             what = "a voice note" if logged["kind"] == "audio" else "a file"
             await channels.notify_owner(
                 f"{lead_tag(lead['id'])} {lead.get('name') or 'A customer'} sent {what}: please check it",
@@ -229,6 +229,11 @@ def create_app(
         who = lead.get("name") or f"lead #{lead_id}"
         try:
             status = await agent.present_price(lead_id, details, amount_aed)
+        except DeliveryError as exc:
+            log.exception("price message for lead %s not delivered; resending shortly", lead_id)
+            db.schedule_job("deliver", time.time() + RETRY_INBOUND_SECONDS, lead_id, exc.payload)
+            return (f"The price message for {who} is written, but the channel refused it. It will be resent in a "
+                    "few minutes; you'll get an alert if it still fails.")
         except Exception as exc:
             log.exception("presenting the price failed for lead %s", lead_id)
             return (f"The price is saved, but writing the message failed ({type(exc).__name__}). It will be given "
@@ -389,7 +394,7 @@ def create_app(
         except Exception:
             log.exception("web chat reply failed")
             reply = ("Sorry, something went wrong on our side. Please message us on WhatsApp at +971 56 722 0533 "
-                     "and we'll reply right away.")
+                     "and the team will get back to you as soon as possible.")
         if is_trial() or db.get_lead(lead["id"])["bot_paused"]:
             # Nothing the bot wrote is shown; the widget tells the visitor the team will get back to them.
             return {"reply": "", "held": True}
@@ -473,8 +478,11 @@ def create_app(
         if _validity(lead):
             pills += f" <span class=pill>{_validity(lead)}</span>"
         trial = is_trial()
+        language = {"ar": "Arabic", "en": "English"}.get(lead.get("language") or "", "not known yet")
         price_form = (
-            f"<h2>Give the price</h2><form method='post' action='/admin/leads/{lead_id}/price'>"
+            f"<h2>Give the price</h2><p class=muted>Write it in the customer's language ({language}): the bot "
+            "keeps your figures and wording exactly. Check the date, crew and equipment first.</p>"
+            f"<form method='post' action='/admin/leads/{lead_id}/price'>"
             "<label>Amount in AED, excluding VAT (for reports)<br><input name='amount' inputmode='numeric' "
             "placeholder='28000'></label><br><label>Exact wording for the customer<br>"
             "<textarea name='details' rows='4' required placeholder='AED 28,000 excl. VAT (+5% VAT) - lighting, "
@@ -578,7 +586,7 @@ def create_app(
         except Exception:
             log.exception("media %s could not be fetched", item_id)
             raise HTTPException(502, "WhatsApp no longer has this file (media expires after some weeks).")
-        extension = (mime or "").split("/")[-1].split(";")[0] or "bin"
+        extension = re.sub(r"[^A-Za-z0-9]", "", (mime or "").split("/")[-1].split(";")[0]) or "bin"
         return Response(data, media_type=mime or "application/octet-stream",
                         headers={"Content-Disposition": f'inline; filename="{item["kind"]}-{item_id}.{extension}"'})
 

@@ -6,8 +6,9 @@ Rules:
 - Only write facts you are happy for the agent to tell customers.
 - Anything inside HTML comments like this one is ignored by the agent.
 - If a fact is missing, the agent says the team will confirm and alerts you.
-  It never guesses. Fill in the "To confirm" items below to make it fully
-  self-sufficient.
+  It never guesses. Add any missing fact as a new line below.
+- The Claude playbook (skills/echolight-sales/SKILL.md) repeats these facts;
+  keep both files the same when you change one.
 -->
 
 # EchoLight
@@ -68,7 +69,8 @@ Portfolio: https://www.echolight.ae/our-work
 ## How we work
 
 1. The customer shares the event details (date, venue, guests, services, indoor or outdoor).
-2. Our team prices each project individually based on its requirements and sends the quote.
+2. Our team checks the date, crew and equipment, prices the project individually and sends the quote
+   (valid for 3 days).
 3. Optional call or site visit to confirm the venue, power and rigging.
 4. Our team delivers setup, live operation during the event, and teardown.
 
@@ -79,7 +81,11 @@ For anything sooner, don't refuse: take the details and say the team will check 
 
 ## Prices and payment
 
+- Every project is priced individually by our team; there is no price list. We send the quote as soon as
+  possible; we don't promise a specific time.
 - All prices are quoted excluding VAT; 5% VAT is added on top.
+- Quotes are valid for 3 days from the day they are sent. After that, the team re-confirms the price and the
+  date before the customer can book.
 - 50% deposit to confirm the booking.
 - The remaining 50% is due on the event date, at the latest before the event starts.
 - Payments are made strictly to EchoLight's official company accounts, such as the company bank account shown

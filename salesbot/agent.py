@@ -33,7 +33,6 @@ from salesbot.tools import (
     ToolExecutor,
     apply_stage,
     format_date,
-    lead_summary,
     lead_tag,
     lead_url,
     quote_status_note,
@@ -173,7 +172,10 @@ class SalesAgent:
                 reply = await self._turn(lead, note, self._price_instruction(lead, valid_until))
                 if not reply:
                     return "waiting"
-                status = await self.deliver(lead_id, reply, "price", valid_until.isoformat())
+                try:
+                    status = await self.deliver(lead_id, reply, "price", valid_until.isoformat())
+                except Exception as exc:
+                    raise DeliveryError(reply, "price", valid_until.isoformat()) from exc
                 self._schedule_followups(lead_id)
                 return status
             # Outside the 24-hour window: nudge with a template; the price is given when they reply.
@@ -190,7 +192,7 @@ class SalesAgent:
                 last = lead["last_outbound_at"] or lead["last_inbound_at"] or time.time()
                 instruction = FOLLOWUP_INSTRUCTION.format(
                     step=step, total=total, hours=round((time.time() - last) / 3600), no_reply=NO_REPLY,
-                    quote_note=quote_status_note(lead), final_note=FINAL_FOLLOWUP_NOTE if step == total else "",
+                    final_note=FINAL_FOLLOWUP_NOTE if step == total else "",
                 )
                 note = [{"type": "text", "text": "[No reply from the customer yet.]"}]
                 reply = await self._turn(lead, note, instruction)

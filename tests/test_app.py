@@ -260,12 +260,12 @@ async def test_daily_digest(db, channels, settings):
     from salesbot.scheduler import Scheduler
 
     scheduler = Scheduler(db, SalesAgent(db, channels, FakeClient()))
-    lead = db.get_or_create_lead("whatsapp", "971501239999", name="Hamad", event_type="gala dinner")
-    db.update_lead(lead["id"], stage="quoted", quote_aed=12000, quote_details="AED 12,000 excl. VAT",
-                   quote_sent_at=time.time(), quote_valid_until=today_local().isoformat())
-    db.get_or_create_lead("whatsapp", "971501238888", name="Mira", stage="awaiting_price")
     scheduler.ensure_digest_scheduled()
     [job] = db.pending_jobs(kind="daily_digest")
+    lead = db.get_or_create_lead("whatsapp", "971501239999", name="Hamad", event_type="gala dinner")
+    db.update_lead(lead["id"], stage="quoted", quote_aed=12000, quote_details="AED 12,000 excl. VAT",
+                   quote_sent_at=time.time(), quote_valid_until=today_local(job["run_at"]).isoformat())
+    db.get_or_create_lead("whatsapp", "971501238888", name="Mira", stage="awaiting_price")
     await scheduler.tick(now=job["run_at"] + 1)
     [(_, subject, body)] = channels.of("owner")
     assert subject == "Daily sales digest" and "Hamad" in body and "AED 12,000" in body
@@ -416,3 +416,35 @@ def test_admin_stage_buttons(app_env, db):
     assert "Unknown stage" in client.post(f"{base}/stage", data={"stage": "booked"}, auth=ADMIN).text
     client.post(f"{base}/stage", data={"stage": "lost"}, auth=ADMIN)
     assert db.pending_jobs(lead["id"], "review_request") == []
+
+
+def test_price_message_refused_by_whatsapp_is_retried(app_env, db, channels):
+    client, claude, _ = app_env
+    lead = db.get_or_create_lead("whatsapp", "971502240000", name="Nada", stage="awaiting_price",
+                                 last_inbound_at=time.time())
+
+    async def broken(to, body):
+        raise RuntimeError("WhatsApp API down")
+
+    channels.whatsapp_text = broken
+    claude.queue(message(text("Nada, your quote is AED 5,000 excl. VAT.")))
+    response = client.post(f"/admin/leads/{lead['id']}/price", data={"details": "AED 5,000 excl. VAT"}, auth=ADMIN)
+    assert "will be resent" in response.text
+    [job] = db.pending_jobs(lead["id"], "deliver")
+    assert job["payload"]["kind"] == "price" and job["payload"]["quote_valid_until"]
+    assert db.get_lead(lead["id"])["quote_sent_at"] is None
+
+
+async def test_resent_price_counts_as_sent(db, channels, settings):
+    from salesbot.agent import SalesAgent
+    from salesbot.scheduler import Scheduler
+
+    scheduler = Scheduler(db, SalesAgent(db, channels, FakeClient()))
+    lead = db.get_or_create_lead("whatsapp", "971502250000", stage="awaiting_price", price_to_send=1,
+                                 last_inbound_at=time.time())
+    db.schedule_job("deliver", 0, lead["id"], {"text": "Your quote: AED 5,000 excl. VAT", "kind": "price",
+                                               "quote_valid_until": "2026-10-12"})
+    await scheduler.tick()
+    assert channels.of("whatsapp_text") == [("whatsapp_text", "971502250000", "Your quote: AED 5,000 excl. VAT")]
+    saved = db.get_lead(lead["id"])
+    assert (saved["stage"], saved["quote_valid_until"], saved["price_to_send"]) == ("quoted", "2026-10-12", 0)

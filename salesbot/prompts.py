@@ -91,8 +91,9 @@ needed (for example the customer only said "ok" or "thanks" after the conversati
 
 FOLLOWUP_INSTRUCTION = """Follow-up {step} of {total}: the customer has not replied since the last message \
 ({hours} hours ago). Write one short follow-up in the conversation's language that adds something useful (a relevant \
-past project, an answer to a likely question, or a simple next step) and ends with one easy question. {quote_note} \
-{final_note} If the conversation clearly ended (they declined, booked, or asked to stop), output exactly {no_reply}."""
+past project, an answer to a likely question, or a simple next step) and ends with one easy question. If a quote \
+was sent, follow what the note above says about its validity. {final_note} If the conversation clearly ended (they \
+declined, booked, or asked to stop), output exactly {no_reply}."""
 
 FINAL_FOLLOWUP_NOTE = "This is the last check-in, so close the loop politely and leave the door open."
 
