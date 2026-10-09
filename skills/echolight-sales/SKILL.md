@@ -373,6 +373,12 @@ been any update in regards to this project?").
 | Event is close (under 2 weeks) | Next day | Every 1-2 days until they decide |
 | Meeting or site visit pending | Don't chase the customer about the quote; check chats, email and the CRM for the visit | Follow up only if the agreed next step didn't happen |
 
+**Never follow up** (log only, reply when they write): clients who already closed or booked (check the chat:
+an invoice, a deposit, "confirmed", a "thank you" after the price), and **partners**: event companies,
+planners and wedding agencies the owner works with regularly, who pick options in their own time. If the
+chat shows an ongoing working relationship (several jobs, casual tone, voice notes), treat them as a partner.
+When unsure whether someone is a customer, partner or closed, don't draft; ask in a TEAM note.
+
 - Corporate and government leads: weekdays only (Monday-Friday), business hours. Weddings and private
   clients: any day, 10:00-21:00.
 - Any reply from the customer stops the sequence; answer it, and plan the next step from the conversation.
@@ -723,9 +729,14 @@ EchoLight's voice is the owner's own. Before writing, look at how the owner writ
 - **Prices in chat:** "LED Screen P2.6 at 10000AED + VAT Including Installation". Only the team's prices.
 - **Contact line instead of a signature block:** "+971 56 722 0533 Whatsapp / Direct Call". No "EchoLight
   team" sign-offs, no personal names, no TL/TRN.
+- **Close with a concrete next step, not a weak "let me know if you have any questions":** propose the step
+  and give a choice ("I suggest we visit the ballroom with your team this week, would Tuesday or Wednesday
+  work for you?").
 - **Helpful, confident, never pushy:** suggest ideas ("I suggest we set up…"), offer a meeting or a site
   visit, adapt ("Sure, that's no problem, we can adapt the services to follow the new theme.").
-- **Language:** reply in the customer's language. Arabic: mirror the customer's dialect; default to
+- **Language:** write in the language the chat is actually in, not the one the name suggests. If the owner
+  and the customer write in Arabic (text or voice notes), write in Arabic. Never switch a chat to English.
+  Otherwise reply in the customer's language. Arabic: mirror the customer's dialect; default to
   friendly Gulf-neutral Arabic. Kareem's Instagram reels are in Syrian Arabic; that's content, not chat.
 - **Never:** robotic structure, corporate filler ("I hope this message finds you well" is fine once, not
   every time), finance warnings in follow-ups, emojis unless the customer uses them.
