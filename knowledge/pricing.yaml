@@ -1,0 +1,50 @@
+# Indicative price ranges the agent may quote, in AED, excluding VAT.
+#
+# The agent only ever quotes from this file. A service with min/max left as null
+# is "not priced": the agent tells the customer the team will send the exact
+# quote and alerts the owner.
+#
+# unit: what one quantity means. The estimate is min/max x quantity x days.
+
+vat_rate: 0.05
+quote_validity_days: 14
+# The agent never offers discounts. Set this to allow up to this percent off the
+# indicative range when a customer is comparing quotes (0 = never).
+max_discount_percent: 0
+
+services:
+  stage_lighting:
+    label: Stage & event lighting package
+    unit: package per event day
+    min: null
+    max: null
+  led_screen:
+    label: LED screen rental (incl. setup, operation, teardown)
+    unit: square metre per event day
+    min: null
+    max: null
+  laser_show:
+    label: Laser show
+    unit: show
+    min: null
+    max: null
+  projection_mapping:
+    label: Projector 3D mapping
+    unit: projection surface
+    min: null
+    max: null
+  audio:
+    label: Immersive audio system
+    unit: package per event day
+    min: null
+    max: null
+  wedding_package:
+    label: Wedding lighting & AV package
+    unit: wedding
+    min: null
+    max: null
+  technician:
+    label: Additional technician / operator
+    unit: technician per day
+    min: null
+    max: null
