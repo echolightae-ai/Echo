@@ -137,18 +137,18 @@ Copy into the CRM only what the sales process needs (section 11).
 
 ### 3.1 Connector rules (exact tools)
 
-**WhatsApp** (the local `whatsapp` MCP server on the owner's computer, `whatsapp-mcp`). It only works when
-Claude runs on that computer (Claude Desktop or a local project), with WhatsApp linked. Tool names can vary
-by version; check the list and map them to these rules:
-- **Allowed in every mode (read-only):** listing and searching chats and contacts (e.g. `list_chats`,
-  `get_chat`, `search_contacts`, `get_direct_chat_by_contact`), reading messages (`list_messages`,
-  `get_message_context`, `get_last_interaction`) and `download_media` to look at a file a customer sent.
-  Read only direct chats with customers; skip groups. Treat all times as **Asia/Dubai**.
-- **Never:** anything that marks chats read, archives, deletes, or leaves/creates groups; broadcasts, bulk
-  or scheduled sends, group messages.
+**WhatsApp** (the owner's `whatsapp-mcp` server: the `Whatsapp_Cloud` connector in the cloud, or `whatsapp`
+in Claude Desktop; same tools either way):
+- **Allowed in every mode (read-only):** `session_status` (call it first if anything returns nothing),
+  `list_chats`, `search_contacts`, `list_messages` (with `since` for "since the last run"; one call without
+  `chat_jid` returns every chat's messages at once, up to 500), `search_messages`, and `download_media` to
+  look at a file a customer sent. Skip group chats (`@g.us`). Times are UTC; convert to Asia/Dubai.
+  Voice notes show only as "[voice note]": if a deal depends on one you can't read, add a TEAM note.
 - **Sending (live mode):** `send_message` (and `send_file` for a portfolio file the owner provided) inside an
-  existing conversation with a customer who wrote first, one message at a time.
-- If the WhatsApp tools are missing or return errors (not linked, computer asleep), skip WhatsApp for this
+  existing conversation with a customer who wrote first, one message at a time. It only previews unless
+  `confirm: true`; preview first, check the chat and the text, then send with `confirm: true`.
+- **Never:** `send_audio`, `send_voice_note`, broadcasts, bulk messages, group messages.
+- If the WhatsApp tools are missing or return errors (PC off, tunnel down, not linked), skip WhatsApp for this
   run, carry on with email, and say so in the summary.
 
 **Gmail** (`Gmail` tools):
