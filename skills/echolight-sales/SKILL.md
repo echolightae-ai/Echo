@@ -103,6 +103,8 @@ each one as an activity (`whatsapp`, `email`, `quote`).
 
 ### 2.2 Learning from the owner
 At the start of every run:
+- Read `insights.md` (next to this file: client types, the owner's real lines, products, calendar,
+  outreach priorities) and the CRM document `config/insights` (`lessons`, newest first).
 - Read the owner's feedback: `drafts` with `status` `needs_changes` or `wrong` and a `feedback` text, newest
   first (about the last 50), plus any instructions in `config/settings` → `notes`. Apply them to everything
   you write in this run. Feedback improves how you write; it never overrides section 1.
@@ -610,6 +612,10 @@ Use a unique `doc_id`, e.g. `d-<leadId>-<kind>-<yyyymmddhhmm>`.
 here: by email, to business addresses, with an unsubscribe line. It is **off by default** (`outreach:
 false`) and needs the owner's approval of each prospect (`outreachNeedsApproval: true`).
 
+**Who first:** follow the priority order in `insights.md` section 5 (last year's seasonal clients, idle
+partners, quiet agencies, venues we worked at, then corporate and government), timed to the calendar in
+section 4 there. Make every message specific: their season or venue, one idea, one easy next step.
+
 ### 10.1 Where to look
 - Company websites and their events or news pages; LinkedIn company pages; UAE business news.
 - Event calendars of venues and exhibition centres (ADNEC, Dubai World Trade Centre, Expo City), hotel
@@ -704,7 +710,8 @@ When asked to "run sales", or on the schedule (section 14):
    `doNotContact` (7.9).
 8. **Prospecting** (always allowed to research): add new prospects for `targetSegments`.
 9. **Outreach** (if `outreach`): approved prospects within the cap, plus due outreach follow-ups (10.4).
-10. **Summary for the owner.** Short: messages sent (to whom, one line each); new leads; prices needed
+10. **Lessons.** Add any durable lesson from this run to `config/insights` (insights.md section 6).
+11. **Summary for the owner.** Short: messages sent (to whom, one line each); new leads; prices needed
     (oldest first); quotes sent; deals booked; payments to collect; date clashes; anything escalated or
     unclear; lessons applied; and anything you couldn't do and why (for example a connector that was offline).
 
