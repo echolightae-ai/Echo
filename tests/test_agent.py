@@ -175,7 +175,7 @@ def test_prompt_never_volunteers_ai_and_is_honest_when_asked(db, channels):
     assert "Would you like Kareem to call you?" in system and "تحب كريم يتصل فيك؟" in system
     assert "escalate_to_team" in system and "not sincere questions" in system
     assert "never promise a time" in system
-    assert "valid for 3 days" in system and "valid until" in system
+    assert "valid for 7 days" in system and "valid until" in system
 
 
 async def test_new_message_resets_followups(db, channels):
@@ -325,7 +325,7 @@ async def test_expiry_day_followup_reminds_and_expired_quote_offers_refresh(db, 
     today = quoted_lead(db, "971500000040", 0)
     await agent.run_followup(today["id"], 2)
     instruction = client.messages.calls[-1]["messages"][-1]["content"]
-    assert "valid until today" in instruction and "lock the date" in instruction
+    assert "validity date today" in instruction and "VAT" in instruction
 
     expired = quoted_lead(db, "971500000041", -2)
     await agent.run_followup(expired["id"], 3)
@@ -455,7 +455,7 @@ async def test_team_reply_with_price_starts_quote_validity(db, channels):
     lead = db.get_or_create_lead("whatsapp", "971500000053", name="Huda", stage="awaiting_price",
                                  last_inbound_at=time.time(), price_requested_at=time.time() - 3600)
     db.schedule_job("price_reminder", time.time() + 3600, lead["id"])
-    reply = await agent.team_reply(lead["id"], "AED 12,000 excl. VAT, valid for 3 days", gives_price=True)
+    reply = await agent.team_reply(lead["id"], "AED 12,000 excl. VAT, valid for 7 days", gives_price=True)
     assert f"Quote valid until {format_date(valid_until_from())}" in reply
     saved = db.get_lead(lead["id"])
     assert (saved["stage"], saved["quote_valid_until"]) == ("quoted", valid_until_from().isoformat())

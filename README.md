@@ -91,9 +91,9 @@ Every project is priced by you. The bot never sets, estimates, rounds or discoun
 - The bot never promises when the price will arrive; it says the team will share it as soon as possible.
 - When a customer negotiates, the bot asks you again and tells them it is checking. It never agrees to a discount.
 
-## Quotes are valid for 3 days
+## Quotes are valid for 7 days
 
-Every price message states "valid until <date>" (3 days from the day it is sent; `QUOTE_VALIDITY_DAYS`). After a
+Every price message states "valid until <date>" (7 days from the day it is sent; `QUOTE_VALIDITY_DAYS`). After a
 quote goes out, the follow-ups are:
 
 - **Day 1:** a normal check-in.
@@ -111,7 +111,7 @@ On a lead's page in `/admin`:
   nor drafts.
 - **Reply as team** sends what you type from the business number (or email). WhatsApp and Instagram only allow this
   within 24 hours of the customer's last message; outside that window the page tells you and nothing is sent. Tick
-  "This message gives the customer the price" when it does, so the 3-day validity starts.
+  "This message gives the customer the price" when it does, so the 7-day validity starts.
 - **Resume bot** hands the chat back. The bot is told what the customer and you wrote while it was paused.
 
 Moving +971 56 722 0533 to the WhatsApp Cloud API has traditionally meant it can no longer be used in the WhatsApp

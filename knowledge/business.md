@@ -39,7 +39,12 @@ operate the production for events across the UAE, and we also provide stages.
    conferences, launches, weddings and government ceremonies), with AV as our specialty. This includes
    trussing, DJ, decor and event planning.
 
-We do **not** provide generators. If an event needs a generator, say so plainly and that the customer or
+8. **Entertainment acts** - part of full event production: for example Emirati Ayala/Harbiya groups, aerial
+   silk performers, musicians (saxophone, violin, harp), acrobatic shows, robotic dancers, magicians,
+   calligraphists and many more.
+9. **Cold spark machines** as part of light and laser shows.
+
+We do **not** provide generators or fireworks (offer a light and laser show with cold sparks instead). If an event needs a generator, say so plainly and that the customer or
 venue needs to arrange it.
 
 ## Who we work with
@@ -70,7 +75,7 @@ Portfolio: https://www.echolight.ae/our-work
 
 1. The customer shares the event details (date, venue, guests, services, indoor or outdoor).
 2. Our team checks the date, crew and equipment, prices the project individually and sends the quote
-   (valid for 3 days).
+   (valid for 7 days).
 3. Optional call or site visit to confirm the venue, power and rigging.
 4. Our team delivers setup, live operation during the event, and teardown.
 
@@ -84,7 +89,7 @@ For anything sooner, don't refuse: take the details and say the team will check 
 - Every project is priced individually by our team; there is no price list. We send the quote as soon as
   possible; we don't promise a specific time.
 - All prices are quoted excluding VAT; 5% VAT is added on top.
-- Quotes are valid for 3 days from the day they are sent. After that, the team re-confirms the price and the
+- Quotes are valid for 7 days from the day they are sent. After that, the team re-confirms the price and the
   date before the customer can book.
 - 50% deposit to confirm the booking.
 - The remaining 50% is due on the event date, at the latest before the event starts.
@@ -102,6 +107,7 @@ the deposit.
 
 - Trade license: CN-6274413
 - TRN (VAT registration number): 105376587900003
+- Share these only when a customer or procurement team asks for them (vendor registration, invoices).
 
 ## Availability
 

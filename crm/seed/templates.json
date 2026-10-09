@@ -67,7 +67,7 @@
     "language": "en",
     "stage": "quoted",
     "subject": "",
-    "body": "Hi {name}, here is your quote for the {event} on {date}:\n\n{price}\n\nPrices are excl. VAT (+ 5% VAT). This quote is valid until {validUntil}.\n\nTo confirm the date we take a 50% deposit, and the remaining 50% is due on the event day before the show starts. Payment is only to the EchoLight company account shown on the invoice.\n\nWould you like to go ahead, or shall we go through it together on a quick call?"
+    "body": "Hi {name}, hope you're well\n\nHere's our quote for your {event} on {date}:\n\n{price}\n\nLet me know if you have any questions, or if you'd like to go through it on a quick call."
   },
   {
     "id": "t06-quote-ar",
@@ -77,7 +77,7 @@
     "language": "ar",
     "stage": "quoted",
     "subject": "",
-    "body": "مرحباً {name}، هذا عرض السعر لفعاليتكم في {date}:\n\n{price}\n\nالسعر غير شامل ضريبة القيمة المضافة (+ 5%). العرض ساري حتى {validUntil}.\n\nلتأكيد الحجز نطلب دفعة مقدمة 50%، والـ 50% الباقية تُدفع يوم الفعالية قبل البدء. الدفع يكون فقط على حساب شركة إيكو لايت الموضح في الفاتورة.\n\nتحبون نثبت الحجز، أو نشرح لكم التفاصيل في مكالمة سريعة؟"
+    "body": "مرحباً {name}، إن شاء الله تكونون بخير\n\nهذا عرض السعر لفعاليتكم في {date}:\n\n{price}\n\nإذا عندكم أي سؤال أو تحبون نمر على التفاصيل باتصال سريع، خبرونا."
   },
   {
     "id": "t25-revised-quote-en",
@@ -87,7 +87,7 @@
     "language": "en",
     "stage": "negotiating",
     "subject": "",
-    "body": "Hi {name}, the team has updated your quote for the {event} on {date}:\n\n{price}\n\nPrices are excl. VAT (+ 5% VAT). This updated quote is valid until {validUntil}.\n\nThe terms stay the same: a 50% deposit confirms the date, and the remaining 50% is due on the event day before the show starts. Shall we go ahead?"
+    "body": "Hi {name}, here's the updated quote for your {event}:\n\n{price}\n\nLet me know what you think."
   },
   {
     "id": "t26-revised-quote-ar",
@@ -97,67 +97,67 @@
     "language": "ar",
     "stage": "negotiating",
     "subject": "",
-    "body": "مرحباً {name}، الفريق حدّث لكم عرض السعر لفعاليتكم في {date}:\n\n{price}\n\nالسعر غير شامل ضريبة القيمة المضافة (+ 5%). العرض المحدّث ساري حتى {validUntil}.\n\nالشروط نفسها: دفعة مقدمة 50% تثبت الموعد، والـ 50% الباقية تُدفع يوم الفعالية قبل البدء. نثبت الحجز؟"
+    "body": "مرحباً {name}، هذا عرض السعر المحدّث لفعاليتكم:\n\n{price}\n\nخبرونا برأيكم."
   },
   {
     "id": "t07-followup1-en",
     "order": 11,
-    "name": "Follow-up 1 (day 1)",
+    "name": "Follow-up 1",
     "channel": "whatsapp",
     "language": "en",
     "stage": "quoted",
     "subject": "",
-    "body": "Hi {name}, just checking you received the quote for your {event}. We're happy to adjust anything or answer any questions. The quote is valid until {validUntil}."
+    "body": "Hi {name}, hope you're well. Just checking you received our quote for the {event}. Let me know if you'd like to adjust anything."
   },
   {
     "id": "t08-followup1-ar",
     "order": 12,
-    "name": "Follow-up 1 (day 1)",
+    "name": "Follow-up 1",
     "channel": "whatsapp",
     "language": "ar",
     "stage": "quoted",
     "subject": "",
-    "body": "مرحباً {name}، حبينا نتأكد إن عرض السعر وصلكم. إذا تحبون نعدل أي شيء أو عندكم أي سؤال، نحن في الخدمة. العرض ساري حتى {validUntil}."
+    "body": "مرحباً {name}، إن شاء الله بخير. حبينا نتأكد إن عرض السعر وصلكم، وإذا تحبون نعدل أي شيء خبرونا."
   },
   {
     "id": "t09-followup2-en",
     "order": 13,
-    "name": "Follow-up 2 (day 3, quote expires today)",
+    "name": "Follow-up 2",
     "channel": "whatsapp",
     "language": "en",
     "stage": "quoted",
     "subject": "",
-    "body": "Hi {name}, a quick reminder that your quote is valid until today, {validUntil}. Shall we lock in {date} for you? Once you confirm, the team will send the invoice for the 50% deposit.\n\nSome of our recent work: https://www.echolight.ae/our-work"
+    "body": "Hi {name}, has there been any update regarding the {event}? Happy to do a quick call or a site visit if it helps.\n\nSome of our recent work: https://www.echolight.ae/our-work"
   },
   {
     "id": "t10-followup2-ar",
     "order": 14,
-    "name": "Follow-up 2 (day 3, quote expires today)",
+    "name": "Follow-up 2",
     "channel": "whatsapp",
     "language": "ar",
     "stage": "quoted",
     "subject": "",
-    "body": "مرحباً {name}، حبينا نذكركم إن عرض السعر ساري لنهاية اليوم ({validUntil}). نثبت لكم الحجز في {date}؟ بمجرد تأكيدكم، الفريق بيرسل لكم فاتورة الدفعة المقدمة 50%.\n\nوهذي بعض أعمالنا الأخيرة: https://www.echolight.ae/our-work"
+    "body": "مرحباً {name}، في أي جديد بخصوص الفعالية؟ إذا يساعدكم، نقدر نسوي اتصال سريع أو زيارة للموقع.\n\nبعض أعمالنا الأخيرة: https://www.echolight.ae/our-work"
   },
   {
     "id": "t11-followup3-en",
     "order": 15,
-    "name": "Follow-up 3 (day 7, offer a refreshed quote)",
+    "name": "Follow-up 3 (last)",
     "channel": "whatsapp",
     "language": "en",
     "stage": "quoted",
     "subject": "",
-    "body": "Hi {name}, last check-in from us about your {event}. Your earlier quote has expired, but if you're still planning the event, just reply here and the team will re-confirm the price and the date's availability for you. If your plans have changed, no problem at all."
+    "body": "Hi {name}, just checking in one last time about the {event}. If you're still planning it, reply here and we'll update the quote and check the date for you. If plans changed, no problem at all."
   },
   {
     "id": "t12-followup3-ar",
     "order": 16,
-    "name": "Follow-up 3 (day 7, offer a refreshed quote)",
+    "name": "Follow-up 3 (last)",
     "channel": "whatsapp",
     "language": "ar",
     "stage": "quoted",
     "subject": "",
-    "body": "مرحباً {name}، هذي آخر رسالة متابعة منا بخصوص فعاليتكم. عرض السعر السابق انتهت صلاحيته، لكن إذا ما زلتم تخططون للفعالية، ردوا علينا هنا والفريق بيؤكد لكم السعر وتوفر الموعد من جديد. وإذا تغيرت خططكم، ولا يهمكم."
+    "body": "مرحباً {name}، آخر متابعة منا بخصوص الفعالية. إذا ما زلتم تخططون لها، ردوا علينا هنا ونحدّث لكم العرض ونتأكد من الموعد. وإذا تغيرت الخطط، ما في مشكلة أبداً."
   },
   {
     "id": "t27-quote-expired-en",

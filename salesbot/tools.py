@@ -197,10 +197,12 @@ def quote_status_note(lead: dict, now: float | None = None) -> str:
         return ""
     today = today_local(now)
     if valid > today:
-        return f"Their quote is valid until {format_date(valid)}."
+        return (f"Their quote is valid until {format_date(valid)}. In a follow-up, don't mention the validity, VAT "
+                "or payment terms: focus on their event and the next step.")
     if valid == today:
-        return (f"Their quote is valid until today ({format_date(valid)}). Remind them kindly and ask whether they "
-                "would like to lock the date.")
+        return (f"Their quote reaches its validity date today ({format_date(valid)}). Don't mention the validity, "
+                "prices or VAT: check in on their plans and offer the next step (a call, a site visit, confirming "
+                "the date).")
     return (f"Their quote expired on {format_date(valid)}. Do not present the old price as valid. Offer to have the "
             "team refresh the quote (re-confirm the price and the date's availability); if they want that, call "
             "request_price.")

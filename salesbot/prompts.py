@@ -91,7 +91,8 @@ needed (for example the customer only said "ok" or "thanks" after the conversati
 
 FOLLOWUP_INSTRUCTION = """Follow-up {step} of {total}: the customer has not replied since the last message \
 ({hours} hours ago). Write one short follow-up in the conversation's language that adds something useful (a relevant \
-past project, an answer to a likely question, or a simple next step) and ends with one easy question. If a quote \
+past project, an answer to a likely question, or a simple next step) and ends with one easy question. Never mention \
+VAT, validity dates, payment terms or company registration numbers in a follow-up. If a quote \
 was sent, follow what the note above says about its validity. {final_note} If the conversation clearly ended (they \
 declined, booked, or asked to stop), output exactly {no_reply}."""
 
@@ -121,5 +122,5 @@ TEAM_REPLY_NOTE = "[The team sent the customer this message themselves: {text}]"
 RESUME_NOTE = "[The team has handed the conversation back to you.]"
 
 
-def build_system_prompt(facts: str, validity_days: int = 3) -> str:
+def build_system_prompt(facts: str, validity_days: int = 7) -> str:
     return SYSTEM_TEMPLATE.format(facts=facts, no_reply=NO_REPLY, validity_days=validity_days)

@@ -378,7 +378,7 @@ class SalesAgent:
         times: list[float | None] = [now + hours * 3600 for hours in config.settings.followup_delays_hours]
         valid = quote_valid_until(lead)
         if valid and len(times) >= 2:
-            # Day 1 check-in, then the expiry-day check-in ("valid until today"), then the last one offering a refresh.
+            # Day 1 check-in, then a check-in on the validity date (no money talk), then the last one offering a refresh.
             expiry = datetime.combine(valid, dtime(EXPIRY_REMINDER_HOUR), tzinfo=config.settings.timezone).timestamp()
             later = times[2] if len(times) > 2 else float("inf")
             if times[0] < expiry < later:

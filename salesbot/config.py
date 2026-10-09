@@ -103,7 +103,7 @@ class Settings:
     )
     # Trial mode: alert the owner about each new customer message, at most once per lead per N minutes.
     trial_alert_minutes: float = field(default_factory=lambda: float(_env("TRIAL_ALERT_MINUTES", "30")))
-    quote_validity_days: int = field(default_factory=lambda: int(_env("QUOTE_VALIDITY_DAYS", "3")))
+    quote_validity_days: int = field(default_factory=lambda: int(_env("QUOTE_VALIDITY_DAYS", "7")))
     review_request_delay_hours: float = field(default_factory=lambda: float(_env("REVIEW_DELAY_HOURS", "24")))
     reactivation_delay_days: float = field(default_factory=lambda: float(_env("REACTIVATION_DELAY_DAYS", "60")))
     quiet_hours: tuple[int, int] = field(default_factory=lambda: (22, 9))  # no automated sends 22:00-09:00 local
