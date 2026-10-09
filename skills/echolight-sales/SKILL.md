@@ -127,10 +127,11 @@ draft. The owner reviews drafts in the CRM's Trial tab.
 | Task | What you need | If it's missing |
 |---|---|---|
 | Read and update the CRM | The `ArtifactData` tool with the CRM link above | Ask the user to open this in a Claude session that has their claude.ai account |
-| WhatsApp history (and live replies) | The local **whatsapp** MCP server on the owner's computer (3.1) | Say WhatsApp isn't reachable from this session; work on the CRM and drafts instead |
+| WhatsApp history (and live replies) | The owner's **whatsapp** MCP server (`Whatsapp_Cloud` or local `whatsapp`, 3.1) | Say WhatsApp isn't reachable from this session; work on the CRM and drafts instead |
 | Email history (and live replies) | The **Gmail** connector (preferred), or the owner's webmail open in the browser | Same as above |
 | Instagram DMs | Instagram open in the browser | Same as above |
 | Finding prospects | Web search and web fetch | Say so; work on the CRM instead |
+| Customer data archive | The project folder `EchoLight Customer Data` (12.1) | Save to the CRM collection `customerData` and say so |
 
 When working in the owner's browser: stay on the WhatsApp, email, Instagram and CRM tabs needed for the
 task. Don't open chats that look personal, family or supplier-related (judge from the name and the preview
@@ -584,7 +585,7 @@ Use a unique `doc_id`, e.g. `d-<leadId>-<kind>-<yyyymmddhhmm>`.
 ### 8.7 `config/settings`
 ```json
 {"mode":"live",
- "autopilot":{"inboundReplies":true,"followUps":true,"outreach":false,"outreachNeedsApproval":true,"outreachDailyCap":20},
+ "autopilot":{"inboundReplies":true,"followUps":true,"outreach":true,"outreachNeedsApproval":false,"outreachDailyCap":20},
  "followUpDays":[2,6,12],"targetSegments":["Corporate","Hospitality / hotel","Automotive","Event agency","Wedding"],
  "notes":"free-text instructions from the owner"}
 ```
@@ -618,8 +619,25 @@ Use a unique `doc_id`, e.g. `d-<leadId>-<kind>-<yyyymmddhhmm>`.
 ## 10. Outbound: finding and approaching new clients
 
 **Policy (the same everywhere):** EchoLight never cold-messages anyone on WhatsApp. Cold outreach exists only
-here: by email, to business addresses, with an unsubscribe line. It is **off by default** (`outreach:
-false`) and needs the owner's approval of each prospect (`outreachNeedsApproval: true`).
+here: by email, to business addresses, with an unsubscribe line. The owner decided (Oct 2026) that outreach
+runs **automatically every day**: `outreach: true`, `outreachNeedsApproval: false`, `outreachDailyCap: 20`
+(new first contacts per day; follow-ups to earlier prospects don't count toward it). The settings still win:
+if the owner switches outreach off or turns approval back on, follow the settings.
+
+**The daily target: 20 new prospects, every day, from different industries.** Rotate so no single industry
+takes more than 5 of the day's 20, and cover at least 4 industries a day. Industries to rotate through:
+hotels and venues (events and wedding teams); wedding planners; event and marketing agencies; car dealers and
+brand launches; real-estate developers (launches, show-homes); malls and retail activations; corporates
+(annual dinners, awards, family days, product launches); government and semi-government (National Day,
+celebrations, conferences); schools and universities (graduations, open days); restaurants, beach clubs and
+lounges (NYE, themed nights); exhibition and conference organisers; embassies (national days); sports clubs
+and tournaments; healthcare and pharma (conferences, launches). Prefer industries with a season coming up
+(insights.md section 4).
+
+**Weekends (Saturday and Sunday):** research and add the day's 20 as usual, but email only prospects that work
+weekends (hotels, venues, wedding planners, restaurants, malls). Corporate, government, schools and embassies
+found at the weekend get their first email on Monday morning (still within that day's cap of 20: Monday's
+new research fills only the remaining places).
 
 **Who first:** follow the priority order in `insights.md` section 5 (last year's seasonal clients, idle
 partners, quiet agencies, venues we worked at, then corporate and government), timed to the calendar in
@@ -641,14 +659,23 @@ section 4 there. Make every message specific: their season or venue, one idea, o
 
 ### 10.3 Adding prospects (allowed in both modes)
 Add each as a `prospects` document with `status: "found"`, `addedBy: "claude"`, `touches: 0`,
-`outreachLog: []`, `createdAt`/`updatedAt`. Aim for quality: 5 well-researched prospects beat 50 names.
+`outreachLog: []`, `createdAt`/`updatedAt`. Each of the 20 must be real and qualify (10.2): a specific
+`whyFit`, a verified public business email from their own website or an official listing, never guessed.
+If you can't find 20 that genuinely qualify, add fewer and say how many in the summary: 12 good ones beat
+20 weak ones.
 
 ### 10.4 Contacting prospects
 Only when `outreach` is on, the prospect is `approved` (if approval is required), not `do_not_contact`,
-within the daily cap, between 09:00 and 18:00 UAE time on weekdays (Monday-Friday).
-- **Email only**, to the business address, from the EchoLight email account. Use the matching outreach
-  template, personalised with one specific line from `whyFit`, in the owner's style. No trade license or TRN.
+within the daily cap, between 09:00 and 18:00 UAE time (weekend rules above).
+- **Email only**, to the business address, from the EchoLight email account. No trade license or TRN.
   Always keep the unsubscribe line.
+- **Friendly, short and specific** (the owner's voice, insights.md section 2): a warm "Good Morning <name or
+  team>,"; one line showing you know them (their venue, launch, season or event, from `whyFit`); one idea of
+  what EchoLight could do for that (a light show, mapping, LED, a full production); one easy next step (a
+  short call, a reference video, a site visit); the contact line "+971 56 722 0533 Whatsapp / Direct Call";
+  the unsubscribe line. Under 120 words. No attachments, no prices, no hard sell, no "I hope this email finds
+  you well" filler. Subject lines are plain and specific ("Lighting idea for your New Year's Eve at <venue>").
+- Each email must be different: never send the same text to two prospects.
 - Send, log it in `outreachLog`, `touches` and `lastOutreachAt`, set `status: "contacted"`.
 - At most two follow-ups: after 4 days and after 9 days, each shorter than the last, adding something
   useful (a relevant past project, a seasonal idea). Then stop.
@@ -701,7 +728,11 @@ and stop.
 
 ## 12. Each run: the routine
 
-When asked to "run sales", or on the schedule (section 14):
+There are three scheduled runs a day (section 14). Each does steps 1-2 and 11-12, plus its own work:
+- **09:00 Prospecting run:** steps 3, 5 (follow-ups due today), 6, 7, 8 and 9.
+- **12:00 and 22:00 WhatsApp runs:** steps 3, 4 and 10; the 12:00 run also does step 5. The 22:00 run sends
+  no follow-ups (quiet hours, 7.5); it only answers people who wrote.
+When the owner asks to "run sales" by hand, do every step.
 
 1. **Settings.** Read `config/settings`: `mode`, the autopilot switches, and the owner's `notes`.
 2. **Learn.** Read the owner's feedback and a few of their recent sent messages (2.2).
@@ -709,7 +740,12 @@ When asked to "run sales", or on the schedule (section 14):
    `awaiting_price` lead still waiting for a price, oldest first, and any expired quote a customer wants to
    book.
 4. **Inbound** (if `inboundReplies`): every unanswered customer message on WhatsApp and email since the last
-   run (section 9). For each: read the whole thread first (rule 8), then reply or log. New enquiries become
+   run (section 9). "Unanswered" means the last message in the chat is from the customer and nobody (the owner
+   or you) has replied. Answer only what you can within section 1 (greetings, qualifying questions, the price
+   checklist, "the team is preparing your quote", scheduling a call or visit, answers from section 4). Never
+   answer partners, staff, suppliers or personal chats (insights.md section 1), anyone the owner is clearly
+   handling in a voice-note conversation, or anything about money owed. Leave those for the owner and list
+   them in the summary as "waiting for you". For each: read the whole thread first (rule 8), then reply or log. New enquiries become
    leads. Skip `claudePaused` and `doNotContact` leads except for logging. Also record anything the owner
    sent themselves (quotations, replies) on the right lead.
 5. **Follow-ups** (if `followUps`): every open lead with `nextActionDate` ≤ today (7.5), at the right hours.
@@ -719,10 +755,35 @@ When asked to "run sales", or on the schedule (section 14):
    `doNotContact` (7.9).
 8. **Prospecting** (always allowed to research): add new prospects for `targetSegments`.
 9. **Outreach** (if `outreach`): approved prospects within the cap, plus due outreach follow-ups (10.4).
-10. **Lessons.** Add any durable lesson from this run to `config/insights` (insights.md section 6).
-11. **Summary for the owner.** Short: messages sent (to whom, one line each); new leads; prices needed
+10. **Customer data archive** (WhatsApp runs): update the local data files (section 12.1).
+11. **Lessons.** Add any durable lesson from this run to `config/insights` (insights.md section 6).
+12. **Summary for the owner.** Short: messages sent (to whom, one line each); new leads; prices needed
     (oldest first); quotes sent; deals booked; payments to collect; date clashes; anything escalated or
     unclear; lessons applied; and anything you couldn't do and why (for example a connector that was offline).
+
+### 12.1 The customer data archive (local files)
+The owner keeps a growing record of every business contact for future projects and analysis, separate from
+the CRM. Keep it in the folder **`EchoLight Customer Data`** that the Claude project can read and write (the
+owner's own computer). If you can't write files in this session, save the same rows to the CRM collection
+`customerData` instead (one document per contact, id = phone digits or email) and say so in the summary.
+
+Two files, created the first time with these header rows:
+
+**`contacts.csv`** (one row per person or company; update the row, never duplicate; match by phone, then email):
+`saved_name,phone,email,company,type,segment,language,emirate,first_seen,last_contact,event_types,services_interested,venues,event_dates,crm_lead_id,status,notes`
+- `type`: customer, partner, agency, corporate, government, vip, venue, supplier.
+- `status`: enquiry, quoted, negotiating, booked, completed, lost, partner, supplier.
+- `saved_name` is the owner's saved contact name (3.1), never the WhatsApp display name.
+
+**`interactions.csv`** (one row per conversation per day, appended):
+`date,saved_name,phone,channel,direction,summary,services,event_date,value_quoted_aed,outcome`
+- `summary`: one plain line ("Asked for LED screen + teleprompter for 10-11 Nov, Abu Dhabi").
+- `value_quoted_aed`: only a figure the team sent the customer in writing; otherwise empty.
+
+**Include:** customers, prospects who replied, agencies, partners and venues, including partner clients who
+are kept out of the CRM. **Never include:** family, friends, staff, personal chats, bank details, IBANs, OTPs,
+passwords, ID or passport numbers, receivables and payment chasing, or anything said in confidence about
+other people. Keep the files plain CSV (UTF-8), so they open in Excel.
 
 ---
 
@@ -759,13 +820,26 @@ EchoLight's voice is the owner's own. Before writing, look at how the owner writ
 
 ## 14. Running on a schedule
 
-Run this playbook twice a day, at about **9:30 and 17:30 UAE time** (Monday to Saturday; Sunday optional).
-The scheduled task prompt:
+Three scheduled tasks in the Claude project, every day (UAE time). The computer must be on, with WhatsApp and
+Gmail connected, and the folder `EchoLight Customer Data` available to the project.
 
-> Run sales for EchoLight using the echolight-sales skill. Follow sections 1 and 12 exactly: read the CRM
-> settings, learn from the owner's feedback and recent messages, deliver any prices waiting to be sent,
-> answer new WhatsApp and email enquiries since the last run, send the follow-ups that are due, then give me
-> a short summary. If WhatsApp, Gmail or the CRM is unreachable, say so in the summary and do what you can.
+**09:00 - Prospecting and outreach**
+> Run the EchoLight 09:00 prospecting run using the echolight-sales skill (section 12, 09:00 run). Read the CRM
+> settings, insights.md and config/insights. Research and add 20 new prospects from at least 4 different
+> industries, each with a specific reason and a verified business email, and email them in a friendly, short,
+> personal way (section 10.4), within the daily cap and the weekend rules. Send the follow-ups that are due
+> (leads and prospects). Then give me a short summary: who you contacted (one line each), replies, and anything
+> you need from me.
+
+**12:00 and 22:00 - WhatsApp replies and customer data**
+> Run the EchoLight WhatsApp run using the echolight-sales skill (section 12, 12:00/22:00 run). Read the CRM
+> settings, insights.md and config/insights. Check every WhatsApp chat (and the sales email) since the last run.
+> Identify each person by my saved contact name. Reply to every customer who's waiting for an answer that you
+> can give within the rules; leave partners, staff, suppliers, money matters and anything you're unsure about
+> for me. Deliver any prices waiting in the CRM. Update the CRM, and update the local customer data files
+> (section 12.1). [12:00 only: also send the follow-ups that are due.] Then give me a short summary: who you
+> replied to, new leads, what's waiting for me.
 
 Each run covers everything since the previous run (use the last run's time, or the last 24 hours if
-unknown). Never run two at once.
+unknown). Never run two at once. If WhatsApp, Gmail, the CRM or the folder is unreachable, say so in the
+summary and do what you can.
