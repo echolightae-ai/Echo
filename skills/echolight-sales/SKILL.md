@@ -146,6 +146,15 @@ in Claude Desktop; same tools either way):
   `chat_jid` returns every chat's messages at once, up to 500), `search_messages`, and `download_media` to
   look at a file a customer sent. Skip group chats (`@g.us`). Times are UTC; convert to Asia/Dubai.
   Voice notes show only as "[voice note]": if a deal depends on one you can't read, add a TEAM note.
+- **Who is this? Always use the owner's saved contact name, never the chat's display name.** Many chats arrive
+  under a hidden ID (`...@lid`) with the person's own profile name (a prayer, an emoji, a nickname). The
+  owner's saved names are on the phone-number entries. For every chat: check `config/insights` → `chatNames`
+  first; if it isn't there, call `search_contacts` with the display name and with any name, company or number
+  from the messages, and take the `full_name` on a `@s.whatsapp.net` entry (that's the owner's saved name and
+  real number). Saved names often carry the job: "Amera Wedding", "Wiem 12/5" (event date), "26/10 Fairy
+  Lights", "Fatima Al Mirfa Energy". If more than one contact could match, or none does, don't guess: add it to
+  your summary as "unidentified chat: <display name>" and ask the owner. When identified, add the mapping to
+  `chatNames`.
 - **Sending (live mode):** `send_message` (and `send_file` for a portfolio file the owner provided) inside an
   existing conversation with a customer who wrote first, one message at a time. It only previews unless
   `confirm: true`; preview first, check the chat and the text, then send with `confirm: true`.
