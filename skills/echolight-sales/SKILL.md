@@ -156,8 +156,8 @@ following the autopilot switches, and log each sent message as an activity (`wha
 | Task | What you need | If it's missing |
 |---|---|---|
 | Read and update the CRM | The `ArtifactData` tool with the CRM link above | Ask the user to open this in a Claude session that has their claude.ai account |
-| WhatsApp history (and live replies) | The owner's WhatsApp Web open in a browser Claude can use (Claude in Chrome, or computer use in the Claude Desktop app on the owner's laptop) | Say WhatsApp isn't reachable from this session; work on the CRM and drafts instead |
-| Email history (and live replies) | A Gmail connector, or the owner's webmail open in the browser | Same as above |
+| WhatsApp history (and live replies) | The **BlueTicks WhatsApp** connector (preferred), or the owner's WhatsApp Web open in a browser Claude can use | Say WhatsApp isn't reachable from this session; work on the CRM and drafts instead |
+| Email history (and live replies) | The **Gmail** connector (preferred), or the owner's webmail open in the browser | Same as above |
 | Instagram DMs | Instagram open in the browser | Same as above |
 | Finding prospects | Web search and web fetch | Say so; work on the CRM instead |
 
@@ -165,6 +165,31 @@ When working in the owner's browser: stay on the WhatsApp, email, Instagram and 
 task. Don't open chats that look personal, family or supplier-related (judge from the name and the preview
 in the chat list), and don't read or copy personal conversations that aren't about EchoLight business.
 Copy into the CRM only what the sales process needs (section 11).
+
+### 3.1 Connector rules (exact tools)
+
+**BlueTicks WhatsApp** (`BlueTicksWhatsapp` tools):
+- **Allowed in every mode (read-only):** `chats` with action `get_latest`, `list` (use `kinds: ["contact"]`
+  to skip groups, `include_last_message: true` to see who is waiting), `search`, `get`, `list_messages`,
+  `get_media`, `load_more_history`; `contacts` with action `list`; `utils` with action `current_date_time`
+  (always treat times as **Asia/Dubai**, whatever timezone the tool reports by default).
+- **Never in trial mode:** `chats` actions `send_message_text`, `send_message_media`, `send_message_poll`,
+  `send_button_reply`, `mark_read`, `archive`, `unarchive`. Marking chats read or archiving them hides
+  unread customers from the owner, so never do it in any mode.
+- **Never in any mode:** the `campaigns`, `audiences`, `scheduled_messages`, `agents`, `agent_schedules`,
+  `groups` and `webhooks` tools. No broadcasts, no bulk or scheduled sends, no group messages.
+- **Live mode only:** `chats` `send_message_text` to reply inside an existing conversation with a customer
+  who wrote first, one message at a time. BlueTicks works through WhatsApp Web, which WhatsApp's terms
+  restrict for automation, so keep live sending to normal one-to-one replies at a human pace.
+
+**Gmail** (`Gmail` tools):
+- **Allowed in every mode (read-only):** `search_threads`, `get_thread`, `get_message`, `list_labels`.
+- **Never in trial mode:** `send_message`, `reply`, `forward`, `create_draft`, `update_draft`. Trial drafts
+  go into the CRM's `drafts` collection only, never into the mailbox.
+- **Never in any mode:** `trash_*`, `untrash_*`, `mark_*spam`, `delete_*`, and changing labels on the owner's
+  mail.
+- **Live mode only:** `reply` (to the customer's own thread) and `send_message` (outreach that section 10
+  allows).
 
 ---
 
