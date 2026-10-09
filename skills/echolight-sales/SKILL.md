@@ -120,8 +120,11 @@ one document in the `drafts` collection (fields in 8.6), then one activity on th
    (quoted, "" for follow-ups), and `reasoning` = one or two lines for the reviewer: why this message, why
    now, and anything they should check (for example "valid-until date assumes it is sent today").
 4. Add an activity on the lead: `type: "draft"`, `text: "<short summary> (draft <draft id>)"`, `by: "claude"`.
-5. Update the lead's `nextAction` so the team knows a draft is waiting, e.g. "Trial: reply drafted, review
-   in Trial tab", `nextActionDate: <today>`.
+5. Update the lead's `nextAction` so the team knows a draft is waiting, e.g. "Trial: <kind> drafted, review
+   in Trial tab". Set `nextActionDate` only as the flow you are in says (for a follow-up, the "Then set"
+   column in 7.5; for a price, 7.4; for a reply, the next step the conversation calls for). Don't set it to
+   today just because a draft is waiting: the Trial tab already lists pending drafts, and a `nextActionDate`
+   of today would make the next run draft the same follow-up again.
 
 The owner reviews drafts in the CRM's Trial tab, marks each Good, Needs changes or Wrong, and may send good
 ones themselves from their phone.
@@ -345,7 +348,8 @@ don't deliver it: add a TEAM note and leave `priceToSend` as it is.
 `lastContactAt: <now>`, and an activity of type `quote` with the message you sent.
 
 **Trial mode**, after drafting (draft `kind: "price"`): `priceToSend: false`,
-`nextAction: "Trial: price drafted — review in Trial tab"`, `nextActionDate: <today>`, plus the `draft`
+`nextAction: "Trial: price drafted — review in Trial tab"`, `nextActionDate: <today>` (so the team sees it
+on the Call sheet; 7.5 doesn't follow up on a price that hasn't been marked sent), plus the `draft`
 activity. Don't touch `quoteSentAt`, `quoteValidUntil` or `stage`. When the owner sends it, they press
 "Mark quote sent" in the CRM. If you later see in the chat that the team sent the price and the lead has no
 `quoteSentAt` (or one older than the price), record it yourself: `quoteSentAt` = time of that message,
@@ -357,21 +361,34 @@ your summary ("price entered but not marked to send or sent").
 
 ### 7.5 Follow-ups and quote expiry
 Only when the `followUps` switch is on, the lead isn't `doNotContact` or `claudePaused`, it isn't
-`awaiting_price` (the customer is waiting for us), and `nextActionDate` is today or earlier. Days count from
-the date the quote was sent (`followUpDays` in settings, normally 1, 3 and 7):
+`awaiting_price` (the customer is waiting for us), and `nextActionDate` is today or earlier.
+
+**Quote follow-ups** (`quoted` and `negotiating` leads) follow the quote, not `nextActionDate` alone. Days
+count from the UAE date of `quoteSentAt` (`followUpDays` in settings, normally 1, 3 and 7); day 3 is
+`quoteValidUntil`. Skip the lead (no quote follow-up this run) when:
+- it has no `quoteSentAt` (in trial mode a drafted price isn't a sent quote; list it in your summary as
+  "price drafted but not marked sent"), or
+- `priceToSend` is `true`, or `priceSetAt` is later than `quoteSentAt`, or you delivered or drafted a price
+  for it in this run (a newer price hasn't gone out yet, so don't chase the old one), or
+- it has a `pending` draft of kind `price` or `reply`.
+
+Otherwise, draft or send only the latest step whose day has arrived and that hasn't been done for this
+quote yet (no activity and no draft of kind `follow_up` for it created after `quoteSentAt`); skip steps that
+were missed. Then set `nextActionDate` as the table says, so the next step comes up on its own day:
 
 | When | Template | Message | Then set |
 |---|---|---|---|
-| Day 1 | "Follow-up 1 (day 1)" | Normal check-in: any questions about the quote? | `nextActionDate` = `quoteValidUntil` |
-| Day 3 = `quoteValidUntil` | "Follow-up 2 (day 3, quote expires today)" | "Your quote is valid until today. Shall we lock the date?" Add a matching past project or the portfolio link | `nextActionDate` = sent date + 7 |
-| Day 7 | "Follow-up 3 (day 7, offer a refreshed quote)" | Last, polite check-in, offering to refresh the quote (the team re-confirms price and availability) | Live: no reply by the next run → `lost`, `lostReason: "No response"` |
+| Day 1 (`quoteSentAt` date + 1) | "Follow-up 1 (day 1)" | Normal check-in: any questions about the quote? | `nextActionDate` = `quoteValidUntil` |
+| Day 3 = `quoteValidUntil` | "Follow-up 2 (day 3, quote expires today)" | "Your quote is valid until today. Shall we lock the date?" Add a matching past project or the portfolio link | `nextActionDate` = `quoteSentAt` date + 7 |
+| Day 7 (`quoteSentAt` date + 7) | "Follow-up 3 (day 7, offer a refreshed quote)" | Last, polite check-in, offering to refresh the quote (the team re-confirms price and availability) | `nextActionDate` = `quoteSentAt` date + 8. Live: no reply by then → `lost`, `lostReason: "No response"` |
 
 - Any reply from the customer stops the sequence; answer it, and plan the next step from the conversation.
 - Leads that went quiet before a quote (`new`, `qualifying`): one gentle check-in when `nextActionDate` is
-  due, asking for the missing details; after another 7 days without a reply, mark `lost`
+  due, asking for the missing details (then set `nextActionDate` = today + 7); after another 7 days without a reply, mark `lost`
   (`lostReason: "No response"`) in live mode, or set the "mark lost?" next action in trial mode.
-- In trial mode the sequence moves on with the drafts (so the owner sees each one on time), but never set
-  `lost` for "No response" yourself; set `nextAction: "Team: no reply after day 7, mark lost?"` instead.
+- In trial mode the sequence moves on with the drafts (each step drafted once, on its day, so the owner sees
+  each one on time), but never set `lost` for "No response" yourself; on day 8 set
+  `nextAction: "Team: no reply after day 7, mark lost?"` instead.
 - **After expiry** (today is after `quoteValidUntil`): if the customer wants to book or asks about the
   price, don't confirm the old price. Send the "Quote expired, re-confirming" template (the team will
   re-confirm the price and the date), add a "PRICE REQUEST: re-confirm expired quote of <quoteDetails>"
@@ -692,7 +709,10 @@ When asked to "run sales", or on a schedule:
    (section 9). Live: reply. Trial: draft. Log everything. Skip `claudePaused` and `doNotContact` leads
    except for logging.
 5. **Follow-ups** (if `followUps`): every open lead with `nextActionDate` ≤ today, not `awaiting_price`, not
-   `claudePaused`, not `doNotContact` (7.5). Live: send (outside 22:00-09:00). Trial: draft.
+   `claudePaused`, not `doNotContact` (7.5). For `quoted` and `negotiating` leads, work out the step from
+   `quoteSentAt` and `quoteValidUntil` and apply the skip rules in 7.5 (no follow-up on a price that hasn't
+   been marked sent, or on an old quote when a newer price is waiting). Live: send (outside 22:00-09:00).
+   Trial: draft.
 6. **Shows.** For `confirmed` leads with events in the next 3 days: remind the team (TEAM note) of the
    balance due on the day, empty `crew` or `kit`, any date clash, and open questions.
 7. **Completed.** Review and referral messages the day after events, for `completed` leads only, not

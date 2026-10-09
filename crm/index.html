@@ -1099,11 +1099,16 @@ function updateTemplatePreview() {
   const l = lead(); const pick = $("#tplPick"); if (!l || !pick) return;
   const t = S.templates.find((x) => x.id === pick.value);
   const hasPrice = !!t && /\{price\}/.test(t.body || "");
+  // Any message that quotes the price or its validity date must not go out on an expired quote (D2).
+  const mentionsQuote = !!t && /\{(price|validUntil)\}/.test(t.body || "");
+  // Expiry-day reminders ("valid until today") only make sense on the day the quote expires.
+  const saysToday = !!t && /\{validUntil\}/.test(t.body || "") && /valid until today|لنهاية اليوم/i.test(t.body || "");
   const v = quoteValidity(l);
   let block = "";
   if (l.doNotContact) block = "This person asked not to be contacted.";
   else if (hasPrice && !l.priceAED) block = "There's no price yet. The team enters it first with Enter price.";
-  else if (hasPrice && v?.expired) block = `This quote expired ${-v.d}d ago. Don't send it again as valid: re-confirm the price first with Change price.`;
+  else if (mentionsQuote && v?.expired) block = `This quote expired ${-v.d}d ago. Don't send it again as valid: re-confirm the price first with Change price, or use a "quote expired" message.`;
+  else if (saysToday && (!v || v.d !== 0)) block = v ? `This message says the quote is valid until today, but it is valid until ${fmtDate(l.quoteValidUntil)}. Use the day-1 follow-up instead.` : "This message says the quote is valid until today, but no sent quote is running for this lead.";
   S.tplBlocked = !!block || !t;
   $("#tplNote").innerHTML = block ? `<div class="note-box bad"><b>Don't send.</b> ${esc(block)}</div>` : (t?.subject ? `<div class="lbl" dir="auto">Subject: ${esc(fillTemplate(t.subject, l, t.language))}</div>` : "");
   const body = t ? fillTemplate(t.body, l, t.language) : "Add messages in the Messages tab.";

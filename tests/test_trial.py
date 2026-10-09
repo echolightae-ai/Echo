@@ -44,7 +44,9 @@ def test_whatsapp_reply_is_drafted_with_the_conversation(app_env, db, channels):
     lead = db.list_leads()[0]
 
     assert channels.to_customers() == [], "nothing reaches the customer"
-    assert len(channels.of("owner")) == 1, "owner alerts still go out"
+    alerts = [subject for _, subject, _ in channels.of("owner")]
+    assert len(alerts) == 2, "owner alerts still go out: the price request and the new-message alert"
+    assert any("New message from Sara on whatsapp" in a for a in alerts)
     assert db.outbound_messages(lead["id"]) == []
     [draft] = db.drafts(lead["id"])
     assert (draft["kind"], draft["channel"], draft["status"]) == ("reply", "whatsapp", "pending")
@@ -125,8 +127,12 @@ def test_comment_reply_webchat_and_missed_call_send_nothing(app_env, db, channel
     params = {"From": "+971507770000", "CallSid": "CA9"}
     client.post("/webhooks/voice", data=params, headers={
         "X-Twilio-Signature": twilio_signature("twilio-token", "https://bot.example.com/webhooks/voice", params)})
-    wait_for(lambda: channels.of("owner"))
-    assert "Trial mode: a WhatsApp message was drafted, not sent. Please call them back." in channels.of("owner")[0][2]
+    wait_for(lambda: any("call them back" in body for _, _, body in channels.of("owner")))
+    assert any("Trial mode: a WhatsApp message was drafted, not sent. Please call them back." in body
+               for _, _, body in channels.of("owner"))
+    new_message_alerts = [body for _, subject, body in channels.of("owner") if "New message from" in subject]
+    assert len(new_message_alerts) == 2, "the comment and the website chat each alert the owner"
+    assert "Hi! What date is the event?" in new_message_alerts[1]
 
     assert channels.to_customers() == []
     kinds = sorted(d["kind"] for d in db.drafts())
@@ -201,3 +207,37 @@ def test_expired_quote_shows_in_dashboard(app_env, db):
                                  quote_valid_until=(today_local() - timedelta(days=3)).isoformat())
     assert "expired 3d ago" in client.get("/admin", auth=ADMIN).text
     assert "expired 3d ago" in client.get(f"/admin/leads/{lead['id']}", auth=ADMIN).text
+
+
+async def test_trial_alerts_the_owner_about_each_new_message_once_per_window(trial, db, channels):
+    claude = FakeClient()
+    agent = SalesAgent(db, channels, claude)
+    lead = db.get_or_create_lead("whatsapp", "971501113344", name="Mona")
+    claude.queue(message(text("Hello Mona! When is the event?")))
+    await agent.handle_inbound(lead["id"], [{"type": "text", "text": "Hi, I need a DJ for a wedding"}])
+
+    assert channels.to_customers() == [], "nothing reaches the customer"
+    [(_, subject, body)] = channels.of("owner")
+    assert subject == f"[Lead #{lead['id']}] New message from Mona on whatsapp: please reply (trial mode)"
+    assert "Hi, I need a DJ for a wedding" in body and "Hello Mona! When is the event?" in body
+    assert f"/admin/leads/{lead['id']}" in body
+
+    claude.queue(message(text("Great, what date?")))
+    await agent.handle_inbound(lead["id"], [{"type": "text", "text": "Also lighting"}])
+    assert len(channels.of("owner")) == 1, "one alert per lead per 30 minutes"
+
+    db.update_lead(lead["id"], trial_alert_at=time.time() - 31 * 60)
+    claude.queue(message(text("Noted!")))
+    await agent.handle_inbound(lead["id"], [{"type": "text", "text": "And a stage"}])
+    assert len(channels.of("owner")) == 2
+    assert channels.to_customers() == []
+
+
+async def test_live_mode_sends_no_new_message_alert(db, channels):
+    claude = FakeClient()
+    agent = SalesAgent(db, channels, claude)
+    lead = db.get_or_create_lead("whatsapp", "971501113355", name="Huda")
+    claude.queue(message(text("Hello Huda!")))
+    await agent.handle_inbound(lead["id"], [{"type": "text", "text": "Hi"}])
+    assert channels.of("owner") == []
+    assert len(channels.to_customers()) == 1

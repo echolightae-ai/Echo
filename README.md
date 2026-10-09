@@ -28,6 +28,10 @@ While `TRIAL_MODE=true`:
   **Needs changes** or **Wrong**, with a note. The drafts page shows how often the drafts were right (overall, last 7
   days, and by type of message). Use those numbers to decide when to switch trial mode off.
 - Owner alerts (price needed, reminders, voice notes, daily digest) still reach you.
+- **You are alerted about every new customer message** (WhatsApp, Instagram DMs and comments, email, website
+  chat), because in trial mode nobody else answers. The alert shows who wrote, what they said, the draft reply
+  and the link to the lead on `/admin`, so you can answer within minutes. To avoid floods, a lead that keeps
+  writing alerts you at most once every 30 minutes (`TRIAL_ALERT_MINUTES`).
 - You can still answer customers yourself with **Reply as team** on the lead's page (that is you sending, not the
   bot). **Use this draft** copies a draft into that box so you can edit it and send it.
 - The website chat shows the visitor "the team will get back to you" and asks for a WhatsApp number or email.

@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS leads (
     quote_sent_at REAL,                -- when the customer actually received the price
     quote_valid_until TEXT,            -- YYYY-MM-DD (UAE): quote_sent_at + QUOTE_VALIDITY_DAYS
     bot_paused INTEGER NOT NULL DEFAULT 0,     -- 1 = the team took over; the bot neither replies nor drafts
+    trial_alert_at REAL,               -- trial mode: when the owner was last alerted about a new message here
     marketing_opt_in INTEGER NOT NULL DEFAULT 0,
     do_not_contact INTEGER NOT NULL DEFAULT 0,
     source TEXT,
@@ -106,6 +107,7 @@ MIGRATIONS = {
         "quote_sent_at": "REAL",
         "quote_valid_until": "TEXT",
         "bot_paused": "INTEGER NOT NULL DEFAULT 0",
+        "trial_alert_at": "REAL",
     },
     "outbox": {"sender": "TEXT NOT NULL DEFAULT 'bot'", "kind": "TEXT"},
 }
@@ -114,7 +116,7 @@ LEAD_FIELDS = (
     "name", "phone", "email", "language", "event_type", "event_date", "venue", "emirate",
     "guest_count", "indoor_outdoor", "services", "budget_aed", "notes", "stage",
     "quote_aed", "quote_details", "price_requested_at", "priced_at", "price_to_send", "quote_sent_at",
-    "quote_valid_until", "bot_paused", "marketing_opt_in", "do_not_contact", "source",
+    "quote_valid_until", "bot_paused", "trial_alert_at", "marketing_opt_in", "do_not_contact", "source",
     "agent_notes", "last_inbound_at", "last_outbound_at",
 )
 

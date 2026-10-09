@@ -122,8 +122,9 @@ class SalesAgent:
             if lead["price_to_send"]:
                 valid_until = valid_until_from()
                 kind, extra = "price", self._price_instruction(lead, valid_until)
-            reply = await self._turn(lead, content, extra)  # on failure the caller queues a retry
+            reply = None
             try:
+                reply = await self._turn(lead, content, extra)  # on failure the caller queues a retry
                 if reply and deliver:
                     try:
                         await self.deliver(lead_id, reply, kind, valid_until and valid_until.isoformat(), said)
@@ -136,7 +137,31 @@ class SalesAgent:
                     self._after_send(lead_id, kind, status, valid_until and valid_until.isoformat())
             finally:
                 self._schedule_followups(lead_id)
+                if is_trial():
+                    # In trial nobody else answers: tell the owner now, even if Claude failed or wrote nothing.
+                    await self._trial_alert(lead_id, said, reply)
             return reply
+
+    async def _trial_alert(self, lead_id: int, said: str, draft: str | None) -> None:
+        """Trial mode: alert the owner about a new customer message, at most once per lead per TRIAL_ALERT_MINUTES."""
+        lead = self.db.get_lead(lead_id)
+        now = time.time()
+        if lead.get("trial_alert_at") and now - lead["trial_alert_at"] < config.settings.trial_alert_minutes * 60:
+            return
+        self.db.update_lead(lead_id, trial_alert_at=now)
+        name = lead.get("name") or "A customer"
+        if draft:
+            drafted = f"Draft reply (not sent):\n{draft}"
+        else:
+            drafted = "No draft was written for this message."
+        try:
+            await self.channels.notify_owner(
+                f"{lead_tag(lead_id)} New message from {name} on {lead['channel']}: please reply (trial mode)",
+                f"{name} wrote:\n{said}\n\n{drafted}\n\n"
+                f"Nothing has been sent. Reply with 'Reply as team' (or 'Use this draft'): {lead_url(lead_id)}",
+            )
+        except Exception:
+            log.exception("trial alert failed for lead %s", lead_id)
 
     async def handle_comment(self, lead_id: int, comment_id: str, comment_text: str) -> str | None:
         """Someone commented a keyword on a post or reel: one private DM reply, and nothing more until they DM us."""
@@ -145,9 +170,14 @@ class SalesAgent:
             if lead["bot_paused"] or lead["do_not_contact"]:
                 return None
             content = [{"type": "text", "text": f"[Instagram comment] {comment_text}"}]
-            reply = await self._turn(lead, content, COMMENT_INSTRUCTION)
-            if reply:
-                await self.outbound.comment_reply(self.db.get_lead(lead_id), comment_id, reply, comment_text)
+            reply = None
+            try:
+                reply = await self._turn(lead, content, COMMENT_INSTRUCTION)
+                if reply:
+                    await self.outbound.comment_reply(self.db.get_lead(lead_id), comment_id, reply, comment_text)
+            finally:
+                if is_trial():
+                    await self._trial_alert(lead_id, content_text(content), reply)
             # No follow-ups and no 24-hour window: the person has only commented, they haven't written to us.
             return reply
 
