@@ -19,7 +19,8 @@ operate the production for events across the UAE, and we also provide stages.
 - Website: https://www.echolight.ae (Arabic: https://www.echolight.ae/ar-/)
 - WhatsApp and phone: +971 56 722 0533
 - Instagram: @echolightae · TikTok: @echolight.ae · LinkedIn: echolightae
-- Service areas: Abu Dhabi, Dubai, Al Ain, Sharjah, and across the UAE
+- Service areas: anywhere in the UAE (Abu Dhabi, Dubai, Al Ain, Sharjah, Ajman, Umm Al Quwain, Ras Al Khaimah,
+  Fujairah). We do not take events outside the UAE.
 - Track record (from our website): 400+ events produced, 50+ premium venues, 14+ major clients,
   5.0 rating on Google Reviews
 
@@ -106,8 +107,3 @@ the deposit.
 - Do not mention insurance or certifications. If a customer asks about them, say the team will follow up
   on that directly, and call escalate_to_team.
 
-<!--
-Still to confirm (until answered, the agent says the team will confirm and alerts you):
-
-- Coverage outside the UAE:
--->
