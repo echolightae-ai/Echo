@@ -1,0 +1,1043 @@
+{
+ "_readme": "EchoLight showcase catalog. Edit by hand or let showcase/build.py add projects from showcase/inbox. Rebuild after editing: python showcase/build.py",
+ "contact": {
+  "whatsapp": "971567220533",
+  "display": "+971 56 722 0533"
+ },
+ "services": [
+  {
+   "id": "stage-lighting",
+   "name": "Stage Lighting",
+   "short": "Moving heads, wash, beams and spotlights, programmed cue by cue.",
+   "terms": [
+    "lighting",
+    "lights",
+    "light design",
+    "moving head",
+    "moving heads",
+    "spotlight",
+    "spotlights",
+    "wash",
+    "beam",
+    "beams",
+    "truss",
+    "uplighting",
+    "up lighting",
+    "dance floor",
+    "إضاءة",
+    "اضاءة",
+    "اضاءه",
+    "إضاءه",
+    "انارة",
+    "إنارة",
+    "سبوت",
+    "لايتات",
+    "لايت"
+   ]
+  },
+  {
+   "id": "led-screens",
+   "name": "LED Screens",
+   "short": "High-resolution LED walls with setup, live operation and teardown.",
+   "terms": [
+    "led",
+    "led wall",
+    "led screen",
+    "screen",
+    "screens",
+    "video wall",
+    "display",
+    "backdrop screen",
+    "live feed",
+    "شاشة",
+    "شاشه",
+    "شاشات",
+    "ليد",
+    "ال اي دي"
+   ]
+  },
+  {
+   "id": "sound",
+   "name": "Sound",
+   "short": "Line arrays, digital consoles, wireless mics and conference audio.",
+   "terms": [
+    "sound",
+    "audio",
+    "speakers",
+    "speaker",
+    "pa",
+    "line array",
+    "microphone",
+    "microphones",
+    "mic",
+    "mics",
+    "dj",
+    "music",
+    "band",
+    "صوت",
+    "صوتيات",
+    "سماعات",
+    "ساوند",
+    "مايك",
+    "مايكات",
+    "ميكروفون",
+    "دي جي"
+   ]
+  },
+  {
+   "id": "3d-mapping",
+   "name": "3D Mapping",
+   "short": "Projection mapping onto facades, walls, ceilings, stages and objects.",
+   "terms": [
+    "mapping",
+    "3d mapping",
+    "projection",
+    "projection mapping",
+    "projector",
+    "projectors",
+    "facade",
+    "façade",
+    "building show",
+    "هولوغرام",
+    "هولوجرام",
+    "بروجكتر",
+    "بروجيكتور",
+    "عرض ثلاثي",
+    "ثري دي",
+    "3d",
+    "ماببنج",
+    "مابينغ",
+    "عرض على المبنى",
+    "واجهة"
+   ]
+  },
+  {
+   "id": "laser-light",
+   "name": "Laser & Light Shows",
+   "short": "High-power laser and light shows with cold sparks for entrances and reveals.",
+   "terms": [
+    "laser",
+    "lasers",
+    "laser show",
+    "light show",
+    "cold spark",
+    "cold sparks",
+    "sparkular",
+    "sparks",
+    "fireworks",
+    "pyro",
+    "grand entrance",
+    "entrance",
+    "reveal",
+    "ليزر",
+    "عرض ليزر",
+    "عرض ضوئي",
+    "شرارات",
+    "سباركات",
+    "سباركلر",
+    "ألعاب نارية",
+    "العاب نارية",
+    "زفة"
+   ]
+  }
+ ],
+ "eventTypes": [
+  {
+   "id": "corporate",
+   "name": "Corporate Event",
+   "terms": [
+    "corporate",
+    "company",
+    "conference",
+    "summit",
+    "seminar",
+    "forum",
+    "town hall",
+    "agm",
+    "kick off",
+    "kickoff",
+    "annual meeting",
+    "staff party",
+    "company party",
+    "team event",
+    "business",
+    "panel",
+    "keynote",
+    "شركة",
+    "شركه",
+    "مؤتمر",
+    "موتمر",
+    "ملتقى",
+    "منتدى",
+    "ندوة",
+    "ندوه",
+    "اجتماع",
+    "حفل شركة",
+    "فعالية شركة"
+   ],
+   "pitch": "Clean sightlines, a crisp LED backdrop for slides and branding, and audio every seat can hear.",
+   "essential": [
+    "led-screens",
+    "sound",
+    "stage-lighting"
+   ],
+   "elevate": [
+    "laser-light"
+   ],
+   "signature": [
+    "3d-mapping"
+   ],
+   "moment": "Open the night with a mapped logo reveal or a laser countdown before the CEO walks on."
+  },
+  {
+   "id": "gala",
+   "name": "Gala Dinner & Awards",
+   "terms": [
+    "gala",
+    "gala dinner",
+    "awards",
+    "award",
+    "award ceremony",
+    "award night",
+    "dinner",
+    "black tie",
+    "appreciation night",
+    "recognition",
+    "حفل عشاء",
+    "عشاء",
+    "جوائز",
+    "حفل تكريم",
+    "تكريم",
+    "حفل توزيع"
+   ],
+   "pitch": "Room-wide atmosphere lighting, a winner's spotlight and an LED stage that carries every award.",
+   "essential": [
+    "stage-lighting",
+    "sound",
+    "led-screens"
+   ],
+   "elevate": [
+    "laser-light"
+   ],
+   "signature": [
+    "3d-mapping"
+   ],
+   "moment": "Hit each winner with a follow spot and a burst of cold sparks as they reach the stage."
+  },
+  {
+   "id": "wedding",
+   "name": "Wedding",
+   "terms": [
+    "wedding",
+    "weddings",
+    "bride",
+    "bridal",
+    "groom",
+    "zaffa",
+    "zaffe",
+    "engagement",
+    "henna",
+    "reception",
+    "marriage",
+    "nikah",
+    "katb kitab",
+    "dabkeh",
+    "زفاف",
+    "عرس",
+    "اعراس",
+    "أعراس",
+    "فرح",
+    "عروس",
+    "العروس",
+    "عريس",
+    "خطوبة",
+    "خطوبه",
+    "ملكة",
+    "ملكه",
+    "حناء",
+    "حنة",
+    "كتب كتاب",
+    "دبكة"
+   ],
+   "pitch": "A bridal walk that glows, spotlights that follow the couple, and a room that feels transformed.",
+   "essential": [
+    "stage-lighting",
+    "sound"
+   ],
+   "elevate": [
+    "led-screens",
+    "laser-light"
+   ],
+   "signature": [
+    "3d-mapping"
+   ],
+   "moment": "A lit bridal walk with moving-head spotlights and cold sparks on the entrance."
+  },
+  {
+   "id": "launch",
+   "name": "Product & Car Launch",
+   "terms": [
+    "launch",
+    "product launch",
+    "car launch",
+    "car reveal",
+    "reveal",
+    "unveil",
+    "unveiling",
+    "new model",
+    "automotive",
+    "car",
+    "cars",
+    "showroom",
+    "brand launch",
+    "إطلاق",
+    "اطلاق",
+    "تدشين",
+    "كشف",
+    "سيارة",
+    "سياره",
+    "سيارات",
+    "معرض سيارات",
+    "منتج جديد"
+   ],
+   "pitch": "Build tension in the dark, then hit the reveal with light, laser and sound landing on the same beat.",
+   "essential": [
+    "stage-lighting",
+    "laser-light",
+    "sound"
+   ],
+   "elevate": [
+    "led-screens"
+   ],
+   "signature": [
+    "3d-mapping"
+   ],
+   "moment": "Project-map the product itself, then drop the cover on a laser and spark hit."
+  },
+  {
+   "id": "opening",
+   "name": "Grand Opening",
+   "terms": [
+    "opening",
+    "grand opening",
+    "inauguration",
+    "ribbon",
+    "ribbon cutting",
+    "store opening",
+    "new branch",
+    "launch party",
+    "افتتاح",
+    "حفل افتتاح",
+    "تدشين فرع",
+    "فرع جديد"
+   ],
+   "pitch": "Make the venue itself the headline: facade light, a lit entrance and a moment people film.",
+   "essential": [
+    "stage-lighting",
+    "sound"
+   ],
+   "elevate": [
+    "laser-light",
+    "led-screens"
+   ],
+   "signature": [
+    "3d-mapping"
+   ],
+   "moment": "Light up the facade on a countdown and cut the ribbon under a laser canopy."
+  },
+  {
+   "id": "government",
+   "name": "National Day & Government Ceremony",
+   "terms": [
+    "national day",
+    "uae national day",
+    "flag day",
+    "commemoration day",
+    "government",
+    "ministry",
+    "ceremony",
+    "official",
+    "royal",
+    "sheikh",
+    "patriotic",
+    "heritage",
+    "union day",
+    "اليوم الوطني",
+    "عيد الاتحاد",
+    "يوم العلم",
+    "يوم الشهيد",
+    "حكومي",
+    "حكومة",
+    "حكومه",
+    "وزارة",
+    "وزاره",
+    "مراسم",
+    "احتفال رسمي",
+    "رسمي",
+    "تراث"
+   ],
+   "pitch": "A stage built for protocol: big LED storytelling, powerful audio and lighting worthy of the occasion.",
+   "essential": [
+    "led-screens",
+    "sound",
+    "stage-lighting"
+   ],
+   "elevate": [
+    "laser-light"
+   ],
+   "signature": [
+    "3d-mapping"
+   ],
+   "moment": "A national-colours light show and mapped facade timed to the anthem."
+  },
+  {
+   "id": "party",
+   "name": "Party & New Year",
+   "terms": [
+    "party",
+    "new year",
+    "new year's",
+    "nye",
+    "countdown",
+    "birthday",
+    "celebration",
+    "night",
+    "club",
+    "pool party",
+    "beach party",
+    "private party",
+    "halloween",
+    "christmas",
+    "حفلة",
+    "حفله",
+    "رأس السنة",
+    "راس السنة",
+    "عيد ميلاد",
+    "احتفال",
+    "سهرة",
+    "سهره",
+    "بارتي"
+   ],
+   "pitch": "Energy on tap: beams and lasers over the dance floor and a sound system that fills the room.",
+   "essential": [
+    "stage-lighting",
+    "sound",
+    "laser-light"
+   ],
+   "elevate": [
+    "led-screens"
+   ],
+   "signature": [
+    "3d-mapping"
+   ],
+   "moment": "A midnight countdown on the LED wall that explodes into lasers and cold sparks."
+  },
+  {
+   "id": "hospitality",
+   "name": "Hotel & Venue Event",
+   "terms": [
+    "hotel",
+    "resort",
+    "ballroom",
+    "venue",
+    "restaurant",
+    "beach club",
+    "rooftop",
+    "terrace",
+    "ramadan",
+    "iftar",
+    "suhoor",
+    "eid",
+    "فندق",
+    "منتجع",
+    "قاعة",
+    "قاعه",
+    "مطعم",
+    "رمضان",
+    "افطار",
+    "إفطار",
+    "سحور",
+    "عيد"
+   ],
+   "pitch": "Turn a familiar ballroom or terrace into a new room for the night, without fighting the venue.",
+   "essential": [
+    "stage-lighting",
+    "sound"
+   ],
+   "elevate": [
+    "led-screens"
+   ],
+   "signature": [
+    "laser-light",
+    "3d-mapping"
+   ],
+   "moment": "Architectural uplighting that recolours the whole venue between courses."
+  },
+  {
+   "id": "show",
+   "name": "Concert, Festival & Fashion Show",
+   "terms": [
+    "concert",
+    "festival",
+    "fashion show",
+    "runway",
+    "catwalk",
+    "show",
+    "performance",
+    "live music",
+    "gig",
+    "stage show",
+    "theatre",
+    "theater",
+    "graduation",
+    "school",
+    "حفل موسيقي",
+    "حفلة موسيقية",
+    "مهرجان",
+    "عرض أزياء",
+    "عرض ازياء",
+    "أزياء",
+    "ازياء",
+    "مسرح",
+    "مسرحية",
+    "تخرج",
+    "حفل تخرج",
+    "مدرسة"
+   ],
+   "pitch": "Show-grade rigging: programmed lighting, full PA and screens so the back row sees the front.",
+   "essential": [
+    "stage-lighting",
+    "sound",
+    "led-screens"
+   ],
+   "elevate": [
+    "laser-light"
+   ],
+   "signature": [
+    "3d-mapping"
+   ],
+   "moment": "Open the runway or headline set on a blackout, then a single laser line and full rig hit."
+  },
+  {
+   "id": "exhibition",
+   "name": "Exhibition & Activation",
+   "terms": [
+    "exhibition",
+    "expo",
+    "booth",
+    "stand",
+    "activation",
+    "trade show",
+    "pop up",
+    "pop-up",
+    "mall",
+    "roadshow",
+    "معرض",
+    "بوث",
+    "جناح",
+    "ستاند",
+    "مول"
+   ],
+   "pitch": "Stop people walking past: bright LED content and focused lighting on the product.",
+   "essential": [
+    "led-screens",
+    "stage-lighting"
+   ],
+   "elevate": [
+    "sound"
+   ],
+   "signature": [
+    "3d-mapping"
+   ],
+   "moment": "Map content onto the product on the stand so it changes every few minutes."
+  }
+ ],
+ "places": {
+  "Abu Dhabi": [
+   "abu dhabi",
+   "abudhabi",
+   "auh",
+   "ابوظبي",
+   "ابو ظبي"
+  ],
+  "Dubai": [
+   "dubai",
+   "dxb",
+   "دبي"
+  ],
+  "Al Ain": [
+   "al ain",
+   "العين"
+  ],
+  "Sharjah": [
+   "sharjah",
+   "الشارقه"
+  ],
+  "Ajman": [
+   "ajman",
+   "عجمان"
+  ],
+  "Umm Al Quwain": [
+   "umm al quwain",
+   "ام القيوين"
+  ],
+  "Ras Al Khaimah": [
+   "ras al khaimah",
+   "rak",
+   "راس الخيمه"
+  ],
+  "Fujairah": [
+   "fujairah",
+   "الفجيره"
+  ],
+  "Saadiyat": [
+   "saadiyat",
+   "السعديات"
+  ],
+  "Yas": [
+   "yas island",
+   "yas",
+   "ياس"
+  ]
+ },
+ "projects": [
+  {
+   "id": "uae-national-day-54",
+   "title": "54th UAE National Day Celebration",
+   "client": "",
+   "venue": "Government Ceremony",
+   "city": "Abu Dhabi",
+   "year": 2025,
+   "summary": "Powerful audio, immersive LED screens and precision lighting for a celebration of the UAE's heritage, unity and national pride.",
+   "eventTypes": [
+    "government"
+   ],
+   "services": [
+    "led-screens",
+    "sound",
+    "stage-lighting"
+   ],
+   "tags": [
+    "national day",
+    "ceremony",
+    "patriotic",
+    "outdoor"
+   ],
+   "featured": true,
+   "link": "https://www.echolight.ae/our-work/v/xy8fxk3jf9y2t6maycldeddjnldn5s",
+   "media": [
+    {
+     "type": "image",
+     "src": "https://video.squarespace-cdn.com/content/v1/695ef3ed50d4e50de10c8cae/842af4bf-0944-4b43-99f9-f2563ac8acfb/thumbnail",
+     "video": true
+    }
+   ]
+  },
+  {
+   "id": "celestial-laser-ceremony",
+   "title": "The Celestial Laser Ceremony",
+   "client": "",
+   "venue": "Luxury Ceremony",
+   "city": "Abu Dhabi",
+   "year": null,
+   "summary": "Precision-controlled laser show as the visual centrepiece of a luxury ceremony: fog, colour and power in sync.",
+   "eventTypes": [
+    "government",
+    "launch"
+   ],
+   "services": [
+    "laser-light"
+   ],
+   "tags": [
+    "laser",
+    "ceremony",
+    "luxury",
+    "fog",
+    "grand entrance"
+   ],
+   "featured": true,
+   "link": "https://www.echolight.ae/our-work/v/the-celestial-laser-ceremony",
+   "media": [
+    {
+     "type": "image",
+     "src": "https://images.squarespace-cdn.com/content/v1/695ef3ed50d4e50de10c8cae/edac922c-73d2-4c7e-819f-9888ca93f335/WhatsApp+Image+2026-03-26+at+12.35.13+AM.jpeg?format=1500w"
+    }
+   ]
+  },
+  {
+   "id": "dibo-grand-opening",
+   "title": "Grand Opening Lighting for DIBO Showroom",
+   "client": "DIBO",
+   "venue": "DIBO Showroom",
+   "city": "Abu Dhabi",
+   "year": null,
+   "summary": "Bold lighting design amplifying the energy of a high-end showroom launch.",
+   "eventTypes": [
+    "opening",
+    "launch"
+   ],
+   "services": [
+    "stage-lighting"
+   ],
+   "tags": [
+    "showroom",
+    "automotive",
+    "grand opening"
+   ],
+   "featured": false,
+   "link": "https://www.echolight.ae/our-work/v/grand-opening-lighting-for-dibo-showroom",
+   "media": [
+    {
+     "type": "image",
+     "src": "https://images.squarespace-cdn.com/content/v1/695ef3ed50d4e50de10c8cae/5d07b9c7-3637-469d-8a9e-c9f5309c8440/IMG_8088.png?format=1500w"
+    }
+   ]
+  },
+  {
+   "id": "twin-beacons-saadiyat-rotana",
+   "title": "The Twin Beacons",
+   "client": "",
+   "venue": "Saadiyat Rotana",
+   "city": "Abu Dhabi",
+   "year": null,
+   "summary": "T-truss precision lighting, immersive LED visuals and crystal-clear audio. Saadiyat Rotana transformed.",
+   "eventTypes": [
+    "corporate",
+    "hospitality"
+   ],
+   "services": [
+    "stage-lighting",
+    "led-screens",
+    "sound"
+   ],
+   "tags": [
+    "hotel",
+    "truss",
+    "ballroom"
+   ],
+   "featured": true,
+   "link": "https://www.echolight.ae/our-work/v/the-twin-beacons-saadiyat-rotana-event-lighting",
+   "media": [
+    {
+     "type": "image",
+     "src": "https://video.squarespace-cdn.com/content/v1/695ef3ed50d4e50de10c8cae/81686680-0bfa-4d5d-99c1-bbe791031197/thumbnail",
+     "video": true
+    }
+   ]
+  },
+  {
+   "id": "rixos-clinic-corporate",
+   "title": "Rixos Clinic Corporate Event",
+   "client": "Rixos Clinic",
+   "venue": "Rixos Clinic",
+   "city": "UAE",
+   "year": null,
+   "summary": "Premium audio, LED visuals and precision lighting for a high-profile corporate medical event.",
+   "eventTypes": [
+    "corporate"
+   ],
+   "services": [
+    "led-screens",
+    "sound",
+    "stage-lighting"
+   ],
+   "tags": [
+    "medical",
+    "healthcare",
+    "conference"
+   ],
+   "featured": false,
+   "link": "https://www.echolight.ae/our-work/v/rixos-clinic-corporate-event-premium-audio-visuals-lighting-uae",
+   "media": [
+    {
+     "type": "image",
+     "src": "https://images.squarespace-cdn.com/content/v1/695ef3ed50d4e50de10c8cae/91d2084f-d2cb-48f5-b049-edb72fc9e3b4/WhatsApp+Image+2026-04-05+at+7.37.58+AM.jpeg?format=1500w"
+    }
+   ]
+  },
+  {
+   "id": "a-moment-in-spotlight",
+   "title": "A Moment In Spotlight",
+   "client": "",
+   "venue": "Corporate showcase",
+   "city": "Abu Dhabi",
+   "year": null,
+   "summary": "Box and twin-truss configuration delivering theatrical spotlight precision for a corporate showcase.",
+   "eventTypes": [
+    "corporate",
+    "show"
+   ],
+   "services": [
+    "stage-lighting"
+   ],
+   "tags": [
+    "truss",
+    "spotlight",
+    "showcase"
+   ],
+   "featured": false,
+   "link": "https://www.echolight.ae/our-work/v/a-moment-in-spotlight",
+   "media": [
+    {
+     "type": "image",
+     "src": "https://images.squarespace-cdn.com/content/v1/695ef3ed50d4e50de10c8cae/497ca25f-aca2-41f2-a93f-e01420f1ca61/IMG_8.png?format=1500w"
+    }
+   ]
+  },
+  {
+   "id": "novotel-al-bustan",
+   "title": "Where Light Becomes the Experience",
+   "client": "Novotel",
+   "venue": "Novotel Al Bustan",
+   "city": "Abu Dhabi",
+   "year": null,
+   "summary": "The Spotlights Effect: refined stage lighting for ambience, focus and visual impact at Novotel Al Bustan.",
+   "eventTypes": [
+    "hospitality",
+    "corporate",
+    "wedding"
+   ],
+   "services": [
+    "stage-lighting"
+   ],
+   "tags": [
+    "hotel",
+    "spotlight",
+    "ballroom"
+   ],
+   "featured": false,
+   "link": "https://www.echolight.ae/our-work/v/where-light-becomes-the-experience",
+   "media": [
+    {
+     "type": "image",
+     "src": "https://video.squarespace-cdn.com/content/v1/695ef3ed50d4e50de10c8cae/eb4516a6-15d0-46dc-88e0-97f2867e29fa/thumbnail",
+     "video": true
+    }
+   ]
+  },
+  {
+   "id": "wedding-transforms-the-night",
+   "title": "Wedding Lighting That Transforms the Night",
+   "client": "",
+   "venue": "Outdoor wedding",
+   "city": "UAE",
+   "year": null,
+   "summary": "Refined outdoor wedding lighting turning open spaces into elegant, immersive environments.",
+   "eventTypes": [
+    "wedding"
+   ],
+   "services": [
+    "stage-lighting"
+   ],
+   "tags": [
+    "outdoor",
+    "garden"
+   ],
+   "featured": true,
+   "link": "https://www.echolight.ae/our-work/v/wedding-lighting-that-transforms-the-night",
+   "media": [
+    {
+     "type": "image",
+     "src": "https://video.squarespace-cdn.com/content/v1/695ef3ed50d4e50de10c8cae/51397424-1f3e-44ed-aef1-95d1d2341f4e/thumbnail",
+     "video": true
+    }
+   ]
+  },
+  {
+   "id": "crafting-moments-with-light",
+   "title": "Crafting Moments With Light",
+   "client": "",
+   "venue": "Premium wedding",
+   "city": "Abu Dhabi",
+   "year": null,
+   "summary": "Dramatic spotlights dancing across floral canopies. Cinematic wedding production.",
+   "eventTypes": [
+    "wedding"
+   ],
+   "services": [
+    "stage-lighting"
+   ],
+   "tags": [
+    "floral",
+    "spotlight",
+    "luxury"
+   ],
+   "featured": false,
+   "link": "https://www.echolight.ae/our-work/v/crafting-moments-with-light",
+   "media": [
+    {
+     "type": "image",
+     "src": "https://images.squarespace-cdn.com/content/v1/695ef3ed50d4e50de10c8cae/0ec126cc-a506-48cd-a9b7-cd97bdd99352/IMG_7425.png?format=1500w"
+    }
+   ]
+  },
+  {
+   "id": "moving-ground-bridal-walk",
+   "title": "The Moving Ground: Lit Bridal Walk",
+   "client": "",
+   "venue": "Signature wedding",
+   "city": "UAE",
+   "year": null,
+   "summary": "Signature lighting effects that made the bridal entrance a moment of drama and elegance.",
+   "eventTypes": [
+    "wedding"
+   ],
+   "services": [
+    "stage-lighting"
+   ],
+   "tags": [
+    "bridal walk",
+    "entrance",
+    "zaffa"
+   ],
+   "featured": false,
+   "link": "https://www.echolight.ae/our-work/v/the-moving-ground-lit-bridal-walk-signature-lighting-effects",
+   "media": [
+    {
+     "type": "image",
+     "src": "https://video.squarespace-cdn.com/content/v1/695ef3ed50d4e50de10c8cae/566459cf-7240-447d-b9de-c03a13426f99/thumbnail",
+     "video": true
+    }
+   ]
+  },
+  {
+   "id": "dabkeh-spotlight-wedding",
+   "title": "Luxury Wedding Spotlight Show with Dabkeh",
+   "client": "",
+   "venue": "Luxury wedding",
+   "city": "UAE",
+   "year": null,
+   "summary": "Spotlight choreography fused with a traditional Dabkeh performance.",
+   "eventTypes": [
+    "wedding"
+   ],
+   "services": [
+    "stage-lighting"
+   ],
+   "tags": [
+    "dabkeh",
+    "spotlight",
+    "entertainment"
+   ],
+   "featured": false,
+   "link": "https://www.echolight.ae/our-work/v/6cnl38rcpcg8ll3bxbtpr7jyyh55xr",
+   "media": [
+    {
+     "type": "image",
+     "src": "https://images.squarespace-cdn.com/content/v1/695ef3ed50d4e50de10c8cae/35d750b6-98f8-4e2f-a9e0-65e51a6398fe/4.png?format=1500w"
+    }
+   ]
+  },
+  {
+   "id": "sky-laser-spectacular",
+   "title": "Sky Laser Spectacular",
+   "client": "Unique Homes & Al Nayef Group",
+   "venue": "",
+   "city": "UAE",
+   "year": null,
+   "summary": "Sky laser show for Unique Homes and Al Nayef Group.",
+   "eventTypes": [
+    "launch",
+    "opening"
+   ],
+   "services": [
+    "laser-light"
+   ],
+   "tags": [
+    "outdoor",
+    "sky"
+   ],
+   "featured": false,
+   "link": "",
+   "media": []
+  },
+  {
+   "id": "captiva-launch",
+   "title": "Captiva Launch Production",
+   "client": "Bin Hamoodah Auto",
+   "venue": "",
+   "city": "UAE",
+   "year": null,
+   "summary": "Car reveal production for the Captiva launch.",
+   "eventTypes": [
+    "launch"
+   ],
+   "services": [
+    "stage-lighting"
+   ],
+   "tags": [
+    "car reveal",
+    "automotive"
+   ],
+   "featured": false,
+   "link": "",
+   "media": []
+  },
+  {
+   "id": "winter-corner-nye",
+   "title": "Winter Corner New Year's Countdown",
+   "client": "Winter Corner",
+   "venue": "",
+   "city": "UAE",
+   "year": null,
+   "summary": "New Year's Eve countdown production.",
+   "eventTypes": [
+    "party",
+    "hospitality"
+   ],
+   "services": [
+    "stage-lighting"
+   ],
+   "tags": [
+    "new year",
+    "countdown"
+   ],
+   "featured": false,
+   "link": "",
+   "media": []
+  },
+  {
+   "id": "jumeirah-saadiyat-wedding",
+   "title": "Jumeirah Saadiyat Wedding Production",
+   "client": "",
+   "venue": "Jumeirah Saadiyat",
+   "city": "Abu Dhabi",
+   "year": null,
+   "summary": "Luxury wedding production at Jumeirah Saadiyat.",
+   "eventTypes": [
+    "wedding"
+   ],
+   "services": [
+    "stage-lighting"
+   ],
+   "tags": [
+    "luxury",
+    "beach"
+   ],
+   "featured": false,
+   "link": "",
+   "media": []
+  },
+  {
+   "id": "rak-grand-wedding",
+   "title": "RAK Grand Wedding",
+   "client": "",
+   "venue": "",
+   "city": "Ras Al Khaimah",
+   "year": null,
+   "summary": "Grand luxury wedding production in Ras Al Khaimah.",
+   "eventTypes": [
+    "wedding"
+   ],
+   "services": [
+    "stage-lighting"
+   ],
+   "tags": [
+    "luxury"
+   ],
+   "featured": false,
+   "link": "",
+   "media": []
+  }
+ ]
+}
