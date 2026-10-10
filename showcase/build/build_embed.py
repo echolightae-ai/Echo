@@ -1,7 +1,7 @@
 """Build the Squarespace embed blocks (English + Arabic) and per-event page blocks.
 
 Usage: python3 -I build_embed.py <showcase_dir> <media_base_url>
-Reads  site/data/events.json (+ site/assets/css/site.css), writes <showcase_dir>/embed/.
+Reads  content/events.json (+ site/assets/css/site.css), writes <showcase_dir>/embed/.
 Each output is ONE block of HTML (CSS + markup + JS inline); media is loaded from <media_base_url>.
 """
 import sys, os, re, json, csv, html, urllib.parse
@@ -10,7 +10,7 @@ import events_src as E
 from events_ar import AR, UI_AR
 root = sys.argv[1]; MEDIA = sys.argv[2].rstrip("/") + "/"
 HUB = {"en": "https://www.echolight.ae/showcase", "ar": "https://www.echolight.ae/ar-/showcase"}
-events = json.load(open(f"{root}/site/data/events.json"))
+events = json.load(open(f"{root}/content/events.json"))
 SRC = os.path.join(os.path.dirname(__file__), "embed_src")
 esc = lambda s: html.escape(str(s), quote=True)
 def trim(s, n):
@@ -37,11 +37,11 @@ SVC = {"en": {
   "laser": ("عروض الليزر والضوء", "ليزر عالي القدرة وأشعة سماء وشرارات باردة للدخولات الكبرى واللحظات الكاشفة والليالي المفتوحة التي تُرى من الموقع كله.", ["أشعة السماء", "مسح الليزر", "شرارات باردة", "التحكم بالعرض"])}}
 UI = {"en": {"eyebrow": "EchoLight · Abu Dhabi · UAE-wide", "h1a": "Show us your event.", "h1b": "We'll show you the proof.", "lead": "Type what you're planning. We'll light up the work we've done for events like yours, and tell you what we'd build.", "go": "Show me", "qlabel": "Describe your event",
         "ev": "The proof", "evh": "Real events. Real rigs. Real nights.", "svce": "What we specialise in", "svch": "Five specialisms. A dedicated team for each.", "svcsub": "EchoLight is built around five disciplines, and each one has its own specialist team. Try them below: every lab ends with a message to us describing what you built.", "idx": "All events at a glance", "ctah": "Let's light your date.", "ctas": "Send us the date, the venue and a rough idea. We reply on WhatsApp with a plan and a quote.", "wa": "Chat on WhatsApp", "area": "Anywhere in the UAE",
-        "stats": [("400+", "events produced"), ("100+", "venues"), ("34+", "clients"), ("5.0 ★", "Google rating")], "back": "← All EchoLight work", "plan": "Plan something like this", "film": "Full film", "live": "Live from our events", "full": "▶ Watch the full film", "copy": "Copy link to this page", "more": "More like this", "see": "See {n} {w} with {s} →", "empty": "Nothing under that exact combination yet. Try removing a filter or message us on WhatsApp.", "events": "events", "event": "event", "videos": "videos", "video": "video",
+        "stats": [("400+", "events produced"), ("100+", "venues"), ("34+", "clients"), ("5.0 ★", "Google rating")], "back": "← All EchoLight work", "plan": "Plan something like this", "film": "Full film", "moreclips": "Show more clips", "live": "Live from our events", "full": "▶ Watch the full film", "copy": "Copy link to this page", "more": "More like this", "see": "See {n} {w} with {s} →", "empty": "Nothing under that exact combination yet. Try removing a filter or message us on WhatsApp.", "events": "events", "event": "event", "videos": "videos", "video": "video",
         "cur_h": "Build a client page", "cur_s": "Open an event, tick the clips you discussed, name the client, copy the link. They see only those clips. This page is not linked anywhere on the site.", "cur_c": "Client or company (optional)", "cur_n": "A short note, e.g. the reference videos we spoke about", "cur_o": "Your link appears here", "cur_p": "Preview", "cur_x": "Clear", "reel": "Quick picks"},
       "ar": {"eyebrow": "إيكو لايت · أبوظبي · كل الإمارات", "h1a": "أخبرنا عن فعاليتك.", "h1b": "ونُريك الإثبات.", "lead": "اكتب ما تخطّط له، وسنُضيء لك أعمالنا في فعاليات تشبه فعاليتك، ونخبرك بما كنّا سنبنيه.", "go": "أرني", "qlabel": "صف فعاليتك",
         "ev": "الإثبات", "evh": "فعاليات حقيقية. أجهزة حقيقية. ليالٍ حقيقية.", "svce": "ما نتخصص فيه", "svch": "خمسة تخصصات، ولكل تخصص فريقه المتخصص.", "svcsub": "تقوم إيكو لايت على خمسة تخصصات، ولكل تخصص فريقه المتخصص. جرّبها بالأسفل: كل مختبر ينتهي برسالة إلينا تصف ما صممته.", "idx": "كل الفعاليات في لمحة", "ctah": "لنُضئ موعدك.", "ctas": "أرسل لنا التاريخ والموقع وفكرة تقريبية. نردّ عبر واتساب بخطة وعرض سعر.", "wa": "تحدّث معنا عبر واتساب", "area": "في أي مكان في الإمارات",
-        "stats": [("+400", "فعالية أنتجناها"), ("+100", "موقع"), ("+34", "عميل"), ("★ 5.0", "تقييم جوجل")], "back": "→ كل أعمال إيكو لايت", "plan": "خطّط لشيء مثل هذا", "film": "الفيلم الكامل", "live": "مباشرة من فعالياتنا", "full": "▶ شاهد الفيلم كاملاً", "copy": "انسخ رابط هذه الصفحة", "more": "المزيد مثل هذا", "see": "شاهد {n} {w} {s} ←", "empty": "لا شيء بهذا الجمع بعد. جرّب إزالة أحد المرشّحات أو راسلنا عبر واتساب.", "events": "فعالية", "event": "فعالية", "videos": "فيديو", "video": "فيديو",
+        "stats": [("+400", "فعالية أنتجناها"), ("+100", "موقع"), ("+34", "عميل"), ("★ 5.0", "تقييم جوجل")], "back": "→ كل أعمال إيكو لايت", "plan": "خطّط لشيء مثل هذا", "film": "الفيلم الكامل", "moreclips": "عرض المزيد من المقاطع", "live": "مباشرة من فعالياتنا", "full": "▶ شاهد الفيلم كاملاً", "copy": "انسخ رابط هذه الصفحة", "more": "المزيد مثل هذا", "see": "شاهد {n} {w} {s} ←", "empty": "لا شيء بهذا الجمع بعد. جرّب إزالة أحد المرشّحات أو راسلنا عبر واتساب.", "events": "فعالية", "event": "فعالية", "videos": "فيديو", "video": "فيديو",
         "cur_h": "أنشئ صفحة لعميل", "cur_s": "افتح فعالية، حدّد المقاطع التي ناقشتموها، اكتب اسم العميل وانسخ الرابط. سيرى هذه المقاطع فقط. هذه الصفحة غير مرتبطة بأي مكان في الموقع.", "cur_c": "العميل أو الشركة (اختياري)", "cur_n": "ملاحظة قصيرة، مثلاً الفيديوهات المرجعية التي تحدثنا عنها", "cur_o": "يظهر رابطك هنا", "cur_p": "معاينة", "cur_x": "مسح", "reel": "اختيارات سريعة"}}
 CHIPS = [("corporate", "#3da9ff"), ("wedding", "#ffb86b"), ("gala", "#ffd27a"), ("launch", "#c04dff"), ("government", "#2ee59d"), ("show", "#ff3df0")]
 MON_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -66,7 +66,7 @@ events.sort(key=lambda e: -e["rank"])
 
 def loc(e, lang):
     if lang == "en": return dict(title=e["title"], dek=e["dek"], desc=e["desc"], body=e["body"], place=place_en(e), label=(f"{MON_EN[int(e['month'][5:7]) - 1]} {e['month'][:4]}" if e.get("month") else ""))
-    t, d, ds, b = AR[e["slug"]]; v = UI_AR["venue"].get(e.get("venue") or "", e.get("venue") or ""); c = UI_AR["city"].get(e.get("city") or "", e.get("city") or "")
+    a = e.get("ar") or {}; t, d, ds, b = (a["title"], a["dek"], a["desc"], a["body"]) if a else AR[e["slug"]]; v = UI_AR["venue"].get(e.get("venue") or "", e.get("venue") or ""); c = UI_AR["city"].get(e.get("city") or "", e.get("city") or "")
     pl = c if (e.get("venue") or "") in ("", "Undisclosed venue") else (v if (c and (e["city"] in e["venue"] or e["venue"] in e["city"])) else (f"{v}، {c}" if c else v))
     return dict(title=t, dek=d, desc=ds, body=b, place=pl, label=(f"{UI_AR['mon'][int(e['month'][5:7]) - 1]} {e['month'][:4]}" if e.get("month") else ""))
 def url(c, kind):
@@ -149,6 +149,7 @@ CSS = scope(css) + """
 #elsc .film-play .pl{position:absolute;inset-inline:0;bottom:16px;margin-inline:auto;width:max-content;max-width:90%;background:rgba(5,6,10,.78);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);padding:11px 20px;border-radius:999px;font-weight:600}
 #elsc .film-play:hover .pl{border-color:var(--accent)}
 #elsc .film video{display:block;width:100%;max-height:72vh;background:#000;border-radius:16px}
+#elsc .clipview{margin-top:34px}#elsc .clipview h3{font-size:1.4rem;margin-bottom:14px}
 #elsc .fxwrap{display:grid;gap:10px;min-width:0}
 #elsc .svc:nth-child(even) .fxwrap{order:-1}
 #elsc .labctl{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:end;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(8,10,16,.7)}
@@ -166,7 +167,7 @@ CSS = scope(css) + """
 # ---- html pieces ------------------------------------------------------------------------------
 def tile(e, c, n, lang, L, first):
     src = url(c, "src"); ratio = max(0.58, min(1.7, c["w"] / c["h"])); a = alt(e, c, n, lang, L); vb = f'<span class="vbadge">▶ {int(round(c.get("d") or 5))}s</span>' if c["t"] != "p" else ""
-    return (f'<a class="tile{" is-v" if c["t"] != "p" else ""}" href="{src}" data-k="{c["k"]}" data-t="{c["t"]}" data-src="{src}" data-poster="{poster(c)}" style="aspect-ratio:{ratio:.3f}" aria-label="{esc(a)}">'
+    return (f'<a class="tile{" is-v" if c["t"] != "p" else ""}" href="{src}" data-k="{c["k"]}" data-t="{c["t"]}" data-sv="{" ".join(c["svc"])}" data-ty="{" ".join(e["types"])}" data-src="{src}" data-poster="{poster(c)}" style="aspect-ratio:{ratio:.3f}" aria-label="{esc(a)}">'
             f'<img src="{poster(c)}" alt="{esc(a)}" width="{c["w"]}" height="{c["h"]}" {"loading=\"lazy\" " if not first else ""}decoding="async">{vb}<span class="cap">{esc(L["title"])}</span></a>')
 def article(e, lang, L, ui, mode, h):
     tiles = []; np_ = nv = 0
@@ -192,8 +193,11 @@ def article(e, lang, L, ui, mode, h):
 def card(e, lang, L, ui):
     cov = e["cover"]; v = e["vcover"]; nv = sum(1 for c in e["clips"] if c["t"] != "p")
     badge = (f'<span class="badge">▶ {ui["film"]} {e["fullDur"] // 60}:{e["fullDur"] % 60:02d}</span>' if e.get("fullClip") else (f'<span class="badge">▶ {nv} {ui["videos"] if nv != 1 else ui["video"]}</span>' if nv else ""))
-    sub = " · ".join(x for x in [L["place"], L["label"]] if x); a = alt(e, cov, 1, lang, L)
-    return (f'<article class="ecard" data-slug="{e["slug"]}"{(" data-v=\"" + url(v, "src") + "\"") if v else ""} data-ty="{" ".join(e["types"])}" data-sv="{" ".join(e["svc"])}"{" data-hero" if e.get("hero") else ""}{" data-old" if e.get("old") else ""} data-clips="{len(e["clips"])}" data-rank="{e["rank"]}">'
+    np = sum(1 for c in e["clips"] if c["t"] == "p")
+    cnt = (f"{np} {'photos' if np != 1 else 'photo'} · {nv} {'videos' if nv != 1 else 'video'}" if lang == "en" else f"{np} صورة · {nv} فيديو")
+    sub = " · ".join(x for x in [L["place"], L["label"], cnt] if x); a = alt(e, cov, 1, lang, L)
+    q = " ".join([L["title"], L["dek"], L["place"], L["label"], " ".join(TN[lang][t] for t in e["types"]), " ".join(SVN[lang][s] for s in e["svc"]), e["slug"].replace("-", " ")]).lower()
+    return (f'<article class="ecard" data-q="{esc(q)}" data-slug="{e["slug"]}"{(" data-v=\"" + url(v, "src") + "\"") if v else ""} data-ty="{" ".join(e["types"])}" data-sv="{" ".join(e["svc"])}"{" data-hero" if e.get("hero") else ""}{" data-old" if e.get("old") else ""} data-clips="{len(e["clips"])}" data-rank="{e["rank"]}">'
             f'<a href="#e={e["slug"]}" aria-label="{esc(L["title"])}"><div class="cov"><img src="{poster(cov)}" alt="{esc(a)}" width="{cov["w"]}" height="{cov["h"]}" loading="lazy" decoding="async">{badge}'
             f'<div class="eb"><span class="ty">{esc(TN[lang][e["types"][0]])}</span><h3>{esc(L["title"])}</h3><p>{esc(trim(L["dek"], 90))}</p><span class="mt">{esc(sub)}</span></div></div></a></article>')
 
@@ -239,7 +243,8 @@ def page(lang, mode, ev=None):
     hub = (f'<div class="el-hub"><section class="hero" aria-labelledby="el-h1"><canvas id="el-hero-canvas" aria-hidden="true"></canvas><div class="hero-fade" aria-hidden="true"></div><div class="hero-inner"><p class="eyebrow">{ui["eyebrow"]}</p><h1 id="el-h1">{ui["h1a"]} <em>{ui["h1b"]}</em></h1><p class="lead">{ui["lead"]}</p>'
            f'<form id="el-finder" role="search" autocomplete="off"><label for="el-q" class="sr">{ui["qlabel"]}</label><div class="finder-box"><input id="el-q" name="q" type="text" inputmode="search" enterkeyhint="search" maxlength="120"><button class="btn btn-go" type="submit">{ui["go"]}</button></div></form><div class="chips" role="group" aria-label="{ui["reel"]}">{chips}</div><div class="stats">{stats}</div></div></section>'
            + reel + f'<section class="work" id="el-work"><div class="wrap"><p class="eyebrow">{ui["ev"]}</p><h2>{ui["evh"]}</h2><p class="sub" id="el-gsub"></p><div class="reco" id="el-reco" hidden aria-live="polite"></div><div class="filters"><div class="f-row" id="el-ftypes" role="group"></div><div class="f-row" id="el-fsvc" role="group"></div></div><p class="count" id="el-count" aria-live="polite"></p>'
-           f'<div class="cards el-cards">{cards}</div><p class="empty" id="el-empty" hidden>{ui["empty"]}</p></div></section>'
+           f'<div class="cards el-cards">{cards}</div><p class="empty" id="el-empty" hidden>{ui["empty"]}</p>'
+           f'<div class="clipview" id="el-clips" hidden><h3 id="el-clips-h"></h3><div class="gal" id="el-clips-g"></div><div class="more"><button class="btn btn-ghost" id="el-clips-more" type="button" hidden>{ui["moreclips"]}</button></div></div></div></section>'
            f'<section class="services"><div class="wrap"><p class="eyebrow">{ui["svce"]}</p><h2>{ui["svch"]}</h2><p class="sub">{ui["svcsub"]}</p>{sv}</div></section>'
            f'<section class="el-index"><div class="wrap"><h2>{ui["idx"]}</h2><ul>{idx}</ul></div></section>'
            f'<section class="contact"><div class="wrap"><h2>{ui["ctah"]}</h2><p class="sub">{ui["ctas"]}</p><div class="c-actions"><a class="btn btn-wa big" target="_blank" rel="noopener" data-wa="{"Hello EchoLight, I would like to plan an event. Date / venue / guests: " if lang == "en" else "مرحباً إيكو لايت، أودّ التخطيط لفعالية. التاريخ / الموقع / الضيوف: "}" href="#">{ui["wa"]}</a><a class="btn btn-ghost big" href="tel:+971567220533">+971 56 722 0533</a></div><p class="fine"><a href="https://www.echolight.ae">echolight.ae</a> · <a href="https://instagram.com/echolightae">@echolightae</a> · {ui["area"]}</p></div></section></div>')
