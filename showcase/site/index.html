@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>EchoLight — Event Lighting, LED, Sound, Mapping &amp; Laser Shows in the UAE</title>
+<meta name="description" content="Tell us your event and see real EchoLight work: stage lighting, LED screens, sound, 3D projection mapping and laser shows across the UAE. 400+ events produced.">
+<meta name="theme-color" content="#05060a">
+<meta property="og:title" content="EchoLight — Lighting Beyond Imagination">
+<meta property="og:description" content="Describe your event. We'll show you the proof — lighting, LED, sound, mapping and laser shows across the UAE.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"ProfessionalService","name":"EchoLight","alternateName":"إيكو لايت","url":"https://www.echolight.ae","telephone":"+971567220533","areaServed":"AE","address":{"@type":"PostalAddress","addressLocality":"Abu Dhabi","addressCountry":"AE"},"description":"Event production specialised in AV: stage lighting, LED screens, sound, projection mapping, laser and light shows.","aggregateRating":{"@type":"AggregateRating","ratingValue":"5.0","bestRating":"5"}}
+</script>
+</head>
+<body>
+<a class="skip" href="#gallery" data-i18n="skip">Skip to the work</a>
+
+<header class="top" id="top-bar">
+  <a class="logo" href="#top" aria-label="EchoLight"><span>Echo</span><b>Light</b></a>
+  <nav aria-label="Main">
+    <a href="#gallery" data-i18n="nav_work">The work</a>
+    <a href="#services" data-i18n="nav_services">Services</a>
+    <a href="#lab" data-i18n="nav_lab">Beam Lab</a>
+    <a href="#contact" data-i18n="nav_contact">Contact</a>
+  </nav>
+  <div class="top-actions">
+    <button class="lang" id="lang" type="button" aria-label="Language"><span>العربية</span></button>
+    <a class="btn btn-wa small" data-wa href="#" target="_blank" rel="noopener"><span data-i18n="cta_short">WhatsApp</span></a>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero" aria-labelledby="h1">
+  <canvas id="hero-canvas" aria-hidden="true"></canvas>
+  <div class="hero-fade" aria-hidden="true"></div>
+  <div class="hero-inner">
+    <p class="eyebrow" data-i18n="eyebrow">EchoLight · Abu Dhabi · UAE-wide</p>
+    <h1 id="h1"><span data-i18n="h1a">Show us your event.</span> <em data-i18n="h1b">We'll show you the proof.</em></h1>
+    <p class="lead" data-i18n="lead">Type what you're planning. We'll light up the work we've done for events like yours, and tell you what we'd build.</p>
+    <form class="finder" id="finder" role="search" autocomplete="off">
+      <label for="q" class="sr" data-i18n="q_label">Describe your event</label>
+      <div class="finder-box">
+        <span class="finder-ic" aria-hidden="true">✦</span>
+        <input id="q" name="q" type="text" inputmode="search" enterkeyhint="search" maxlength="120" placeholder="">
+        <button class="btn btn-go" type="submit"><span data-i18n="go">Show me</span></button>
+      </div>
+    </form>
+    <div class="chips" id="chips" role="group" aria-label="Quick picks"></div>
+    <div class="stats" id="stats"></div>
+  </div>
+  <a class="scroll" href="#reel" aria-label="Scroll"><i></i></a>
+</section>
+
+<section class="reel" id="reel" aria-label="Live from our events">
+  <div class="reel-head"><span class="dot"></span><span data-i18n="reel">Live from our events</span></div>
+  <div class="reel-track" id="reel-track"></div>
+</section>
+
+<section class="gallery" id="gallery" aria-labelledby="g-title">
+  <div class="wrap">
+    <div class="g-head">
+      <p class="eyebrow" data-i18n="g_eyebrow">The proof</p>
+      <h2 id="g-title" data-i18n="g_title">Real events. Real rigs. Real nights.</h2>
+      <p class="sub" id="g-sub"></p>
+    </div>
+
+    <div class="reco" id="reco" hidden aria-live="polite"></div>
+
+    <div class="filters" id="filters">
+      <div class="f-row" id="f-events" role="group" aria-label="Event type"></div>
+      <div class="f-row" id="f-services" role="group" aria-label="Service"></div>
+    </div>
+
+    <div class="grid" id="grid" aria-live="polite"></div>
+    <div class="more"><button class="btn btn-ghost" id="more" type="button" hidden><span data-i18n="more">Show more</span></button></div>
+    <p class="empty" id="empty" hidden data-i18n="empty">Nothing under that exact combination yet — try removing a filter.</p>
+  </div>
+</section>
+
+<section class="services" id="services" aria-labelledby="s-title">
+  <div class="wrap">
+    <p class="eyebrow" data-i18n="s_eyebrow">What we bring</p>
+    <h2 id="s-title" data-i18n="s_title">Five disciplines. One crew.</h2>
+    <div class="s-grid" id="s-grid"></div>
+  </div>
+</section>
+
+<section class="lab" id="lab" aria-labelledby="l-title">
+  <canvas id="lab-canvas" aria-hidden="true"></canvas>
+  <div class="lab-shade" aria-hidden="true"></div>
+  <div class="wrap lab-inner">
+    <p class="eyebrow" data-i18n="l_eyebrow">Beam Lab</p>
+    <h2 id="l-title" data-i18n="l_title">Program your own sky.</h2>
+    <p class="sub" data-i18n="l_sub">Pick a colour and a pattern. This is the same language our programmers use to design a laser or beam show.</p>
+    <div class="lab-ctl" role="group" aria-label="Beam controls">
+      <div class="ctl"><span data-i18n="l_color">Colour</span><div class="sw" id="sw"></div></div>
+      <div class="ctl"><span data-i18n="l_pattern">Pattern</span><div class="seg" id="pat"></div></div>
+      <div class="ctl"><span data-i18n="l_count">Beams</span><input id="cnt" type="range" min="3" max="24" value="12" aria-label="Beams"></div>
+      <div class="ctl"><span data-i18n="l_speed">Speed</span><input id="spd" type="range" min="1" max="10" value="4" aria-label="Speed"></div>
+    </div>
+    <a class="btn btn-wa" data-wa data-ctx="lab" href="#" target="_blank" rel="noopener"><span data-i18n="l_cta">I want this at my event</span></a>
+  </div>
+</section>
+
+<section class="contact" id="contact" aria-labelledby="c-title">
+  <div class="wrap">
+    <h2 id="c-title" data-i18n="c_title">Let's light your date.</h2>
+    <p class="sub" data-i18n="c_sub">Send us the date, the venue and a rough idea. We reply on WhatsApp with a plan and a quote.</p>
+    <div class="c-actions">
+      <a class="btn btn-wa big" data-wa data-ctx="contact" href="#" target="_blank" rel="noopener"><span data-i18n="c_wa">Chat on WhatsApp</span></a>
+      <a class="btn btn-ghost big" href="tel:+971567220533"><span>+971 56 722 0533</span></a>
+    </div>
+    <p class="fine"><a href="https://www.echolight.ae" rel="noopener">echolight.ae</a> · <a href="https://instagram.com/echolightae" rel="noopener">@echolightae</a> · <span data-i18n="c_area">Anywhere in the UAE</span></p>
+  </div>
+</section>
+</main>
+
+<footer class="foot"><span>© <span id="yr"></span> EchoLight</span><span data-i18n="tag">Lighting beyond imagination</span></footer>
+
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Viewer" hidden>
+  <button class="lb-x" id="lb-x" type="button" aria-label="Close">×</button>
+  <button class="lb-nav prev" id="lb-prev" type="button" aria-label="Previous">‹</button>
+  <button class="lb-nav next" id="lb-next" type="button" aria-label="Next">›</button>
+  <figure class="lb-fig"><div class="lb-media" id="lb-media"></div>
+    <figcaption><div><strong id="lb-title"></strong><span id="lb-meta"></span></div>
+      <a class="btn btn-wa small" id="lb-wa" href="#" target="_blank" rel="noopener"><span data-i18n="lb_cta">Request this look</span></a></figcaption>
+  </figure>
+</div>
+
+<script src="data/items.js"></script>
+<script src="i18n.js"></script>
+<script src="beams.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
