@@ -1,0 +1,11 @@
+<!-- EchoLight showcase loader (en): paste into a Squarespace Code Block (untick "Display Source"). Loads the full page from the CDN. -->
+<div id="elsc-mount" style="min-height:70vh;background:#05060a"></div>
+<script>
+(function () {
+  var u = "https://cdn.jsdelivr.net/gh/echolightae-ai/Echo@47ff4005743228ae9ecfaadc305eb233f7ca3358/showcase/embed/showcase-en.html", m = document.getElementById("elsc-mount");
+  fetch(u).then(function (r) { return r.text(); }).then(function (h) {
+    m.innerHTML = h;
+    [].slice.call(m.querySelectorAll("script")).forEach(function (o) { var s = document.createElement("script"); if (o.type) s.type = o.type; s.text = o.text; o.parentNode.replaceChild(s, o); });
+  });
+})();
+</script>
