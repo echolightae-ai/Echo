@@ -258,3 +258,22 @@ EVENTS = [
       desc="Laser mapping over a wide LED video wall on a conference stage. Laser and LED production by EchoLight.",
       body="Lasers drawn over a long blue LED wall, turning the stage back-drop into a moving piece of light."),
 ]
+
+# Full-length films per event: slug -> (source video id, [(start, end), ...] or None for the whole video).
+# Segments come from shot detection (label/shots.json) and skip bland decor shots and logo end-cards.
+FULL = {
+ "show-of-the-night-timecoded-lighting": ("V6", None),
+ "laser-mapping-on-an-led-video-wall": ("N1", None),
+ "laser-mapping-showcase": ("V97", None),
+ "concert-scale-lighting-conference": ("V38", None),
+ "wedding-written-in-light": ("N0", ["N0s01", "N0s07", "N0s08", "N0s09", "N0s10", "N0s11"]),
+ "building-the-ballroom": ("V95", ["V95s00", "V95s01", "V95s02"]),
+ "echolight-showreel": ("V96", ["V96s00", "V96s01", "V96s02", "V96s03", "V96s04", "V96s05"]),
+ "floral-wedding-brought-to-life": ("V94", ["V94s01", "V94s02", "V94s03", "V94s04", "V94s05", "V94s06"]),
+ "luxury-wedding-al-dhaid": ("V39", None),
+ "diet-box-launch-night": ("V93", None),
+ "thailand-fashion-show-dubai": ("V61", None),
+ "emirati-kuwaiti-womens-forum": ("V54", None),
+ "3d-mapping-on-a-hotel-facade": ("V9", None),
+ "the-muse-grand-opening": ("V84", None),
+}
