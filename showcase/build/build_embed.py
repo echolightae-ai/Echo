@@ -37,11 +37,11 @@ SVC = {"en": {
   "laser": ("عروض الليزر والضوء", "ليزر عالي القدرة وأشعة سماء وشرارات باردة للدخولات الكبرى واللحظات الكاشفة والليالي المفتوحة التي تُرى من الموقع كله.", ["أشعة السماء", "مسح الليزر", "شرارات باردة", "التحكم بالعرض"])}}
 UI = {"en": {"eyebrow": "EchoLight · Abu Dhabi · UAE-wide", "h1a": "Show us your event.", "h1b": "We'll show you the proof.", "lead": "Type what you're planning. We'll light up the work we've done for events like yours, and tell you what we'd build.", "go": "Show me", "qlabel": "Describe your event",
         "ev": "The proof", "evh": "Real events. Real rigs. Real nights.", "svce": "What we specialise in", "svch": "Five specialisms. A dedicated team for each.", "svcsub": "EchoLight is built around five disciplines, and each one has its own specialist team. Try them below: every lab ends with a message to us describing what you built.", "idx": "All events at a glance", "ctah": "Let's light your date.", "ctas": "Send us the date, the venue and a rough idea. We reply on WhatsApp with a plan and a quote.", "wa": "Chat on WhatsApp", "area": "Anywhere in the UAE",
-        "stats": [("400+", "events produced"), ("100+", "venues"), ("34+", "clients"), ("5.0 ★", "Google rating")], "back": "← All EchoLight work", "plan": "Plan something like this", "film": "Full film", "full": "▶ Watch the full film", "copy": "Copy link to this page", "more": "More like this", "see": "See {n} {w} with {s} →", "empty": "Nothing under that exact combination yet. Try removing a filter or message us on WhatsApp.", "events": "events", "event": "event", "videos": "videos", "video": "video",
+        "stats": [("400+", "events produced"), ("100+", "venues"), ("34+", "clients"), ("5.0 ★", "Google rating")], "back": "← All EchoLight work", "plan": "Plan something like this", "film": "Full film", "live": "Live from our events", "full": "▶ Watch the full film", "copy": "Copy link to this page", "more": "More like this", "see": "See {n} {w} with {s} →", "empty": "Nothing under that exact combination yet. Try removing a filter or message us on WhatsApp.", "events": "events", "event": "event", "videos": "videos", "video": "video",
         "cur_h": "Build a client page", "cur_s": "Open an event, tick the clips you discussed, name the client, copy the link. They see only those clips. This page is not linked anywhere on the site.", "cur_c": "Client or company (optional)", "cur_n": "A short note, e.g. the reference videos we spoke about", "cur_o": "Your link appears here", "cur_p": "Preview", "cur_x": "Clear", "reel": "Quick picks"},
       "ar": {"eyebrow": "إيكو لايت · أبوظبي · كل الإمارات", "h1a": "أخبرنا عن فعاليتك.", "h1b": "ونُريك الإثبات.", "lead": "اكتب ما تخطّط له، وسنُضيء لك أعمالنا في فعاليات تشبه فعاليتك، ونخبرك بما كنّا سنبنيه.", "go": "أرني", "qlabel": "صف فعاليتك",
         "ev": "الإثبات", "evh": "فعاليات حقيقية. أجهزة حقيقية. ليالٍ حقيقية.", "svce": "ما نتخصص فيه", "svch": "خمسة تخصصات، ولكل تخصص فريقه المتخصص.", "svcsub": "تقوم إيكو لايت على خمسة تخصصات، ولكل تخصص فريقه المتخصص. جرّبها بالأسفل: كل مختبر ينتهي برسالة إلينا تصف ما صممته.", "idx": "كل الفعاليات في لمحة", "ctah": "لنُضئ موعدك.", "ctas": "أرسل لنا التاريخ والموقع وفكرة تقريبية. نردّ عبر واتساب بخطة وعرض سعر.", "wa": "تحدّث معنا عبر واتساب", "area": "في أي مكان في الإمارات",
-        "stats": [("+400", "فعالية أنتجناها"), ("+100", "موقع"), ("+34", "عميل"), ("★ 5.0", "تقييم جوجل")], "back": "→ كل أعمال إيكو لايت", "plan": "خطّط لشيء مثل هذا", "film": "الفيلم الكامل", "full": "▶ شاهد الفيلم كاملاً", "copy": "انسخ رابط هذه الصفحة", "more": "المزيد مثل هذا", "see": "شاهد {n} {w} {s} ←", "empty": "لا شيء بهذا الجمع بعد. جرّب إزالة أحد المرشّحات أو راسلنا عبر واتساب.", "events": "فعالية", "event": "فعالية", "videos": "فيديو", "video": "فيديو",
+        "stats": [("+400", "فعالية أنتجناها"), ("+100", "موقع"), ("+34", "عميل"), ("★ 5.0", "تقييم جوجل")], "back": "→ كل أعمال إيكو لايت", "plan": "خطّط لشيء مثل هذا", "film": "الفيلم الكامل", "live": "مباشرة من فعالياتنا", "full": "▶ شاهد الفيلم كاملاً", "copy": "انسخ رابط هذه الصفحة", "more": "المزيد مثل هذا", "see": "شاهد {n} {w} {s} ←", "empty": "لا شيء بهذا الجمع بعد. جرّب إزالة أحد المرشّحات أو راسلنا عبر واتساب.", "events": "فعالية", "event": "فعالية", "videos": "فيديو", "video": "فيديو",
         "cur_h": "أنشئ صفحة لعميل", "cur_s": "افتح فعالية، حدّد المقاطع التي ناقشتموها، اكتب اسم العميل وانسخ الرابط. سيرى هذه المقاطع فقط. هذه الصفحة غير مرتبطة بأي مكان في الموقع.", "cur_c": "العميل أو الشركة (اختياري)", "cur_n": "ملاحظة قصيرة، مثلاً الفيديوهات المرجعية التي تحدثنا عنها", "cur_o": "يظهر رابطك هنا", "cur_p": "معاينة", "cur_x": "مسح", "reel": "اختيارات سريعة"}}
 CHIPS = [("corporate", "#3da9ff"), ("wedding", "#ffb86b"), ("gala", "#ffd27a"), ("launch", "#c04dff"), ("government", "#2ee59d"), ("show", "#ff3df0")]
 MON_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
@@ -131,6 +131,24 @@ CSS = scope(css) + """
 #elsc .ehead h2{font-size:clamp(2rem,5vw,3.4rem);margin:8px 0 12px;max-width:20ch;line-height:1.08;letter-spacing:-.02em;font-weight:700}
 #elsc .client h2{font-size:clamp(1.9rem,4.5vw,3.2rem);margin:6px 0 10px;line-height:1.1}
 #elsc .cur h2{font-size:1.8rem;margin-bottom:8px}
+#elsc .reel{padding:28px 0 6px;overflow:hidden;background:var(--bg)}
+#elsc .reel-head{display:flex;align-items:center;gap:10px;padding-inline:max(16px,calc(50% - 620px));font-size:.8rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin-bottom:14px}
+#elsc .dot{width:8px;height:8px;border-radius:50%;background:#ff3b4e;box-shadow:0 0 12px #ff3b4e;animation:elpulse 1.6s infinite}
+@keyframes elpulse{50%{opacity:.35}}
+#elsc .reel-track{display:flex;width:max-content;animation:elmarq 80s linear infinite}
+#elsc .reel:hover .reel-track{animation-play-state:paused}
+#elsc .rv-set{display:flex;gap:12px;padding-inline-end:12px}
+#elsc .rv{position:relative;height:min(46vw,300px);border-radius:14px;overflow:hidden;background:#10131c;flex:none}
+#elsc .rv img,#elsc .rv video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+@keyframes elmarq{to{transform:translateX(-50%)}}
+@keyframes elmarqr{to{transform:translateX(50%)}}
+#elsc[dir=rtl] .reel-track{animation-name:elmarqr}
+#elsc .film{margin:4px 0 24px;max-width:960px}
+#elsc .film-play{position:relative;display:block;width:100%;background:#000;border-radius:16px;overflow:hidden;cursor:pointer}
+#elsc .film-play img{width:100%;max-height:72vh;object-fit:contain;background:#000}
+#elsc .film-play .pl{position:absolute;inset-inline:0;bottom:16px;margin-inline:auto;width:max-content;max-width:90%;background:rgba(5,6,10,.78);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);padding:11px 20px;border-radius:999px;font-weight:600}
+#elsc .film-play:hover .pl{border-color:var(--accent)}
+#elsc .film video{display:block;width:100%;max-height:72vh;background:#000;border-radius:16px}
 #elsc .fxwrap{display:grid;gap:10px;min-width:0}
 #elsc .svc:nth-child(even) .fxwrap{order:-1}
 #elsc .labctl{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:end;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(8,10,16,.7)}
@@ -161,19 +179,21 @@ def article(e, lang, L, ui, mode, h):
     meta = "".join(f"<li>{esc(x)}</li>" for x in [L["place"], L["label"]] if x)
     wamsg = (f'Hello EchoLight, I saw "{L["title"]}" on your showcase and I would like something like it for my event. Date / venue / guests: ' if lang == "en" else f'مرحباً إيكو لايت، شاهدت "{L["title"]}" في معرض أعمالكم وأريد شيئاً مثله لفعاليتي. التاريخ / الموقع / الضيوف: ')
     full = ""
-    if e.get("fullClip"): full = f'<a class="btn btn-ghost small" data-full data-poster="{MEDIA}v/{e["fullClip"]}.jpg" href="{MEDIA}v/{e["fullClip"]}.mp4">{ui["full"]} ({e["fullDur"] // 60}:{e["fullDur"] % 60:02d})</a>'
+    film = ""
+    if e.get("fullClip"):
+        film = f'<figure class="film"><button type="button" class="film-play" data-film data-src="{MEDIA}v/{e["fullClip"]}.mp4" aria-label="{esc(ui["full"])}"><img src="{MEDIA}v/{e["fullClip"]}.jpg" alt="{esc(L["title"])}" loading="lazy" decoding="async"><span class="pl">{ui["full"]} · {e["fullDur"] // 60}:{e["fullDur"] % 60:02d}</span></button></figure>'
     related = sorted((x for x in events if x is not e), key=lambda x: -(len(set(x["types"]) & set(e["types"])) * 3 + len(set(x["svc"]) & set(e["svc"]) - {"sound"}) + (2 if x.get("hero") else 0) - (5 if x.get("old") else 0)))[:3]
     rel = "".join(f'<li><a href="{hub}#e={x["slug"]}">{esc(loc(x, lang)["title"])}</a></li>' for x in related)
     back = f'<a data-back href="{HUB[lang] if mode == "event" else "#"}">{ui["back"]}</a>'
     return (f'<article class="elev wrap" id="el-ev-{e["slug"]}" data-title="{esc(L["title"])}"{"" if mode == "event" else " hidden"}><nav class="crumbs" aria-label="Breadcrumb">{back}</nav>'
             f'<header class="ehead"><p class="eyebrow">{esc(" · ".join(TN[lang][t] for t in e["types"]))}</p><{h}>{esc(L["title"])}</{h}><p class="dek">{esc(L["dek"])}</p><ul class="meta">{meta}</ul><ul class="chiprow">{chips}</ul></header>'
             f'<section class="story"><p>{esc(L["body"])}</p><div class="acts"><a class="btn btn-wa" target="_blank" rel="noopener" data-wa="{esc(wamsg)}" href="#">{ui["plan"]}</a>{full}<button class="btn btn-ghost small" type="button" data-copy>{ui["copy"]}</button></div></section>'
-            f'<section class="gal" aria-label="{esc(L["title"])}">{"".join(tiles)}</section><section class="rel"><h3>{ui["more"]}</h3><ul>{rel}</ul></section></article>')
+            f'{film}<section class="gal" aria-label="{esc(L["title"])}">{"".join(tiles)}</section><section class="rel"><h3>{ui["more"]}</h3><ul>{rel}</ul></section></article>')
 def card(e, lang, L, ui):
     cov = e["cover"]; v = e["vcover"]; nv = sum(1 for c in e["clips"] if c["t"] != "p")
     badge = (f'<span class="badge">▶ {ui["film"]} {e["fullDur"] // 60}:{e["fullDur"] % 60:02d}</span>' if e.get("fullClip") else (f'<span class="badge">▶ {nv} {ui["videos"] if nv != 1 else ui["video"]}</span>' if nv else ""))
     sub = " · ".join(x for x in [L["place"], L["label"]] if x); a = alt(e, cov, 1, lang, L)
-    return (f'<article class="ecard" data-slug="{e["slug"]}" data-types="{" ".join(e["types"])}" data-svc="{" ".join(e["svc"])}"{" data-hero" if e.get("hero") else ""}{" data-old" if e.get("old") else ""} data-clips="{len(e["clips"])}" data-rank="{e["rank"]}">'
+    return (f'<article class="ecard" data-slug="{e["slug"]}"{(" data-v=\"" + url(v, "src") + "\"") if v else ""} data-ty="{" ".join(e["types"])}" data-sv="{" ".join(e["svc"])}"{" data-hero" if e.get("hero") else ""}{" data-old" if e.get("old") else ""} data-clips="{len(e["clips"])}" data-rank="{e["rank"]}">'
             f'<a href="#e={e["slug"]}" aria-label="{esc(L["title"])}"><div class="cov"><img src="{poster(cov)}" alt="{esc(a)}" width="{cov["w"]}" height="{cov["h"]}" loading="lazy" decoding="async">{badge}'
             f'<div class="eb"><span class="ty">{esc(TN[lang][e["types"][0]])}</span><h3>{esc(L["title"])}</h3><p>{esc(trim(L["dek"], 90))}</p><span class="mt">{esc(sub)}</span></div></div></a></article>')
 
@@ -212,9 +232,13 @@ def page(lang, mode, ev=None):
     sv = "".join(f'<article class="svc"><div><p class="eyebrow">0{i + 1} / 05</p><h3>{v[0]}</h3><p>{v[1]}</p><ul>{"".join(f"<li>{x}</li>" for x in v[2])}</ul><a class="go" href="#" data-svc="{k}">{ui["see"].format(n=counts[k], w=ui["events"], s=v[0])}</a></div><div class="fxwrap"><div class="fx"><canvas data-fx="{k}" role="img" aria-label="{esc(v[0])}"></canvas></div><div class="labctl"></div></div></article>' for i, (k, v) in enumerate(SVC[lang].items()))
     idx = "".join(f'<li><h3>{esc(loc(e, lang)["title"])}</h3>. {esc(loc(e, lang)["desc"])}</li>' for e in events)
     stats = "".join(f"<div><b>{a}</b><span>{b}</span></div>" for a, b in ui["stats"])
+    reel_items = [e for e in events if e.get("hero") and e["vcover"]][:12]
+    def rv(e):
+        v = e["vcover"]; return f'<div class="rv" style="aspect-ratio:{v["w"] / v["h"]:.3f}"><img src="{poster(v)}" alt="" loading="lazy" decoding="async"><video muted loop playsinline preload="none" data-src="{url(v, "src")}" aria-hidden="true"></video></div>'
+    reel = '<section class="reel" aria-label="' + esc(ui["live"]) + '"><div class="reel-head"><span class="dot"></span>' + esc(ui["live"]) + '</div><div class="reel-track">' + "".join('<div class="rv-set">' + "".join(rv(e) for e in reel_items) + "</div>" for _ in range(2)) + '</div></section>'
     hub = (f'<div class="el-hub"><section class="hero" aria-labelledby="el-h1"><canvas id="el-hero-canvas" aria-hidden="true"></canvas><div class="hero-fade" aria-hidden="true"></div><div class="hero-inner"><p class="eyebrow">{ui["eyebrow"]}</p><h1 id="el-h1">{ui["h1a"]} <em>{ui["h1b"]}</em></h1><p class="lead">{ui["lead"]}</p>'
            f'<form id="el-finder" role="search" autocomplete="off"><label for="el-q" class="sr">{ui["qlabel"]}</label><div class="finder-box"><input id="el-q" name="q" type="text" inputmode="search" enterkeyhint="search" maxlength="120"><button class="btn btn-go" type="submit">{ui["go"]}</button></div></form><div class="chips" role="group" aria-label="{ui["reel"]}">{chips}</div><div class="stats">{stats}</div></div></section>'
-           f'<section class="work" id="el-work"><div class="wrap"><p class="eyebrow">{ui["ev"]}</p><h2>{ui["evh"]}</h2><p class="sub" id="el-gsub"></p><div class="reco" id="el-reco" hidden aria-live="polite"></div><div class="filters"><div class="f-row" id="el-ftypes" role="group"></div><div class="f-row" id="el-fsvc" role="group"></div></div><p class="count" id="el-count" aria-live="polite"></p>'
+           + reel + f'<section class="work" id="el-work"><div class="wrap"><p class="eyebrow">{ui["ev"]}</p><h2>{ui["evh"]}</h2><p class="sub" id="el-gsub"></p><div class="reco" id="el-reco" hidden aria-live="polite"></div><div class="filters"><div class="f-row" id="el-ftypes" role="group"></div><div class="f-row" id="el-fsvc" role="group"></div></div><p class="count" id="el-count" aria-live="polite"></p>'
            f'<div class="cards el-cards">{cards}</div><p class="empty" id="el-empty" hidden>{ui["empty"]}</p></div></section>'
            f'<section class="services"><div class="wrap"><p class="eyebrow">{ui["svce"]}</p><h2>{ui["svch"]}</h2><p class="sub">{ui["svcsub"]}</p>{sv}</div></section>'
            f'<section class="el-index"><div class="wrap"><h2>{ui["idx"]}</h2><ul>{idx}</ul></div></section>'
