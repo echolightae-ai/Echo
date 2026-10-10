@@ -118,7 +118,8 @@ CSS = scope(css) + """
 #elsc[dir=rtl] .finder-box{padding:8px 20px 8px 8px}
 #elsc[dir=rtl] .cov::after{background:linear-gradient(180deg,rgba(5,6,10,0) 35%,rgba(5,6,10,.92))}
 #elsc .lb{z-index:2147483000}
-#elsc .el-index{padding:30px 0 10px}#elsc .el-index h2{font-size:1.3rem;margin-bottom:14px}
+#elsc .el-index{position:absolute!important;width:1px;height:1px;margin:-1px!important;padding:0!important;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
+#elsc .el-index-old{padding:30px 0 10px}#elsc .el-index h2{font-size:1.3rem;margin-bottom:14px}
 #elsc .el-index ul{columns:2 320px;column-gap:28px}#elsc .el-index li{break-inside:avoid;margin-bottom:12px;font-size:.92rem;color:var(--mute)}#elsc .el-index h3{font-size:1rem;color:var(--ink);display:inline}
 #elsc .elev{padding-bottom:20px}#elsc .crumbs a{color:var(--accent)}
 #elsc .rel ul{display:grid;gap:8px}#elsc .rel a{color:var(--ink);border-bottom:1px solid var(--line)}
@@ -149,6 +150,13 @@ CSS = scope(css) + """
 #elsc .film-play .pl{position:absolute;inset-inline:0;bottom:16px;margin-inline:auto;width:max-content;max-width:90%;background:rgba(5,6,10,.78);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.25);padding:11px 20px;border-radius:999px;font-weight:600}
 #elsc .film-play:hover .pl{border-color:var(--accent)}
 #elsc .film video{display:block;width:100%;max-height:72vh;background:#000;border-radius:16px}
+#elsc .pick{position:absolute;top:8px;inset-inline-end:8px;z-index:4;min-width:36px;height:36px;padding:0 10px;border-radius:999px;background:rgba(5,6,10,.78);border:2px solid #fff;color:#fff;font-size:1.15rem;line-height:1;cursor:pointer}
+#elsc .tile.picked{outline:3px solid var(--accent);outline-offset:-3px}#elsc .tile.picked .pick{background:var(--accent);border-color:var(--accent);color:#031018}
+#elsc .film{position:relative}#elsc .film .pick{top:12px;font-size:.95rem;height:40px;font-weight:600}#elsc .film .pick.on{background:var(--accent);border-color:var(--accent);color:#031018}
+#elsc .cmtray{position:fixed;inset-inline:0;bottom:0;z-index:2147482000;display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:rgba(8,10,16,.96);border-top:1px solid var(--accent);backdrop-filter:blur(10px)}
+#elsc .cmtray input{background:#141821;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;min-width:140px;flex:1 1 150px;max-width:260px}
+#elsc .cmtray .cm-h{color:var(--mute);font-size:.9rem;flex:1 1 200px}
+#elsc.cm{padding-bottom:84px}
 #elsc .clipview{margin-top:34px}#elsc .clipview h3{font-size:1.4rem;margin-bottom:14px}
 #elsc .fxwrap{display:grid;gap:10px;min-width:0}
 #elsc .svc:nth-child(even) .fxwrap{order:-1}
