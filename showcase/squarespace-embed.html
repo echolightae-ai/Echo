@@ -1,0 +1,8 @@
+<!-- EchoLight showcase: paste into a Squarespace Code Block (Add Block > Code), untick "Display Source". -->
+<iframe id="echolight-showcase" src="https://showcase.echolight.ae/index.html" title="EchoLight event showcase" loading="lazy" style="width:100%;height:1400px;border:0;display:block;background:#05060a" allow="autoplay; fullscreen"></iframe>
+<script>
+window.addEventListener("message", function (e) {
+  if (e.origin !== "https://showcase.echolight.ae" || !e.data || !e.data.echolightHeight) return;
+  document.getElementById("echolight-showcase").style.height = e.data.echolightHeight + "px";
+});
+</script>

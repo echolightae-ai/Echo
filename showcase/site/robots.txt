@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /curator.html
+Disallow: /c.html
+
+Sitemap: https://showcase.echolight.ae/sitemap.xml
