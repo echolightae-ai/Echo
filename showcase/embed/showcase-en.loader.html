@@ -2,7 +2,7 @@
 <div id="elsc-mount" style="min-height:70vh;background:#05060a"></div>
 <script>
 (function () {
-  var u = "https://cdn.jsdelivr.net/gh/echolightae-ai/Echo@de8f5925630938ef3c69d36c944723698a68ff14/showcase/embed/showcase-en.html", m = document.getElementById("elsc-mount");
+  var u = "https://cdn.jsdelivr.net/gh/echolightae-ai/Echo@977a3a2b264d4d98c44b15b9eb434848e8e03ae8/showcase/embed/showcase-en.html", m = document.getElementById("elsc-mount");
   fetch(u).then(function (r) { return r.text(); }).then(function (h) {
     m.innerHTML = h;
     [].slice.call(m.querySelectorAll("script")).forEach(function (o) { var s = document.createElement("script"); if (o.type) s.type = o.type; s.text = o.text; o.parentNode.replaceChild(s, o); });
