@@ -1,7 +1,7 @@
 # EchoLight Showcase – Handover
 
 Everything for www.echolight.ae/showcase (English) and www.echolight.ae/ar-/showcase (Arabic).
-Content: **47 events, 302 photos and clips**, five services: Stage Lighting, LED Screens, Sound, 3D Mapping, Laser & Light Shows.
+Content: **54 events, 338 photos and clips**, five services: Stage Lighting, LED Screens, Sound, 3D Mapping, Laser & Light Shows.
 
 ## 1. Put it live (Squarespace)
 1. Open `embed/showcase-en.html` in a text editor, select all, copy.
@@ -57,6 +57,14 @@ Tell the chat: "Read showcase/CLAUDE.md and CONTENT.md in the echolightae-ai/Ech
 To change it: edit the shot list at the top of `promo/make_reel.py` and run it.
 
 ## 8. Latest additions
+**November 2026 (36 files):**
+- **Dubai Fashion Week** (Dubai): runway lighting, LED screens, projection mapping. 7 photos, 6 videos.
+- **EDGE Group Facade Lighting** (Abu Dhabi): facade lighting and the NABD pulse effect. 2 photos, 3 videos.
+- **UAE National Day 3D Mapping**, **Halloween 3D Mapping Show** (2 long videos), **Cultural 3D Mapping**, **3D Mapping for Corporate Events** (3 videos).
+- **Ballroom Wedding Lighting**: 6 videos, 1 photo.
+- **The Muse grand opening**: 4 more sky-beam and facade-lighting videos.
+
+**October 2026:**
 - **Real Estate Signing Ceremony Gala, Dubai**: LED Screens (gala, corporate, launch).
 - **3D Table Mapping for a Gala Dinner**: 3D Mapping on plates and table (gala, corporate, private).
 - **Liwa Dates Festival Press Conference**: LED Screens for the Abu Dhabi Heritage Authority (government, corporate), 2 clips + 1 photo.
